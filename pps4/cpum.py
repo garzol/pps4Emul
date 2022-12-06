@@ -16,39 +16,49 @@ class PPS4InstSet():
     HexCod = {
         "LBL":  [0x00],
         "TML":  [0x01, 0x02, 0x03],
+        "LBUA": [0x04],
         "RTN":  [0x05],
         "XS":   [0x06],
         "RTNSK":[0x07],
         "ADCSK":[0x08],
+        "ADSK": [0x09],
         "ADC":  [0x0A],
         "AD":   [0x0B],
+        "EOR":  [0x0C],
         "AND":  [0x0D],
         "COMP": [0x0E],
         "OR":   [0x0F],
         "LBMX": [0x10],
         "LABL": [0x11],
         "LAX":  [0x12],
+        "SAG":  [0x13],
         "SKF2": [0x14],
         "SKC":  [0x15],
+        "SKF1": [0x16],
         "INCB": [0x17],
         "XBMX": [0x18],
         "XABL": [0x19],
         "XAX":  [0x1A],
         "LXA":  [0x1B],
         "IOL":  [0x1C],
+        "DOA":  [0x1D],
         "SKZ":  [0x1E],
         "DECB": [0x1F],
         "SC":   [0x20],
         "SF2":  [0x21],
         "SF1":  [0x22],
+        "DIB":  [0x23],
+        "RC":   [0x24],
         "RF2":  [0x25],
         "RF1":  [0x26],
+        "DIA":  [0x27],
         "EXD":  [x for x in range(0x28,0x30)],
-        "LD":   [x for x in range(0x30,0x37)],
+        "LD":   [x for x in range(0x30,0x38)],
         "EX ":  [x for x in range(0x38,0x40)],
         "SKBI": [x for x in range(0x40,0x50)],
         "TL":   [x for x in range(0x50,0x60)],
         "ADI":  [x for x in range(0x60,0x65)]+[x for x in range(0x66,0x6F)],
+        "DC":   [0x65],
         "CYS":  [0x6F],
         "LDI":  [x for x in range(0x70,0x80)],
         "T":    [x for x in range(0x80,0xC0)],
@@ -100,6 +110,18 @@ class PPS4InstSet():
                                  N/A
                                  ''',
                                  "A<-SA(4:1)\nSA(4:1)<-SA(8:5)\nSA(8:5)<-SA(12:9)\nSA(12:9)<-A"),
+         
+         "SAG":    ("Special Address Generation", 1,  '''
+                                         This instruction causes the eight most 
+                                         significant bits of the RAM address output 
+                                         to be zeroed during the next cycle only. 
+                                         Note that this instruction does not 
+                                         alter the contents of the B register. 
+                                         ''',
+                                 '''
+                                 N/A
+                                 ''',
+                                 "A/B Bus(12:5)<-0000 0000\nA/B Bus(4:1)<-BL(4:1)\nContents of 'B' remain unchanged"),
          
          "LABL":    ("Load Accumulator with BL", 1,  '''
                                          The contents of BL register are 
@@ -207,6 +229,16 @@ class PPS4InstSet():
                                  ''',
                                  "C,A<-A+M+C\nSkip if C=1"),
             
+         "ADSK":    ("Add and skip on carry-out", 1,  '''
+                              Same as AD except the next ROM word 
+                              will be skipped (ignored) if
+                              a carry-out is generated.
+                              ''',
+                                 '''
+                                 N/A
+                                 ''',
+                                 "C,A<-A+M\nSkip if C=1"),
+            
            
          "AND":    ("Logical AND", 1,  '''
                                      The result of logical AND 
@@ -220,7 +252,7 @@ class PPS4InstSet():
                                  "A<-A&M"),
                              
          "OR":    ("Logical OR", 1,  '''
-                                     The result of logical OR 
+                                     The result of logic OR 
                                      of accumulator and 4-bit contents 
                                      of RAM currently addressed by B register 
                                      replaces contents of accumulator.
@@ -229,6 +261,17 @@ class PPS4InstSet():
                                  N/A
                                  ''',
                                  "A<-A|M"),
+                             
+         "EOR":    ("Logical Exclusive-OR", 1,  '''
+                                     The result of logic Exclusive-OR 
+                                     of accumulator and 4-bit contents 
+                                     of RAM currently addressed by B register 
+                                     replaces contents of accumulator.
+                                     ''',
+                                 '''
+                                 N/A
+                                 ''',
+                                 "A<-A^M"),
                              
          "COMP":    ("Complement", 1,  '''
                                      Each bit of the accumulator is logically 
@@ -247,6 +290,18 @@ class PPS4InstSet():
                                  N/A
                                  ''',
                                  "A<->BL"),
+                             
+         "LBUA":    ("Load BU with A", 1,  '''
+                                         The contents of accumulator are 
+                                         transferred to BU register.
+                                         Also, the contents of currently
+                                         addressed RAM are transferred to 
+                                         accumulator. 
+                                         ''',
+                                 '''
+                                 N/A
+                                 ''',
+                                 "BU<-A\nA<-M"),
                              
          "LBMX":    ("Load BM with X", 1,  '''
                                          The contents of X register are 
@@ -292,6 +347,33 @@ class PPS4InstSet():
                                  N/A
                                  ''',
                                  "X<-A"),
+                             
+         "DIA":    ("Discrete Input Group A", 1,  '''
+                                         Data at the inputs to discrete:
+                                         Group A is transferred to the accumulator.
+                                         ''',
+                                 '''
+                                 N/A
+                                 ''',
+                                 "A<-DIA"),
+                             
+         "DIB":    ("Discrete Input Group B", 1,  '''
+                                         Data at the inputs to discrete:
+                                         Group B is transferred to the accumulator.
+                                         ''',
+                                 '''
+                                 N/A
+                                 ''',
+                                 "A<-DIB"),
+                             
+         "DOA":    ("Discrete Output", 1,  '''
+                                         The contents of the accumulator 
+                                         are transferred to the discrete output register.
+                                         ''',
+                                 '''
+                                 N/A
+                                 ''',
+                                 "DOA<-A"),
                              
         "IOL":    ("Input/Output Long", 2,   '''
                                              This instruction occupies two ROM
@@ -396,6 +478,17 @@ class PPS4InstSet():
                                  ''',
                                  "A<-A+|I(4:1)|\nSkip if carry-out=one\nI(4:1)!=0000\nI(4:1)!=1010"),
                                  
+        "DC":  ("Decimal Correction", 1, 
+                                 '''
+                                 Binary 1010 is added to contents 
+                                 of accumulator. Result is stored in accumulator.
+                                 Instruction does not use or change 
+                                 carry flip-flop or skip.
+                                 ''',
+                                 '''
+                                 ''',
+                                 "A<-A+|I(4:1)|\nSkip if carry-out=one\nI(4:1)!=0000\nI(4:1)!=1010"),
+                                 
         "SKZ":  ("Skip on Accumulator Zero", 1, 
                                  '''
                                  The next ROM word will be ignored if 
@@ -409,6 +502,13 @@ class PPS4InstSet():
                                  FF2 is 1.
                                  ''',
                                  "skip if FF2=1"),
+                                 
+        "SKF1":  ("Skip if FF1 Equals 1", 1, 
+                                 '''
+                                 The next ROM word will be ignored if 
+                                 FF1 is 1.
+                                 ''',
+                                 "skip if FF1=1"),
                                  
         "SKC":  ("Skip on Carry flip-flop", 1, 
                                  '''
@@ -450,6 +550,12 @@ class PPS4InstSet():
                                  The C Flip-flop is  set to 1.
                                  ''',
                                  "C<-1"),
+                                 
+        "RC":  ("Reset Carry flip-flop", 1, 
+                                 '''
+                                 The C Flip-flop is  set to 0.
+                                 ''',
+                                 "C<-0"),
                                  
         "RF2":  ("Reset FF2", 1, 
                                  '''
@@ -776,6 +882,11 @@ class Pps4Cpu:
         self.AB = Register(12*['0'])
         self.SA = Register(12*['0'])
         self.SB = Register(12*['0'])
+        
+        self.DOA  = Register(4*['0'])  #Discrete output register
+        self.DIA  = Register(4*['0'])  #Discrete input register group A
+        self.DIB  = Register(4*['0'])  #Discrete input register group B
+
         self.I1 = Register(8*['0'])
         self.I2 = Register(8*['0'])
         self.lastI1 = None 
@@ -925,6 +1036,18 @@ class Pps4Cpu:
             instphrase = instcode
             return instphrase
 
+        '''LBUA (04)''' 
+        if self.I1 == Register(b"00000100"):     
+            #simulate
+            self.BU = self.A[:]
+            self.A = self.ramd
+            self.P = incr(self.P[:6])+self.P[6:]
+
+            #render phrase
+            instcode="LBUA"
+            instphrase = instcode
+            return instphrase
+
         '''LBMX (10)''' 
         if self.I1 == Register(b"00010000"):     
             #simulate
@@ -955,6 +1078,17 @@ class Pps4Cpu:
 
             #render phrase
             instcode="SC"
+            instphrase = instcode
+            return instphrase
+
+        '''RC (20)''' 
+        if self.I1 == Register(b"00100100"):     
+            #simulate
+            self.C = Register(b"0")
+            self.P = incr(self.P[:6])+self.P[6:]
+
+            #render phrase
+            instcode="RC"
             instphrase = instcode
             return instphrase
 
@@ -1045,6 +1179,24 @@ class Pps4Cpu:
             instphrase = instcode+skptxt
             return instphrase
 
+        '''ADSK (09)'''  
+        if self.I1 == Register(b"00001001"):     
+            #simulate
+            carry, self.A = self.A.binAdd(self.ramd)
+            self.C = Register(carry)
+            self.P = incr(self.P[:6])+self.P[6:]
+            if carry == '1':
+                #skip next ROM word
+                self.P = incr(self.P[:6])+self.P[6:]
+                skptxt="\t(C=1 ==> skip)"
+            else:
+                skptxt=""  
+                  
+            #render phrase
+            instcode="ADSK"
+            instphrase = instcode+skptxt
+            return instphrase
+
         '''ADC (0A)'''  
         if self.I1 == Register(b"00001010"):     
             #simulate
@@ -1068,6 +1220,17 @@ class Pps4Cpu:
             
             #render phrase
             instcode="AD"
+            instphrase = instcode
+            return instphrase
+
+        '''EOR (0C)'''  
+        if self.I1 == Register(b"00001100"):     
+            #simulate
+            self.A = self.A ^ self.ramd
+            self.P = incr(self.P[:6])+self.P[6:]
+
+            #render phrase
+            instcode="EOR"
             instphrase = instcode
             return instphrase
 
@@ -1099,6 +1262,26 @@ class Pps4Cpu:
 
             #render phrase
             instcode="SKF2"
+            instphrase = instcode
+            return instphrase
+
+        '''SKF1 (16)'''  
+        if self.I1 == Register(b"00010110"):     
+            #simulate
+            if not self.FF1.isZero():
+                #skip next instruction
+                #can't just increment P from here because
+                #we don't know nothing about the length of next instruction
+                #self.P = incr(self.P[:6])+self.P[6:]
+                #might be superfluous because the datasheet
+                #indicates "next ROM word"
+                #so we have to check (TODO)
+                self.skipNext = True
+                #print("skipnext is True from incr", self.skipNext)
+            self.P = incr(self.P[:6])+self.P[6:]
+
+            #render phrase
+            instcode="SKF1"
             instphrase = instcode
             return instphrase
         
@@ -1268,6 +1451,39 @@ class Pps4Cpu:
             instphrase = instcode
             return instphrase
             
+        #DOA (1D)  
+        if self.I1 == Register(b"00011101"):     
+            #simulate
+            self.DOA = self.A[:]
+            self.P = incr(self.P[:6])+self.P[6:]
+
+            #render phrase
+            instcode="DOA"
+            instphrase = instcode
+            return instphrase
+            
+        #DIB (23)  
+        if self.I1 == Register(b"00100011"):     
+            #simulate
+            self.A = self.DIB[:]
+            self.P = incr(self.P[:6])+self.P[6:]
+
+            #render phrase
+            instcode="DIB"
+            instphrase = instcode
+            return instphrase
+            
+        #DIA (27)  
+        if self.I1 == Register(b"00100111"):     
+            #simulate
+            self.A = self.DIA[:]
+            self.P = incr(self.P[:6])+self.P[6:]
+
+            #render phrase
+            instcode="DIA"
+            instphrase = instcode
+            return instphrase
+            
         #RTN (05)  
         if self.I1 == Register(b"00000101"):     
             #simulate
@@ -1355,6 +1571,16 @@ class Pps4Cpu:
             instphrase = instcode+"\t"+"{0:04X}".format(self.P.toInt())
             return instphrase
         
+        '''SAG (13)'''
+        if self.I1 == Register(b"00010011"): 
+            #simulate
+            self.P = self.I2[:8]+self.I1[:4]
+            raise Exception(f"The SAG instruction is not yet implemented")
+            #render phrase
+            instcode="SAG"
+            instphrase = instcode
+            return instphrase
+
         #Transfer Long is in range 50..5F
         if self.I1[4:] == Register(b"0101"): 
             #simulate
@@ -1483,7 +1709,7 @@ class Pps4Cpu:
                 self.SA, self.SB = self.SB, self.SA
 
             self.P = incr(self.P[:6])+self.P[6:]
-            print("called LB")
+            print("called LB=============================================")
             #render phrase
             if self.lastI1[4:] == Register(b"1100"):
                 #this is a string of LDI's only first counts others are nop
@@ -1499,76 +1725,4 @@ class Pps4Cpu:
         self.P = incr(self.P[:6])+self.P[6:]
         return ""
     
-if __name__ == '__main__':
-    fb = open("A1752EFA1753EE.bin", "rb")
-    prom = ROM12(fb)
-    fb.close()
-    pram = RAM(256)
-    cpu = Pps4Cpu()
-    print("===ROM===")
-    prom.show(length=10)
-    print("===RAM===")
-    pram.show()
-    print("===CPU===")
-    ramv = 0
-    for i in range(4096):
-        acc, rom_addr, wio = cpu.cyclephi12(ramv)
-        romi = prom.mem[rom_addr]
-        #print("main: {1:08d}\t{0:04X}\t{2:02X}".format(rom_addr, i, romi))
-        ram_addr, ldis = cpu.cyclephi34(romi)
-        #print(cpu.I1, cpu.skipNext, "cpu.skipNext")
-        ramv = pram.mem[ram_addr]
-        if wio == Pps4Cpu.wr:
-            #print("write:", acc, ram_addr)
-            pram.mem[ram_addr] = acc
-        if ldis is not None:
-            if ldis == "":
-                print("****************************")
-                exit(0)
-            print("{1:08d}\t{2}".format(rom_addr, i, ldis))
-        # else:
-        #     print("{1:08d}\t==============".format(rom_addr, i))
-        
-    pram.show()
-    print(prom.countinstoccur())        
-        #print("\t\t{0:04X} {1:02X}".format(ram_addr, ramv))
-    # x=Register(b"01000111")
-    # y=Register(b"11000111")
-    # z=Register(4)
-    # print(x&y)
-    # try:
-    #     print(x&z)
-    # except IndexError:
-    #     print ("indexerrorpass")
-    # try:
-    #     print(x&7)
-    # except:
-    #     print ("indexerrorpass")
-    # y.incr()
-    # print(x&y)
-    # if (x&y).isZero():
-    #     print("zero")
-    # if (x&Register(8)).isZero():
-    #     print("ja voll")
-    #
-    # if x == y:
-    #     print("zobi", x, y, x&y)
-    # x=y
-    # if x == y:
-    #     print("zobi2", x, y, x&y)
-    # x=Register(10)
-    # if x == Register(9):
-    #     print("zarbi")
-    # if x<y:
-    #     print("caillou")
-    # # cpu.P = Register(b"000000111111")
-    # # print(cpu.P)
-    # # #cpu.P.incr()
-    # # cpu.P[0:6].incr()
-    # # print(cpu.P)
-    # # #cpu.P.incr()
-    # # print(cpu.P)
-    #
-    #
-
     
