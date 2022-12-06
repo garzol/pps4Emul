@@ -847,11 +847,15 @@ class Pps4Cpu:
             if self.is2CyclesInst(romi):
                 #we are in the first half of a 2-cycle inst
                 self.nextIis2Cycles = True
-                #Caution! There is the case of TM
+                #Caution! There is the case of TM or LB
                 if self.I1[6:] == Register(b"11") and \
-                   (self.I1.bit(4) or self.I1.bit(5)):
+                   (self.I1.bit(4) or self.I1.bit(5)):  #TM
                     self.AB = self.I1[:6]+Register(b"000011")
                     self.P  = incr(self.P[:6])+self.P[6:]
+                elif self.I1[4:] == Register(b"1100"):  #LB
+                    self.SB = self.SA[:]
+                    self.SA = self.P[:]                    
+                    self.P = self.I1[:4] + Register(b"00001100")
                 else:
                     #standard case of 2 cycles instructions
                     self.P = self.AB = incr(self.P[:6])+self.P[6:]
@@ -1458,6 +1462,43 @@ class Pps4Cpu:
         self.P = incr(self.P[:6])+self.P[6:]
         return ""
 
+        '''
+        LB is in range C0..CF
+        (while TM Transfer and mark Indirect is D0..FF)
+        LB is special because you need to put an address the address bus which
+        will not be equal to the current P
+        LB, like LBL is ignored in a string of it, except the first one
+        '''
+        if self.I1[4:] == Register(b"1100"):
+            #simulate
+            if self.lastI1[4:] == Register(b"1100"):
+                #this is a string of LB's only first counts others are nop
+                pass
+            else:
+                self.BU = Register(b"0000")
+                self.BM = ~(self.I2[4:])
+                self.BL = ~(self.I2[:4])
+                
+                self.P = self.SA[:]
+                self.SA, self.SB = self.SB, self.SA
+
+            self.P = incr(self.P[:6])+self.P[6:]
+            print("called LB")
+            #render phrase
+            if self.lastI1[4:] == Register(b"1100"):
+                #this is a string of LDI's only first counts others are nop
+                instcode="NOP"
+                instphrase = instcode+"\t"+"(series of LB's"
+                return instphrase
+            else:
+                instcode="LB"
+                instphrase = instcode+"\t"+"{0:02X}".format((~self.I2).toInt())
+                return instphrase
+
+
+        self.P = incr(self.P[:6])+self.P[6:]
+        return ""
+    
 if __name__ == '__main__':
     fb = open("A1752EFA1753EE.bin", "rb")
     prom = ROM12(fb)
