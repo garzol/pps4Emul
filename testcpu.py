@@ -6,7 +6,7 @@ Created on 6 déc. 2022
 start of iol handling
 '''
 from pps4.cpum import ROM12, RAM, Pps4Cpu
-
+from pps4.A17IO import A17IO
 
 if __name__ == '__main__':
     fb = open("pps4/A1752EFA1753EE.bin", "rb")
@@ -14,13 +14,20 @@ if __name__ == '__main__':
     fb.close()
     pram = RAM(256)
     cpu = Pps4Cpu()
+    a170x2 = A17IO(0x2)
+
     print("===ROM===")
     prom.show(length=10)
-    print("===RAM===")
+    print("===RAM===")  
     pram.show()
+
+
+    print("===A17 switch matrix===")
+    print("a17", "id=#{0:01X}".format(a170x2.id))
+    
     print("===CPU===")
     ramv = 0
-    for i in range(300):
+    for i in range(5000):
         
         '''
         #first half of main cycle (phi1, phi2)
@@ -44,6 +51,7 @@ if __name__ == '__main__':
         elif wioioram == Pps4Cpu.iodev:
             #print(cpu.A, ram_addr, cpu.I2.toInt())
             print("ioldevice reception of A={0:01X}, B={1:03X}, I2={2:02X}".format(cpu.A.toInt(), ram_addr, cpu.I2.toInt()))
+            a170x2.handle(i, cpu.I2.toInt(), ram_addr, cpu.A.toInt())
         if ldis is not None:
             if ldis == "":
                 print("**********STOP******************")
@@ -51,7 +59,8 @@ if __name__ == '__main__':
             print("{1:08d}\t{2}".format(rom_addr, i, ldis))
         # else:
         #     print("{1:08d}\t==============".format(rom_addr, i))
-        
+
+    a170x2.stop()    
     pram.show()
     print(prom.countinstoccur())        
         #print("\t\t{0:04X} {1:02X}".format(ram_addr, ramv))
