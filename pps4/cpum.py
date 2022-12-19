@@ -56,7 +56,7 @@ class PPS4InstSet():
         "DIA":  [0x27],
         "EXD":  [x for x in range(0x28,0x30)],
         "LD":   [x for x in range(0x30,0x38)],
-        "EX ":  [x for x in range(0x38,0x40)],
+        "EX":   [x for x in range(0x38,0x40)],
         "SKBI": [x for x in range(0x40,0x50)],
         "TL":   [x for x in range(0x50,0x60)],
         "ADI":  [x for x in range(0x60,0x65)]+[x for x in range(0x66,0x6F)],
@@ -591,7 +591,13 @@ class RAM:
         self.mem = bytearray(length)
         for i in range(len(self.mem)):
             self.mem[i] = random.randint(0, 15)        
-            
+
+    def lby8(self):
+        ret=list()
+        for i in range(0,len(self.mem),8):  
+            ret.append(self.mem[i:i+8])  
+        return ret  
+              
     def show(self, start=0, *, length=-1):  
         #print("size:", length) 
         if length == -1:
@@ -653,7 +659,7 @@ class Pps4Cpu:
     
     iodev  = 1
     ramdev = 0
-    def __init__(self):
+    def __init__(self, mode="trace"):
         '''
         registers are lists of '0' and '1'
         the index 0 is bit 0, index 1 is bit 1 and so forth
@@ -663,7 +669,9 @@ class Pps4Cpu:
         list("{0:08b}".format(romi)).reverse()
         
         This way, we have reg[0] which is actually bit 0
+        default mode is trace. If set mode to "dasm", then simply disassemble code
         '''
+        self.mode = mode
         self.A  = Register(4*['0'])  #Accumulator
         self.X  = Register(4*['0'])  #Accumulator
         self.BL = Register(4*['0'])
@@ -765,7 +773,8 @@ class Pps4Cpu:
                     self.P = self.I1[:4] + Register(b"00001100")
                 else:
                     #standard case of 2 cycles instructions
-                    self.P = self.AB = incr(self.P[:6])+self.P[6:]
+                    self.P = incr(self.P[:6])+self.P[6:]
+                    self.AB = self.P[:]
                 #print("self.P", self.P)
                 return (self.BL+self.BM+self.BU).toInt(), None, self.wramio 
             else:
@@ -773,22 +782,28 @@ class Pps4Cpu:
             
         #print("self.P", self.P)
         ldis = self.cpuexe()
-        self.AB = self.P
+        self.AB = self.P[:]
+        
+        #SAG handling
+        if self.I1 == Register(b"00010011"):
+            return (self.BL+Register(b"00000000")).toInt(), ldis, self.wramio
         return (self.BL+self.BM+self.BU).toInt(), ldis, self.wramio
         
     def cpuexe(self):
         
         if self.nextIis2Cycles:
-            ldis = "{0:04X}\t{1:02X} {2:02X}".format(self.P.toInt()-1, self.I1.toInt(), self.I2.toInt())
+            ldis = "{0:03X}\t{1:02X}\t{2:02X}".format(self.P.toInt()-1, self.I1.toInt(), self.I2.toInt())
         else:
-            ldis = "{0:04X}\t{1:02X}".format(self.P.toInt(), self.I1.toInt())
+            ldis = "{0:03X}\t{1:02X}\t  ".format(self.P.toInt(), self.I1.toInt())
         #print("skipnext", self.skipNext)
-        if self.skipNext == False:
-            myphrase = self.instdoc()
-        else:
-            myphrase = "SKIP"
-            self.P = incr(self.P[:6])+self.P[6:]
-            self.skipNext = False
+        # if self.skipNext == False:
+        #     myphrase = self.instdoc()
+        # else:
+        #     myphrase = "SKIP"
+        #     self.P = incr(self.P[:6])+self.P[6:]
+        #     self.skipNext = False
+        self.skipNext = False  #just for info, does not take part in anything else
+        myphrase = self.instdoc()
         
         self.nextIis2Cycles = False
         return ldis+"\t"+myphrase
@@ -801,30 +816,28 @@ class Pps4Cpu:
         ''' 
         if self.I1 == Register(b"00000000"):     
             #simulate
-            if self.lastI1 == Register(b"00000000"):
-                #this is a string of LBL's only first counts others are nop
-                pass
-            else:
-                self.BU = Register(b"0000")
-                self.BM = ~self.I2[4:8]
-                self.BL = ~self.I2[0:4]
+            ctxtxt=""
+            if self.mode != "dasm":
+                if self.lastI1 == Register(b"00000000"):
+                    #this is a string of LBL's only first counts others are nop
+                    ctxtxt="\t"+"(NOP: series of LBL's)"
+                else:
+                    self.BU = Register(b"0000")
+                    self.BM = ~self.I2[4:8]
+                    self.BL = ~self.I2[0:4]
             self.P = incr(self.P[:6])+self.P[6:]
             
             #render phrase
-            if self.lastI1 == Register(b"00000000"):
-                #this is a string of LDI's only first counts others are nop
-                instcode="NOP"
-                instphrase = instcode+"\t"+"(series of LBL's"
-                return instphrase
-            else:
-                instcode="LBL"
-                instphrase = instcode+"\t"+"{0:04X}".format((~self.I2).toInt())
-                return instphrase
+            instcode="LBL"
+            instphrase = instcode+"\t"+"{0:04X}".format((~self.I2).toInt())
+            instphrase += ctxtxt
+            return instphrase
 
         '''LABL (11)''' 
         if self.I1 == Register(b"00010001"):     
             #simulate
-            self.A = self.BL[:]
+            if self.mode != "dasm":
+                self.A = self.BL[:]
             self.P = incr(self.P[:6])+self.P[6:]
 
             #render phrase
@@ -835,8 +848,9 @@ class Pps4Cpu:
         '''LBUA (04)''' 
         if self.I1 == Register(b"00000100"):     
             #simulate
-            self.BU = self.A[:]
-            self.A = self.ramd
+            if self.mode != "dasm":
+                self.BU = self.A[:]
+                self.A = self.ramd
             self.P = incr(self.P[:6])+self.P[6:]
 
             #render phrase
@@ -847,7 +861,8 @@ class Pps4Cpu:
         '''LBMX (10)''' 
         if self.I1 == Register(b"00010000"):     
             #simulate
-            self.BM = self.X[:]
+            if self.mode != "dasm":
+                self.BM = self.X[:]
             self.P = incr(self.P[:6])+self.P[6:]
 
             #render phrase
@@ -858,7 +873,8 @@ class Pps4Cpu:
         '''RF2 (25)''' 
         if self.I1 == Register(b"00100101"):     
             #simulate
-            self.FF2 = Register(b"0")
+            if self.mode != "dasm":
+                self.FF2 = Register(b"0")
             self.P = incr(self.P[:6])+self.P[6:]
 
             #render phrase
@@ -869,7 +885,8 @@ class Pps4Cpu:
         '''SC (20)''' 
         if self.I1 == Register(b"00100000"):     
             #simulate
-            self.C = Register(b"1")
+            if self.mode != "dasm":
+                self.C = Register(b"1")
             self.P = incr(self.P[:6])+self.P[6:]
 
             #render phrase
@@ -880,7 +897,8 @@ class Pps4Cpu:
         '''RC (20)''' 
         if self.I1 == Register(b"00100100"):     
             #simulate
-            self.C = Register(b"0")
+            if self.mode != "dasm":
+                self.C = Register(b"0")
             self.P = incr(self.P[:6])+self.P[6:]
 
             #render phrase
@@ -891,7 +909,8 @@ class Pps4Cpu:
         '''SF2 (21)''' 
         if self.I1 == Register(b"00100001"):     
             #simulate
-            self.FF2 = Register(b"1")
+            if self.mode != "dasm":
+                self.FF2 = Register(b"1")
             self.P = incr(self.P[:6])+self.P[6:]
 
             #render phrase
@@ -902,7 +921,8 @@ class Pps4Cpu:
         '''SF1 (22)''' 
         if self.I1 == Register(b"00100010"):     
             #simulate
-            self.FF1 = Register(b"1")
+            if self.mode != "dasm":
+                self.FF1 = Register(b"1")
             self.P = incr(self.P[:6])+self.P[6:]
 
             #render phrase
@@ -913,7 +933,8 @@ class Pps4Cpu:
         '''RF1 (26)''' 
         if self.I1 == Register(b"00100110"):     
             #simulate
-            self.FF1 = Register(b"0")
+            if self.mode != "dasm":
+                self.FF1 = Register(b"0")
             self.P = incr(self.P[:6])+self.P[6:]
 
             #render phrase
@@ -924,7 +945,8 @@ class Pps4Cpu:
         #CYS (6F)  
         if self.I1 == Register(b"01101111"):     
             #simulate
-            self.A, self.SA[:4], self.SA[4:8], self.SA[8:] = self.SA[:4], self.SA[4:8], self.SA[8:], self.A
+            if self.mode != "dasm":
+                self.A, self.SA[:4], self.SA[4:8], self.SA[8:] = self.SA[:4], self.SA[4:8], self.SA[8:], self.A
             
             self.P = incr(self.P[:6])+self.P[6:]
 
@@ -936,7 +958,8 @@ class Pps4Cpu:
         '''AND (0D) ''' 
         if self.I1 == Register(b"00001101"):     
             #simulate
-            self.A = self.A & self.ramd
+            if self.mode != "dasm":
+                self.A = self.A & self.ramd
             self.P = incr(self.P[:6])+self.P[6:]
 
             #render phrase
@@ -947,7 +970,8 @@ class Pps4Cpu:
         '''COMP (0E) ''' 
         if self.I1 == Register(b"00001110"):     
             #simulate
-            self.A = ~self.A
+            if self.mode != "dasm":
+                self.A = ~self.A
             self.P = incr(self.P[:6])+self.P[6:]
 
             #render phrase
@@ -958,48 +982,53 @@ class Pps4Cpu:
         '''ADCSK (08)'''  
         if self.I1 == Register(b"00001000"):     
             #simulate
-            carry, self.A = self.A.binAdd(self.ramd)
-            self.C = Register(carry)
-            carry, self.A = self.A.binAdd(self.C+Register(b"000"))
-            self.C = Register(carry)
+            ctxtxt=""
+            if self.mode != "dasm":
+                carry, self.A = self.A.binAdd(self.ramd)
+                self.C = Register(carry)
+                carry, self.A = self.A.binAdd(self.C+Register(b"000"))
+                self.C = Register(carry)
+                if carry == '1':
+                    #skip next ROM word
+                    self.P = incr(self.P[:6])+self.P[6:]
+                    ctxtxt="\t(C=1 ==> skip)"
+                else:
+                    ctxtxt=""  
             self.P = incr(self.P[:6])+self.P[6:]
-            if carry == '1':
-                #skip next ROM word
-                self.P = incr(self.P[:6])+self.P[6:]
-                skptxt="\t(C=1 ==> skip)"
-            else:
-                skptxt=""  
                   
             #render phrase
             instcode="ADCSK"
-            instphrase = instcode+skptxt
+            instphrase = instcode+ctxtxt
             return instphrase
 
         '''ADSK (09)'''  
         if self.I1 == Register(b"00001001"):     
             #simulate
-            carry, self.A = self.A.binAdd(self.ramd)
-            self.C = Register(carry)
+            ctxtxt=""
+            if self.mode != "dasm":
+                carry, self.A = self.A.binAdd(self.ramd)
+                self.C = Register(carry)
+                if carry == '1':
+                    #skip next ROM word
+                    self.P = incr(self.P[:6])+self.P[6:]
+                    ctxtxt="\t(C=1 ==> skip)"
+                else:
+                    ctxtxt=""  
             self.P = incr(self.P[:6])+self.P[6:]
-            if carry == '1':
-                #skip next ROM word
-                self.P = incr(self.P[:6])+self.P[6:]
-                skptxt="\t(C=1 ==> skip)"
-            else:
-                skptxt=""  
                   
             #render phrase
             instcode="ADSK"
-            instphrase = instcode+skptxt
+            instphrase = instcode+ctxtxt
             return instphrase
 
         '''ADC (0A)'''  
         if self.I1 == Register(b"00001010"):     
             #simulate
-            carry, self.A = self.A.binAdd(self.ramd)
-            self.C = Register(carry)
-            carry, self.A = self.A.binAdd(self.C+Register(b"000"))
-            self.C = Register(carry)
+            if self.mode != "dasm":
+                carry, self.A = self.A.binAdd(self.ramd)
+                self.C = Register(carry)
+                carry, self.A = self.A.binAdd(self.C+Register(b"000"))
+                self.C = Register(carry)
             self.P = incr(self.P[:6])+self.P[6:]
             
             #render phrase
@@ -1010,8 +1039,9 @@ class Pps4Cpu:
         '''AD (0B)'''  
         if self.I1 == Register(b"00001011"):     
             #simulate
-            carry, self.A = self.A.binAdd(self.ramd)
-            self.C = Register(carry)
+            if self.mode != "dasm":
+                carry, self.A = self.A.binAdd(self.ramd)
+                self.C = Register(carry)
             self.P = incr(self.P[:6])+self.P[6:]
             
             #render phrase
@@ -1022,7 +1052,8 @@ class Pps4Cpu:
         '''EOR (0C)'''  
         if self.I1 == Register(b"00001100"):     
             #simulate
-            self.A = self.A ^ self.ramd
+            if self.mode != "dasm":
+                self.A = self.A ^ self.ramd
             self.P = incr(self.P[:6])+self.P[6:]
 
             #render phrase
@@ -1033,7 +1064,8 @@ class Pps4Cpu:
         #OR (0F)  
         if self.I1 == Register(b"00001111"):     
             #simulate
-            self.A = self.A | self.ramd
+            if self.mode != "dasm":
+                self.A = self.A | self.ramd
             self.P = incr(self.P[:6])+self.P[6:]
 
             #render phrase
@@ -1044,16 +1076,18 @@ class Pps4Cpu:
         '''SKF2 (14)'''  
         if self.I1 == Register(b"00010100"):     
             #simulate
-            if not self.FF2.isZero():
-                #skip next instruction
-                #can't just increment P from here because
-                #we don't know nothing about the length of next instruction
-                #self.P = incr(self.P[:6])+self.P[6:]
-                #might be superfluous because the datasheet
-                #indicates "next ROM word"
-                #so we have to check (TODO)
-                self.skipNext = True
-                #print("skipnext is True from incr", self.skipNext)
+            if self.mode != "dasm":
+                if not self.FF2.isZero():
+                    #skip next instruction
+                    #can't just increment P from here because
+                    #we don't know nothing about the length of next instruction
+                    #self.P = incr(self.P[:6])+self.P[6:]
+                    #might be superfluous because the datasheet
+                    #indicates "next ROM word"
+                    #so we have to check (TODO)
+                    self.skipNext = True
+                    self.P = incr(self.P[:6])+self.P[6:]
+                    #print("skipnext is True from incr", self.skipNext)
             self.P = incr(self.P[:6])+self.P[6:]
 
             #render phrase
@@ -1064,16 +1098,18 @@ class Pps4Cpu:
         '''SKF1 (16)'''  
         if self.I1 == Register(b"00010110"):     
             #simulate
-            if not self.FF1.isZero():
-                #skip next instruction
-                #can't just increment P from here because
-                #we don't know nothing about the length of next instruction
-                #self.P = incr(self.P[:6])+self.P[6:]
-                #might be superfluous because the datasheet
-                #indicates "next ROM word"
-                #so we have to check (TODO)
-                self.skipNext = True
-                #print("skipnext is True from incr", self.skipNext)
+            if self.mode != "dasm":
+                if not self.FF1.isZero():
+                    #skip next instruction
+                    #can't just increment P from here because
+                    #we don't know nothing about the length of next instruction
+                    #self.P = incr(self.P[:6])+self.P[6:]
+                    #might be superfluous because the datasheet
+                    #indicates "next ROM word"
+                    #so we have to check (TODO)
+                    self.skipNext = True
+                    self.P = incr(self.P[:6])+self.P[6:]
+                    #print("skipnext is True from incr", self.skipNext)
             self.P = incr(self.P[:6])+self.P[6:]
 
             #render phrase
@@ -1084,16 +1120,18 @@ class Pps4Cpu:
         '''SKC (15)'''  
         if self.I1 == Register(b"00010101"):     
             #simulate
-            if not self.C.isZero():
-                #skip next instruction
-                #can't just increment P from here because
-                #we don't know nothing about the length of next instruction
-                #self.P = incr(self.P[:6])+self.P[6:]
-                #might be superfluous because the datasheet
-                #indicates "next ROM word"
-                #so we have to check (TODO)
-                self.skipNext = True
-                #print("skipnext is True from incr", self.skipNext)
+            if self.mode != "dasm":
+                if not self.C.isZero():
+                    #skip next instruction
+                    #can't just increment P from here because
+                    #we don't know nothing about the length of next instruction
+                    #self.P = incr(self.P[:6])+self.P[6:]
+                    #might be superfluous because the datasheet
+                    #indicates "next ROM word"
+                    #so we have to check (TODO)
+                    self.skipNext = True
+                    self.P = incr(self.P[:6])+self.P[6:]
+                    #print("skipnext is True from incr", self.skipNext)
             self.P = incr(self.P[:6])+self.P[6:]
 
             #render phrase
@@ -1104,13 +1142,14 @@ class Pps4Cpu:
         '''SKZ (1E)'''  
         if self.I1 == Register(b"00011110"):     
             #simulate
-            if self.A.isZero():
-                #skip next instruction
-                #can't just increment P from here because
-                #we don't know nothing about the length of next instruction
-                #self.P = incr(self.P[:6])+self.P[6:]
-                self.skipNext = True
-                #print("skipnext is True from incr", self.skipNext)
+            if self.mode != "dasm":
+                if self.A.isZero():
+                    #skip next instruction
+                    #can't just increment P from here because
+                    #we don't know nothing about the length of next instruction
+                    self.P = incr(self.P[:6])+self.P[6:]
+                    self.skipNext = True
+                    #print("skipnext is True from incr", self.skipNext)
             self.P = incr(self.P[:6])+self.P[6:]
 
             #render phrase
@@ -1121,70 +1160,76 @@ class Pps4Cpu:
         #DECB (1F)  
         if self.I1 == Register(b"00011111"):     
             #simulate
-            self.BL.decr()
-            if self.BL == Register(b"1111"):
-                #skip next instruction
-                #can't just increment P from here because
-                #we don't know nothing about the length of next instruction
-                #self.P = incr(self.P[:6])+self.P[6:]
-                self.skipNext = True
-                #print("skipnext is True from incr", self.skipNext)
+            ctxtxt = ""
+            if self.mode != "dasm":
+                self.BL.decr()
+                if self.BL == Register(b"1111"):
+                    #skip next instruction
+                    #can't just increment P from here because
+                    #we don't know nothing about the length of next instruction
+                    ctxtxt = "(skip)"
+                    self.P = incr(self.P[:6])+self.P[6:]
+                    self.skipNext = True
+                else:
+                    ctxtxt = "(BL={0:1X})".format(self.BL.toInt())
+
+                    #print("skipnext is True from incr", self.skipNext)
             self.P = incr(self.P[:6])+self.P[6:]
 
             #render phrase
             instcode="DECB"
-            if self.BL == Register(b"1111"):
-                op = "(skip)"
-            else:
-                op = "(BL={0:1X})".format(self.BL.toInt())
-            instphrase = instcode+"\t" + op
+            instphrase = instcode+"\t" + ctxtxt
             return instphrase
  
         '''SKBI (40..4F)'''  
         if self.I1[4:] == Register(b"0100"):     
             #simulate
-            if self.BL == self.I1[:4]:
-                #skip next instruction
-                #can't just increment P from here because
-                #we don't know nothing about the length of next instruction
-                self.P = incr(self.P[:6])+self.P[6:]
+            ctxtxt = ""
+            if self.mode != "dasm":
+                if self.BL == self.I1[:4]:
+                    #skip next instruction
+                    #can't just increment P from here because
+                    #we don't know nothing about the length of next instruction
+                    ctxtxt = "(skip)"
+                    self.P = incr(self.P[:6])+self.P[6:]
+                else:
+                    ctxtxt = "(BL={0:1X})".format(self.BL.toInt())                    
             self.P = incr(self.P[:6])+self.P[6:]
 
             #render phrase
             instcode="SKBI\t{0:1X}".format(self.I1[:4].toInt())
-            if self.BL == self.I1[:4]:
-                op = "(skip)"
-            else:
-                op = "(BL={0:1X})".format(self.BL.toInt())
-            instphrase = instcode+"\t" + op
+            instphrase = instcode+"\t" + ctxtxt
             return instphrase
             
         #INCB (17)  
         if self.I1 == Register(b"00010111"):     
             #simulate
-            self.BL.incr()
-            if self.BL.isZero():
-                #skip next instruction
-                #can't just increment P from here because
-                #we don't know nothing about the length of next instruction
-                #self.P = incr(self.P[:6])+self.P[6:]
-                self.skipNext = True
-                #print("skipnext is True from incr", self.skipNext)
+            ctxtxt = ""
+            if self.mode != "dasm":
+                self.BL.incr()
+                if self.BL.isZero():
+                    #skip next instruction
+                    #can't just increment P from here because
+                    #we don't know nothing about the length of next instruction
+                    self.P = incr(self.P[:6])+self.P[6:]
+                    self.skipNext = True
+                    ctxtxt = "(skip)"
+                else:
+                    ctxtxt = "(BL={0:1X})".format(self.BL.toInt())
+                    
+                    #print("skipnext is True from incr", self.skipNext)
             self.P = incr(self.P[:6])+self.P[6:]
 
             #render phrase
             instcode="INCB"
-            if self.BL.isZero():
-                op = "(skip)"
-            else:
-                op = "(BL={0:1X})".format(self.BL.toInt())
-            instphrase = instcode+"\t" + op
+            instphrase = instcode+"\t" + ctxtxt
             return instphrase
             
         #XS (06)  
         if self.I1 == Register(b"00000110"):     
             #simulate
-            self.SA, self.SB = self.SB, self.SA
+            if self.mode != "dasm":
+                self.SA, self.SB = self.SB, self.SA
             self.P = incr(self.P[:6])+self.P[6:]
 
             #render phrase
@@ -1195,18 +1240,22 @@ class Pps4Cpu:
         #XABL (19)  
         if self.I1 == Register(b"00011001"):     
             #simulate
-            self.A, self.BL = self.BL, self.A
+            ctxtxt = ""
+            if self.mode != "dasm":
+                self.A, self.BL = self.BL, self.A
+                ctxtxt = "\t(A<=>BL, A<={0:01X}, {1:01X}=>BL)".format(self.A.toInt(), self.BL.toInt())
             self.P = incr(self.P[:6])+self.P[6:]
 
             #render phrase
             instcode="XABL"
-            instphrase = instcode
+            instphrase = instcode+"\t" + ctxtxt
             return instphrase
             
         #XBMX (18)  
         if self.I1 == Register(b"00011000"):     
             #simulate
-            self.X, self.BM = self.BM, self.X
+            if self.mode != "dasm":
+                self.X, self.BM = self.BM, self.X
             self.P = incr(self.P[:6])+self.P[6:]
 
             #render phrase
@@ -1217,7 +1266,8 @@ class Pps4Cpu:
         #XAX (1A)  
         if self.I1 == Register(b"00011010"):     
             #simulate
-            self.X, self.A = self.A, self.X
+            if self.mode != "dasm":
+                self.X, self.A = self.A, self.X
             self.P = incr(self.P[:6])+self.P[6:]
 
             #render phrase
@@ -1228,7 +1278,8 @@ class Pps4Cpu:
         #LAX (12)  
         if self.I1 == Register(b"00010010"):     
             #simulate
-            self.A = self.X[:]
+            if self.mode != "dasm":
+                self.A = self.X[:]
             self.P = incr(self.P[:6])+self.P[6:]
 
             #render phrase
@@ -1239,7 +1290,8 @@ class Pps4Cpu:
         #LXA (1B)  
         if self.I1 == Register(b"00011011"):     
             #simulate
-            self.X = self.A[:]
+            if self.mode != "dasm":
+                self.X = self.A[:]
             self.P = incr(self.P[:6])+self.P[6:]
 
             #render phrase
@@ -1250,7 +1302,8 @@ class Pps4Cpu:
         #DOA (1D)  
         if self.I1 == Register(b"00011101"):     
             #simulate
-            self.DOA = self.A[:]
+            if self.mode != "dasm":
+                self.DOA = self.A[:]
             self.P = incr(self.P[:6])+self.P[6:]
 
             #render phrase
@@ -1261,7 +1314,8 @@ class Pps4Cpu:
         #DIB (23)  
         if self.I1 == Register(b"00100011"):     
             #simulate
-            self.A = self.DIB[:]
+            if self.mode != "dasm":
+                self.A = self.DIB[:]
             self.P = incr(self.P[:6])+self.P[6:]
 
             #render phrase
@@ -1272,7 +1326,8 @@ class Pps4Cpu:
         #DIA (27)  
         if self.I1 == Register(b"00100111"):     
             #simulate
-            self.A = self.DIA[:]
+            if self.mode != "dasm":
+                self.A = self.DIA[:]
             self.P = incr(self.P[:6])+self.P[6:]
 
             #render phrase
@@ -1283,8 +1338,12 @@ class Pps4Cpu:
         #RTN (05)  
         if self.I1 == Register(b"00000101"):     
             #simulate
-            self.P = self.SA[:]
-            self.SA, self.SB = self.SB, self.SA
+            if self.mode != "dasm":
+                self.P = self.SA[:]
+                self.SA, self.SB = self.SB, self.SA
+            else:
+                self.P = incr(self.P[:6])+self.P[6:]
+                
 
             #render phrase
             instcode="RTN"
@@ -1294,10 +1353,13 @@ class Pps4Cpu:
         #RTNSK (07)  
         if self.I1 == Register(b"00000111"):     
             #simulate
-            self.P = self.SA[:]
-            self.SA, self.SB = self.SB, self.SA
-            self.P = incr(self.P[:6])+self.P[6:]   #to be confirmed
-
+            if self.mode != "dasm":
+                self.P = self.SA[:]
+                self.SA, self.SB = self.SB, self.SA
+                self.P = incr(self.P[:6])+self.P[6:]   #to be confirmed
+            else:
+                self.P = incr(self.P[:6])+self.P[6:]
+            
             #render phrase
             instcode="RTNSK"
             instphrase = instcode
@@ -1306,50 +1368,68 @@ class Pps4Cpu:
         #IOL (1C) is todo at the moment. 
         if self.I1 == Register(b"00011100"):     
             #simulate
+            ctxtxt=""
             self.P = incr(self.P[:6])+self.P[6:]
-            self.wramio = Pps4Cpu.iodev #default
-            self.ramout = self.A
+            if self.mode != "dasm":
+                self.wramio = Pps4Cpu.iodev #default
+                self.ramout = self.A
+                opt = "SOS" if self.I2.bit(0) else "SES"
+                ctxtxt = "\t"+"{0:01X} (B=0x{2:03X} A={3:01X})".format(self.I2.toInt(), opt, (self.BL+self.BM+self.BU).toInt(), self.A.toInt())
                
             #render phrase
             instcode="IOL"
-            opt = "SOS" if self.I2.bit(0) else "SES"
-            instphrase = instcode+"\t"+"{0:01X} ({1} B={2:04X} A={3:01X}xxx)".format(self.I2.toInt(), opt, (self.BL+self.BM+self.BU).toInt(), self.A.bit(3))
+            instphrase = instcode+"\t" + ctxtxt
             return instphrase
 
         #EX (38..3F). 
         if self.I1[3:] == Register(b"00111"):     
             #simulate
-            #print("avant", self.BL, self.BM, self.BU)
-            self.A, self.ramout = self.ramd, self.A
-            self.wio = Pps4Cpu.wr #default
+            ctxtxt=""
+            if self.mode != "dasm":
+                #print("avant", self.BL, self.BM, self.BU)
+                addrcible = self.BL + self.BM + self.BU
+                ctxtxt   = "mem({0:03X})<={1:01X}, {2:01X}=>Acc".format(addrcible.toInt(),
+                                                                          self.A.toInt(),
+                                                                          self.ramd.toInt())
+                self.A, self.ramout = self.ramd, self.A
+                self.wio = Pps4Cpu.wr #default
+    
+                
+                self.BM[:3] = self.BM[:3] ^ ~self.I1[:3]
 
             self.P = incr(self.P[:6])+self.P[6:]
-            
-            self.BM[:3] = self.BM[:3] ^ ~self.I1[:3]
 
             #render phrase
             instcode="EX"
             instphrase = instcode+"\t"+"{0:01X}".format((~self.I1[:3]).toInt())
+            instphrase += "\t"+ctxtxt
             return instphrase
             
             
         #EXD (28..2F). 
         if self.I1[3:] == Register(b"00101"):     
             #simulate
-            #print("avant", self.BL, self.BM, self.BU)
-            self.A, self.ramout = self.ramd, self.A
-            self.wio = Pps4Cpu.wr #default
+            ctxtxt=""
+            if self.mode != "dasm":
+                #print("avant", self.BL, self.BM, self.BU)
+                addrcible = self.BL + self.BM + self.BU
+                ctxtxt   = "mem({0:03X})<={1:01X}, {2:01X}=>Acc BL--".format(addrcible.toInt(),
+                                                                          self.A.toInt(),
+                                                                          self.ramd.toInt())
+                self.A, self.ramout = self.ramd, self.A
+                self.wio = Pps4Cpu.wr #default
+    
+                
+                self.BM[:3] = self.BM[:3] ^ ~self.I1[:3]
+                self.BL.decr()
+                if self.BL == Register(b"1111"):
+                    #skip next instruction
+                    #can't just increment P from here because
+                    #we don't know nothing about the length of next instruction
+                    self.P = incr(self.P[:6])+self.P[6:]
+                    self.skipNext = True
 
             self.P = incr(self.P[:6])+self.P[6:]
-            
-            self.BM[:3] = self.BM[:3] ^ ~self.I1[:3]
-            self.BL.decr()
-            if self.BL == Register(b"1111"):
-                #skip next instruction
-                #can't just increment P from here because
-                #we don't know nothing about the length of next instruction
-                #self.P = incr(self.P[:6])+self.P[6:]
-                self.skipNext = True
                 
             #print("apres", self.BL, self.BM, self.BU)
 
@@ -1357,23 +1437,30 @@ class Pps4Cpu:
             #render phrase
             instcode="EXD"
             instphrase = instcode+"\t"+"{0:01X}".format((~self.I1[:3]).toInt())
+            instphrase += "\t"+ctxtxt
             return instphrase
             
         '''T Transfer is in range 80..BF'''
         if self.I1.bit(7) and not self.I1.bit(6):
             #simulate
-            self.P = self.I1[:6]+self.P[6:]
+            if self.mode != "dasm":
+                self.P = self.I1[:6]+self.P[6:]
+            else:
+                #pass
+                self.P = incr(self.P[:6])+self.P[6:]
+                
             
             #render phrase
             instcode="T"
-            instphrase = instcode+"\t"+"{0:04X}".format(self.P.toInt())
+            instphrase = instcode+"\t"+"{0:04X}".format( (self.I1[:6]+self.P[6:]).toInt() )
             return instphrase
         
         '''SAG (13)'''
         if self.I1 == Register(b"00010011"): 
             #simulate
-            self.P = self.I2[:8]+self.I1[:4]
-            raise Exception(f"The SAG instruction is not yet implemented")
+            self.P = incr(self.P[:6])+self.P[6:]
+            #raise Exception(f"The SAG instruction is not yet implemented")
+            
             #render phrase
             instcode="SAG"
             instphrase = instcode
@@ -1382,24 +1469,32 @@ class Pps4Cpu:
         #Transfer Long is in range 50..5F
         if self.I1[4:] == Register(b"0101"): 
             #simulate
-            self.P = self.I2[:8]+self.I1[:4]
+            if self.mode != "dasm":
+                self.P = self.I2[:8]+self.I1[:4]
+            else:
+                self.P = incr(self.P[:6])+self.P[6:]
             
             #render phrase
             instcode="TL"
-            instphrase = instcode+"\t"+"{0:04X}".format(self.P.toInt())
+            instphrase = instcode+"\t"+"{0:04X}".format( (self.I2[:8]+self.I1[:4]).toInt())
             return instphrase
 
         #LD Load Accumulator from Memory is 30..37
         if self.I1[3:] == Register(b"00110"):
             #simulate
-            self.A    = self.ramd
-            self.BM[:3] = self.BM[:3] ^ ~self.I1[:3]
-
+            ctxtxt=""
+            if self.mode != "dasm":
+                self.A    = self.ramd
+                addrcur   = (self.BL+self.BM+self.BU)
+                self.BM[:3] = self.BM[:3] ^ ~self.I1[:3]
+                ctxtxt = "\tA<={0:01X} (from @{1:03X})".format(self.ramd.toInt(), addrcur.toInt())
+                
             self.P     = incr(self.P[:6])+self.P[6:]
             
             #render phrase
             instcode="LD"
             instphrase = instcode+"\t"+"{0:01X}".format((~self.I1[:3]).toInt())
+            instphrase += ctxtxt
             return instphrase
                 
         '''
@@ -1410,14 +1505,19 @@ class Pps4Cpu:
         if self.I1[6:] == Register(b"11") and \
            (self.I1.bit(4) or self.I1.bit(5)):
             #simulate
-            self.SB, self.SA = self.SA, self.P[:]
-            #self.SA    = incr(self.P[:6])+self.P[6:]
-            #self.SA    = self.P[:6]+self.P[6:]
-            self.P[8:] = Register(b"0001")
-            self.P[:8] = self.I2
+            ctxtxt = "\t{0:04X}".format((self.I2+Register(b"0001")).toInt())
+            if self.mode != "dasm":
+                self.SB, self.SA = self.SA, self.P[:]
+                #self.SA    = incr(self.P[:6])+self.P[6:]
+                #self.SA    = self.P[:6]+self.P[6:]
+                self.P[8:] = Register(b"0001")
+                self.P[:8] = self.I2
+            else:
+                self.P     = incr(self.P[:6])+self.P[6:]
+                
             #render phrase
             instcode="TM"
-            instphrase = instcode+"\t"+"{0:04X}".format(self.P.toInt())
+            instphrase = instcode+ctxtxt
             return instphrase
         
         #TML Transfer and mark Long is 01, 02 or 03
@@ -1425,36 +1525,37 @@ class Pps4Cpu:
            self.I1 == Register(b"00000010") or \
            self.I1 == Register(b"00000011"): 
             #simulate
-            self.SB, self.SA = self.SA, incr(self.P[:6])+self.P[6:]
-            #self.SA    = incr(self.P[:6])+self.P[6:]
-            self.P[8:] = self.I1[:4]
-            self.P[:8] = self.I2
+            ctxtxt = "\t{0:04X}".format((self.I2+self.I1[:4]).toInt())
+            if self.mode != "dasm":
+                self.SB, self.SA = self.SA, incr(self.P[:6])+self.P[6:]
+                #self.SA    = incr(self.P[:6])+self.P[6:]
+                self.P[8:] = self.I1[:4]
+                self.P[:8] = self.I2
+            else:
+                self.P     = incr(self.P[:6])+self.P[6:]
             
             #render phrase
             instcode="TML"
-            instphrase = instcode+"\t"+"{0:04X}".format(self.P.toInt())
+            instphrase = instcode+ctxtxt
             return instphrase
         
         #LDI is in range 70..7F
         if self.I1[4:] == Register(b"0111"):
             #simulate
-            if self.lastI1[4:] == Register(b"0111"):
-                #this is a string of LDI's only first counts others are nop
-                pass
-            else:
-                self.A = self.I1[:4] ^ Register(b"1111")
+            ctxtxt=""
+            if self.mode != "dasm":
+                if self.lastI1[4:] == Register(b"0111"):
+                    #this is a string of LDI's only first counts others are nop
+                    ctxtxt = "\t"+"(NOP: series of LDI's)"
+                else:
+                    self.A = self.I1[:4] ^ Register(b"1111")
             self.P = incr(self.P[:6])+self.P[6:]
             
             #render phrase
-            if self.lastI1[4:] == Register(b"0111"):
-                #this is a string of LDI's only first counts others are nop
-                instcode="NOP"
-                instphrase = instcode+"\t"+"(series of LDI's)"
-                return instphrase
-            else:
-                instcode="LDI"
-                instphrase = instcode+"\t"+"{0:01X}".format(self.A.toInt())
-                return instphrase
+            instcode="LDI"
+            instcode = instcode+"\t"+"{0:01X}".format( (self.I1[:4] ^ Register(b"1111")).toInt() )
+            instphrase = instcode+ctxtxt
+            return instphrase
             
             
         '''
@@ -1463,14 +1564,17 @@ class Pps4Cpu:
         '''
         if self.I1[4:] == Register(b"0110") and self.I1[:4] != Register(b"1111"):
             #simulate
-            carry, self.A = self.A.binAdd(~(self.I1[:4]))
+            ctxtxt=""
+            if self.mode != "dasm":
+                carry, self.A = self.A.binAdd(~(self.I1[:4]))
+                if carry == '1' and self.I1[:4] != Register(b"0101"):
+                    #skip next instruction
+                    #can't just increment P from here because
+                    #we don't know nothing about the length of next instruction
+                    self.P = incr(self.P[:6])+self.P[6:]
+                    self.skipNext = True
+                    
             self.P = incr(self.P[:6])+self.P[6:]
-            if carry == '1' and self.I1[:4] != Register(b"0101"):
-                #skip next instruction
-                #can't just increment P from here because
-                #we don't know nothing about the length of next instruction
-                #self.P = incr(self.P[:6])+self.P[6:]
-                self.skipNext = True
             
             #render phrase
             if self.I1[:4] == Register(b"0101"):
@@ -1483,8 +1587,8 @@ class Pps4Cpu:
                 instphrase = instcode+"\t"+"{0:1X}".format((~self.I1[:4]).toInt())
                 return instphrase
 
-        self.P = incr(self.P[:6])+self.P[6:]
-        return ""
+        # self.P = incr(self.P[:6])+self.P[6:]
+        # return ""
 
         '''
         LB is in range C0..CF
@@ -1495,29 +1599,29 @@ class Pps4Cpu:
         '''
         if self.I1[4:] == Register(b"1100"):
             #simulate
-            if self.lastI1[4:] == Register(b"1100"):
-                #this is a string of LB's only first counts others are nop
-                pass
+            ctxtxt=""
+            if self.mode != "dasm":
+                if self.lastI1[4:] == Register(b"1100"):
+                    #this is a string of LB's only first counts others are nop
+                    ctxtxt = "\t"+"(NOP: series of LB's)"
+                else:
+                    self.BU = Register(b"0000")
+                    self.BM = ~(self.I2[4:])
+                    self.BL = ~(self.I2[:4])
+                    
+                    self.P = self.SA[:]
+                    self.SA, self.SB = self.SB, self.SA
+    
+                self.P = incr(self.P[:6])+self.P[6:]
+                print("Debug: called LB=============================================")
             else:
-                self.BU = Register(b"0000")
-                self.BM = ~(self.I2[4:])
-                self.BL = ~(self.I2[:4])
+                self.P = incr(self.P[:6])+self.P[6:]
                 
-                self.P = self.SA[:]
-                self.SA, self.SB = self.SB, self.SA
-
-            self.P = incr(self.P[:6])+self.P[6:]
-            print("called LB=============================================")
             #render phrase
-            if self.lastI1[4:] == Register(b"1100"):
-                #this is a string of LDI's only first counts others are nop
-                instcode="NOP"
-                instphrase = instcode+"\t"+"(series of LB's"
-                return instphrase
-            else:
-                instcode="LB"
-                instphrase = instcode+"\t"+"{0:02X}".format((~self.I2).toInt())
-                return instphrase
+            instcode="LB"
+            instphrase = instcode+"\t"+"{0:02X}".format((~self.I2).toInt())
+            instphrase += ctxtxt
+            return instphrase
 
 
         self.P = incr(self.P[:6])+self.P[6:]

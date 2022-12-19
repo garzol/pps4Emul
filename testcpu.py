@@ -6,7 +6,9 @@ Created on 6 déc. 2022
 start of iol handling
 '''
 from pps4.cpum import ROM12, RAM, Pps4Cpu
-from pps4.A17IO import A17IO
+from pps4.A17IO import A17IO    
+from pps4._10696 import GPIO10696
+from pps4.register import Register
 
 if __name__ == '__main__':
     fb = open("pps4/A1752EFA1753EE.bin", "rb")
@@ -14,8 +16,9 @@ if __name__ == '__main__':
     fb.close()
     pram = RAM(256)
     cpu = Pps4Cpu()
-    a170x2 = A17IO(0x2)
-
+    a170x2  = A17IO(0x2)
+    a170x4  = A17IO(0x4)
+    gpio0x3 = GPIO10696(0x3)
     print("===ROM===")
     prom.show(length=10)
     print("===RAM===")  
@@ -25,9 +28,12 @@ if __name__ == '__main__':
     print("===A17 switch matrix===")
     print("a17", "id=#{0:01X}".format(a170x2.id))
     
+    print("===A17 solenoid control===")
+    print("a17", "id=#{0:01X}".format(a170x4.id))
+    
     print("===CPU===")
     ramv = 0
-    for i in range(5000):
+    for i in range(20000):
         
         '''
         #first half of main cycle (phi1, phi2)
@@ -50,8 +56,16 @@ if __name__ == '__main__':
                 pram.mem[ram_addr] = acc
         elif wioioram == Pps4Cpu.iodev:
             #print(cpu.A, ram_addr, cpu.I2.toInt())
-            print("ioldevice reception of A={0:01X}, B={1:03X}, I2={2:02X}".format(cpu.A.toInt(), ram_addr, cpu.I2.toInt()))
-            a170x2.handle(i, cpu.I2.toInt(), ram_addr, cpu.A.toInt())
+            #print("ioldevice reception of A={0:01X}, B={1:03X}, I2={2:02X}".format(cpu.A.toInt(), ram_addr, cpu.I2.toInt()))
+            ret = a170x2.handle(i, cpu.I2.toInt(), ram_addr, cpu.A.toInt())
+            if ret is not None:
+                ramv = 8 if ret == Register('1') else 0
+                print("A17 device", a170x2.id, "returned", ramv)
+            ret = a170x4.handle(i, cpu.I2.toInt(), ram_addr, cpu.A.toInt())
+            if ret is not None:
+                ramv = 8 if ret == Register('1') else 0
+                print("A17 device", a170x4.id, "returned", ramv)
+            ret = gpio0x3.handle(i, cpu.I2.toInt(), cpu.A.toInt())
         if ldis is not None:
             if ldis == "":
                 print("**********STOP******************")
@@ -102,4 +116,16 @@ if __name__ == '__main__':
     # # print(cpu.P)
     #
     #
+    print("-----Achtung----------")
+    cpu = Pps4Cpu(mode="dasm")
+    i=0
+    romi=0
+    rom_addr = 0
+    while rom_addr<len(prom.mem):
+        romi = prom.mem[rom_addr]
+        _, ldis, _ = cpu.cyclephi34(romi)
+        if ldis is not None:
+            print("main: {1:08d}\t{0:04X}\t{2:02X}\t{3}".format(rom_addr, i, cpu.P.toInt(), ldis))
+        i+=1
+        rom_addr+= 1
 
