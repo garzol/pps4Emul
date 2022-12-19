@@ -792,9 +792,9 @@ class Pps4Cpu:
     def cpuexe(self):
         
         if self.nextIis2Cycles:
-            ldis = "{0:03X}\t{1:02X}\t{2:02X}".format(self.P.toInt()-1, self.I1.toInt(), self.I2.toInt())
+            ldis = self.P.toInt()-1, self.I1.toInt(), self.I2.toInt()
         else:
-            ldis = "{0:03X}\t{1:02X}\t  ".format(self.P.toInt(), self.I1.toInt())
+            ldis = self.P.toInt(), self.I1.toInt(), None
         #print("skipnext", self.skipNext)
         # if self.skipNext == False:
         #     myphrase = self.instdoc()
@@ -806,7 +806,7 @@ class Pps4Cpu:
         myphrase = self.instdoc()
         
         self.nextIis2Cycles = False
-        return ldis+"\t"+myphrase
+        return ldis, myphrase
     
     def instdoc(self):
         '''

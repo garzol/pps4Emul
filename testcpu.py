@@ -9,8 +9,15 @@ from pps4.cpum import ROM12, RAM, Pps4Cpu
 from pps4.A17IO import A17IO    
 from pps4._10696 import GPIO10696
 from pps4.register import Register
+from pps4.cpum import PPS4InstSet
 
 if __name__ == '__main__':
+    infodict=dict()
+    for k,v in PPS4InstSet.HexCod.items():
+        for vi in v:
+            infodict[vi] = k 
+            
+
     fb = open("pps4/A1752EFA1753EE.bin", "rb")
     prom = ROM12(fb)  
     fb.close()
@@ -66,11 +73,29 @@ if __name__ == '__main__':
                 ramv = 8 if ret == Register('1') else 0
                 print("A17 device", a170x4.id, "returned", ramv)
             ret = gpio0x3.handle(i, cpu.I2.toInt(), cpu.A.toInt())
+ 
+  
+            # if ldis is not None:
+            #     if ldis == "":
+            #         distxt.append(["{0:08d}".format(i), "**********STOP******************", "no infos"])
+            #         break
+            #
+            #     #print("ldis", ldis)  #exemple ldis: ldis ((0, 129, None), 'T\t0001')
+            #     infos = PPS4InstSet.Doc[infodict[ldis[0][1]]]
+            #     distxt.append(["{0:08d}".format(i), ldis, infos])
+            #
+
+        
         if ldis is not None:
             if ldis == "":
-                print("**********STOP******************")
+                print("**********STOP******************", "no infos")
                 exit(0)
-            print("{1:08d}\t{2}".format(rom_addr, i, ldis))
+            infos = PPS4InstSet.Doc[infodict[ldis[0][1]]]
+            if ldis[0][2] is not None:
+                print("{1:08d}\t{2:03X}\t{3:02X}\t{4:02X}\t{5}".format(rom_addr, i, int(ldis[0][0]), int(ldis[0][1]), int(ldis[0][2]), ldis[1]))
+            else:
+                print("{1:08d}\t{2:03X}\t{3:02X}\t  \t{4}".format(rom_addr, i, int(ldis[0][0]), int(ldis[0][1]), ldis[1]))
+                
         # else:
         #     print("{1:08d}\t==============".format(rom_addr, i))
 
@@ -117,15 +142,15 @@ if __name__ == '__main__':
     #
     #
     print("-----Achtung----------")
-    cpu = Pps4Cpu(mode="dasm")
-    i=0
-    romi=0
-    rom_addr = 0
-    while rom_addr<len(prom.mem):
-        romi = prom.mem[rom_addr]
-        _, ldis, _ = cpu.cyclephi34(romi)
-        if ldis is not None:
-            print("main: {1:08d}\t{0:04X}\t{2:02X}\t{3}".format(rom_addr, i, cpu.P.toInt(), ldis))
-        i+=1
-        rom_addr+= 1
+    # cpu = Pps4Cpu(mode="dasm")
+    # i=0
+    # romi=0
+    # rom_addr = 0
+    # while rom_addr<len(prom.mem):
+    #     romi = prom.mem[rom_addr]
+    #     _, ldis, _ = cpu.cyclephi34(romi)
+    #     if ldis is not None:
+    #         print("main: {1:08d}\t{0:04X}\t{2:02X}\t{3}".format(rom_addr, i, cpu.P.toInt(), ldis))
+    #     i+=1
+    #     rom_addr+= 1
 
