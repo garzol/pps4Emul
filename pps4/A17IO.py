@@ -23,17 +23,16 @@ class A17IO(object):
         self.tick = 0
         self.fb = list()
         for i in range(16):
-            self.fb.append(open("gox{0}_{1:02d}".format(self.id,i), "w"))
-        self.fdir  = open("gdir{0}".format(self.id), "w")
-        self.ftick = open("gtick{0}".format(self.id), "w")
+            self.fb.append(list())
+        self.fdir  = list()
+        self.ftick = list()
         
     def stop(self):
-        for i in range(16):
-            self.fb[i].close()
-            
-        self.fdir.close()
-        self.ftick.close()
-        
+        '''
+        store in files
+        todo later
+        '''
+        pass
                 
     def handle(self, tick, cmd, addr, acc):   
         self.tick = tick
@@ -63,10 +62,11 @@ class A17IO(object):
                     self.iodir = A17IO.inp
             
         for i in range(16):
-            self.fb[i].write("%d"%self.oio[i].toInt()+os.linesep)    
+            self.fb[i].append(self.oio[i].toInt())    
+            #self.fb[i].write("%d"%self.oio[i].toInt()+os.linesep)    
         
-        self.fdir.write("%d"%self.iodir+os.linesep)
-        self.ftick.write("%d"%self.tick+os.linesep)   
+        self.fdir.append(self.iodir)
+        self.ftick.append(self.tick)   
         return ret
     
     @property

@@ -700,7 +700,15 @@ class Pps4Cpu:
         self.wramio = None
         
   
-            
+    def printcontext(self):
+        print (" A:", self.A, "\tX:", self.X)
+        print ("BL:", self.BL, "\tBM", self.BM, "\tBU", self.BU)
+        print (" C:", self.C, "\tFF1", self.FF1, "\tFF2", self.FF2)
+        print (" P:", "{0:03X}".format(self.P.toInt()))
+        print ("AB:", self.AB)
+        print ("SA:", "{0:03X}".format(self.SA.toInt()), "\tSB", "{0:03X}".format(self.SB.toInt()))
+        print ("DIA:", self.DIA, "\tDIB", self.DIB, "\tDOA", self.DOA)
+        print ('cur ram loaded', self.ramd)
             
              
     def is2CyclesInst(self, inst):
@@ -732,17 +740,15 @@ class Pps4Cpu:
         A is the current content of accumulator, P the current programm counter, WIO the WIO signal
         '''
         self.ramd = Register("{0:04b}".format(ramd))
-        if self.ramout is not None:
-            ramout = self.ramout.toInt()
-        else:
-            ramout = None
         
-        return ramout, self.AB.toInt(), self.wio
+        return self.AB.toInt(), self.wio
         
-    def cyclephi34(self, romi):
+    def cyclephi1(self, romi):
         '''
-        Second part of the cpu cycle.
-        CPU set addresses to the RAM byte it wants to read
+        First part of the cpu cycle.
+        CPU: - set addresses to the next RAM byte it wants to read
+             - return the disassembly text of what it has executed
+             - says if next action is ram or io
         
         romi contains the instruction.
         '''
@@ -825,6 +831,7 @@ class Pps4Cpu:
                     self.BU = Register(b"0000")
                     self.BM = ~self.I2[4:8]
                     self.BL = ~self.I2[0:4]
+
             self.P = incr(self.P[:6])+self.P[6:]
             
             #render phrase
@@ -984,17 +991,24 @@ class Pps4Cpu:
             #simulate
             ctxtxt=""
             if self.mode != "dasm":
-                carry, self.A = self.A.binAdd(self.ramd)
-                self.C = Register(carry)
-                carry, self.A = self.A.binAdd(self.C+Register(b"000"))
-                self.C = Register(carry)
-                if carry == '1':
+                carry1, self.A = self.A.binAdd(self.C+Register(b"000"))
+                carry2, self.A = self.A.binAdd(self.ramd)
+                if carry1 == '0' and carry2 == '0':
+                    self.C = Register('0')
+                else:
+                    self.C = Register('1')
+                if carry1 == '1' and carry2 == '1':
+                    print("dubious case in ADCSK, carry and carry2 are set")
+                
+                
+                if self.C == Register('1'):
                     #skip next ROM word
                     self.P = incr(self.P[:6])+self.P[6:]
                     ctxtxt="\t(C=1 ==> skip)"
                 else:
                     ctxtxt=""  
             self.P = incr(self.P[:6])+self.P[6:]
+            
                   
             #render phrase
             instcode="ADCSK"
@@ -1007,7 +1021,8 @@ class Pps4Cpu:
             ctxtxt=""
             if self.mode != "dasm":
                 carry, self.A = self.A.binAdd(self.ramd)
-                self.C = Register(carry)
+                self.C = Register(carry)                
+                
                 if carry == '1':
                     #skip next ROM word
                     self.P = incr(self.P[:6])+self.P[6:]
@@ -1024,16 +1039,25 @@ class Pps4Cpu:
         '''ADC (0A)'''  
         if self.I1 == Register(b"00001010"):     
             #simulate
+            ctxtxt=""
             if self.mode != "dasm":
-                carry, self.A = self.A.binAdd(self.ramd)
-                self.C = Register(carry)
-                carry, self.A = self.A.binAdd(self.C+Register(b"000"))
-                self.C = Register(carry)
+                ctxtxt = "\t(C,A<=C({0:01X})+A({1:01X})+M({2:01X})".format(self.C.toInt(),
+                                                                           self.A.toInt(),
+                                                                           self.ramd.toInt())
+                carry1, self.A = self.A.binAdd(self.C+Register(b"000"))
+                carry2, self.A = self.A.binAdd(self.ramd)
+                if carry1 == '0' and carry2 == '0':
+                    self.C = Register('0')
+                else:
+                    self.C = Register('1')
+                if carry1 == '1' and carry2 == '1':
+                    print("dubious case in ADC, carry and carry2 are set")
+
             self.P = incr(self.P[:6])+self.P[6:]
             
             #render phrase
             instcode="ADC"
-            instphrase = instcode
+            instphrase = instcode+ctxtxt
             return instphrase
 
         '''AD (0B)'''  
@@ -1416,7 +1440,7 @@ class Pps4Cpu:
                 ctxtxt   = "mem({0:03X})<={1:01X}, {2:01X}=>Acc BL--".format(addrcible.toInt(),
                                                                           self.A.toInt(),
                                                                           self.ramd.toInt())
-                self.A, self.ramout = self.ramd, self.A
+                self.A, self.ramout = self.ramd[:], self.A[:]
                 self.wio = Pps4Cpu.wr #default
     
                 
@@ -1566,7 +1590,9 @@ class Pps4Cpu:
             #simulate
             ctxtxt=""
             if self.mode != "dasm":
+                ctxtxt="\t(C,A<=A({0:01X})+#{1:01X})".format(self.A.toInt(), (~(self.I1[:4])).toInt())
                 carry, self.A = self.A.binAdd(~(self.I1[:4]))
+                self.C = Register(carry)
                 if carry == '1' and self.I1[:4] != Register(b"0101"):
                     #skip next instruction
                     #can't just increment P from here because
@@ -1585,6 +1611,9 @@ class Pps4Cpu:
             else:
                 instcode="ADI"
                 instphrase = instcode+"\t"+"{0:1X}".format((~self.I1[:4]).toInt())
+                instphrase+=ctxtxt
+                if self.C == Register(b"1"):
+                    instphrase+="\twill skip"
                 return instphrase
 
         # self.P = incr(self.P[:6])+self.P[6:]

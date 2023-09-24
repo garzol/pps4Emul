@@ -19,10 +19,12 @@ class GPIO10696(object):
         '''
         self.id  = id
         self.out = Register(12)
-        self.inp = Register(12)
+        self.inp = Register(12*['1'])
         self.tick = 0
         self.fb = list()
-        # for i in range(12):
+        for i in range(12):
+            self.fb.append(list())
+        self.ftick = list()
         #     self.fb.append(open("gox{0}_{1:02d}".format(self.id,i), "w"))
         # self.ftick = open("gtick{0}".format(self.id), "w")
         
@@ -72,9 +74,12 @@ class GPIO10696(object):
                     grpstxt += "C"
                 else:
                     grpstxt += "-"  
-                ret = Register(b"1111")                  
                 print("GET", grpstxt, "value", ret)
-
+                
+        for i in range(12):
+            self.fb[i].append(self.out[i].toInt())    
+        
+        self.ftick.append(self.tick)   
         return ret
     
     @property

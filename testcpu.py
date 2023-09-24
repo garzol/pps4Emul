@@ -5,6 +5,8 @@ Created on 6 déc. 2022
 
 start of iol handling
 '''
+import matplotlib.pyplot as plt
+
 from pps4.cpum import ROM12, RAM, Pps4Cpu
 from pps4.A17IO import A17IO    
 from pps4._10696 import GPIO10696
@@ -40,39 +42,46 @@ if __name__ == '__main__':
     
     print("===CPU===")
     ramv = 0
-    for i in range(20000):
-        
-        '''
-        #first half of main cycle (phi1, phi2)
-        #during phi2, cpu push ROM address on the bus
-        '''
-        acc, rom_addr, wiorw = cpu.cyclephi12(ramv)
+    ram_addr = (cpu.BL+cpu.BM+cpu.BU).toInt()
+    for i in range(2500):
+        rom_addr = cpu.P.toInt()
+
+        cpu.ramd = Register("{0:04b}".format(ramv))
+
+        #print("main: {1}\t{0:04X}\t{2:02X}".format(rom_addr, acc, 0), cpu.P)
         romi = prom.mem[rom_addr]
-        #print("main: {1:08d}\t{0:04X}\t{2:02X}".format(rom_addr, i, romi))
         
         '''
         #second half of main cycle (phi3, phi4)
         '''
-        ram_addr, ldis, wioioram = cpu.cyclephi34(romi)
+        next_ram_addr, ldis, wioioram = cpu.cyclephi1(romi)
+        wiorw    = cpu.wio
         
         #print("{0:02X}".format(cpu.I1.toInt()), wioioram, wiorw)
         if wioioram == Pps4Cpu.ramdev:
             ramv = pram.mem[ram_addr]
             if wiorw == Pps4Cpu.wr:
                 #print("write:", acc, ram_addr)
-                pram.mem[ram_addr] = acc
+                pram.mem[ram_addr] = cpu.ramout.toInt()
         elif wioioram == Pps4Cpu.iodev:
             #print(cpu.A, ram_addr, cpu.I2.toInt())
             #print("ioldevice reception of A={0:01X}, B={1:03X}, I2={2:02X}".format(cpu.A.toInt(), ram_addr, cpu.I2.toInt()))
+            ramviol = None
             ret = a170x2.handle(i, cpu.I2.toInt(), ram_addr, cpu.A.toInt())
             if ret is not None:
-                ramv = 8 if ret == Register('1') else 0
-                print("A17 device", a170x2.id, "returned", ramv)
+                ramviol = 8 if ret == Register('1') else 0
+                print("A17 device", a170x2.id, "returned", ramviol)
             ret = a170x4.handle(i, cpu.I2.toInt(), ram_addr, cpu.A.toInt())
             if ret is not None:
-                ramv = 8 if ret == Register('1') else 0
-                print("A17 device", a170x4.id, "returned", ramv)
+                ramviol = 8 if ret == Register('1') else 0
+                print("A17 device", a170x4.id, "returned", ramviol)
             ret = gpio0x3.handle(i, cpu.I2.toInt(), cpu.A.toInt())
+            if ret is not None:
+                ramviol = ret.toInt()
+                print("10696 device", gpio0x3.id, "returned", ramviol)
+            if ramviol is not None:
+                cpu.A = Register("{0:04b}".format(ramviol))
+        ram_addr = next_ram_addr
  
   
             # if ldis is not None:
@@ -101,7 +110,23 @@ if __name__ == '__main__':
 
     a170x2.stop()    
     pram.show()
-    print(prom.countinstoccur())        
+    # print(prom.countinstoccur())   
+    #
+    #
+    # print(a170x2.fb[0])
+    # #print(a170x2.fdir)
+    # print(a170x2.ftick)
+    # print(a170x2.fdir)
+ 
+    fig, ax = plt.subplots()
+    #ax.plot(a170x4.ftick, a170x4.fb[0], label="out0")
+    #ax.plot(a170x4.ftick, a170x4.fb[1], label="out1")
+    ax.plot(a170x2.ftick, a170x2.fb[2], label="out2")
+    #ax.plot(a170x2.ftick, a170x2.fb[3], label="out3")
+    #ax.plot(a170x2.ftick, a170x2.fdir, label="dir")
+    ax.plot(a170x2.ftick, a170x2.fdir, label="dir")
+    ax.legend()
+    plt.show()    
         #print("\t\t{0:04X} {1:02X}".format(ram_addr, ramv))
     # x=Register(b"01000111")
     # y=Register(b"11000111")
@@ -142,15 +167,15 @@ if __name__ == '__main__':
     #
     #
     print("-----Achtung----------")
-    # cpu = Pps4Cpu(mode="dasm")
-    # i=0
-    # romi=0
-    # rom_addr = 0
-    # while rom_addr<len(prom.mem):
-    #     romi = prom.mem[rom_addr]
-    #     _, ldis, _ = cpu.cyclephi34(romi)
-    #     if ldis is not None:
-    #         print("main: {1:08d}\t{0:04X}\t{2:02X}\t{3}".format(rom_addr, i, cpu.P.toInt(), ldis))
-    #     i+=1
-    #     rom_addr+= 1
+    cpu = Pps4Cpu(mode="dasm")
+    i=0
+    romi=0
+    rom_addr = 0
+    while rom_addr<len(prom.mem):
+        romi = prom.mem[rom_addr]
+        _, ldis, _ = cpu.cyclephi1(romi)
+        if ldis is not None:
+            print("main: {1:08d}\t{0:04X}\t{2:02X}\t{3}".format(rom_addr, i, cpu.P.toInt(), ldis))
+        i+=1
+        rom_addr+= 1
 
