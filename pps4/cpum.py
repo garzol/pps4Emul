@@ -85,7 +85,7 @@ class PPS4InstSet():
                                  '''
                                  N/A
                                  ''',
-                                 "SB<-SA\nSA<-P\nI2->I/O Device"),
+                                 "SB<-SA\nSA<-P\nP(12:5)<-00001100\nP(4:1)<-I1(4:1)\nBU<-0000\nB(8:1)<-|I2(8:1)|\nP<-SA\nSA<->SB"),
                              
         "LBL":    ("Load B Long", 2,     '''
                                          This instruction occupies two ROM words,
@@ -405,7 +405,7 @@ class PPS4InstSet():
                                  '''
                                  N/A
                                  ''',
-                                 "P(6:1)<-I(6:1"),
+                                 "P(6:1)<-I(6:1)"),
                              
         "TL":    ("Transfer Long", 2,  '''
                                  This instruction executes a transfer to any ROM 
@@ -418,7 +418,7 @@ class PPS4InstSet():
                                  '''
                                  N/A
                                  ''',
-                                 "P(12:9)<-I1(4:1\nP(8:1)<-I2(8:1"),
+                                 "P(12:9)<-I1(4:1)\nP(8:1)<-I2(8:1)"),
                              
         "TML":    ("Transfer and Mark Long", 2,  '''
                                  This instruction executes a transfer and 
@@ -496,12 +496,16 @@ class PPS4InstSet():
                                  The next ROM word will be ignored if 
                                  accumulator is 0.
                                  ''',
+                                 '''
+                                 ''',
                                  "skip if A=0000"),
                                  
         "SKF2":  ("Skip if FF2 Equals 1", 1, 
                                  '''
                                  The next ROM word will be ignored if 
                                  FF2 is 1.
+                                 ''',
+                                 '''
                                  ''',
                                  "skip if FF2=1"),
                                  
@@ -510,12 +514,16 @@ class PPS4InstSet():
                                  The next ROM word will be ignored if 
                                  FF1 is 1.
                                  ''',
+                                 '''
+                                 ''',
                                  "skip if FF1=1"),
                                  
         "SKC":  ("Skip on Carry flip-flop", 1, 
                                  '''
                                  The next ROM word will be ignored if 
                                  C flip-flop is 1.
+                                 ''',
+                                 '''
                                  ''',
                                  "skip if C=1"),
                                  
@@ -527,11 +535,15 @@ class PPS4InstSet():
                                  to the 4-bit immediate field 
                                  I(4:1) of instruction.
                                  ''',
+                                 '''
+                                 ''',
                                  "skip if BL=I(4:1)"),
                                  
         "RF1":  ("Reset FF1", 1, 
                                  '''
                                  Flip-flop 1 is  set to 0.
+                                 ''',
+                                 '''
                                  ''',
                                  "FF1<-0"),
                                  
@@ -539,11 +551,15 @@ class PPS4InstSet():
                                  '''
                                  Flip-flop 1 is  set to 1.
                                  ''',
+                                 '''
+                                 ''',
                                  "FF1<-1"),
                                  
         "SF2":  ("Set FF2", 1, 
                                  '''
                                  Flip-flop 2 is  set to 1.
+                                 ''',
+                                 '''
                                  ''',
                                  "FF2<-1"),
                                  
@@ -551,17 +567,23 @@ class PPS4InstSet():
                                  '''
                                  The C Flip-flop is  set to 1.
                                  ''',
+                                 '''
+                                 ''',
                                  "C<-1"),
                                  
         "RC":  ("Reset Carry flip-flop", 1, 
                                  '''
                                  The C Flip-flop is  set to 0.
                                  ''',
+                                 '''
+                                 ''',
                                  "C<-0"),
                                  
         "RF2":  ("Reset FF2", 1, 
                                  '''
                                  Flip-flop 2 is  set to 0.
+                                 ''',
+                                 '''
                                  ''',
                                  "FF2<-0"),
                                  
@@ -572,12 +594,16 @@ class PPS4InstSet():
                                  If the new contents of BL is 1111, the next 
                                  ROM word will be ignored
                                  ''',
+                                 '''
+                                 ''',
                                  "A<->M\nB(7:5)<-B(7:5)xor|I(3:1)|\nBL<-BL-1\nskip on BL=1111"),
                                  
         "EX":  ("Exchange Accumulator and Memory", 1, 
                                  '''
                                  Same as LD except the contents of accumulator 
                                  are also placed in currently addressed RAM location.
+                                 ''',
+                                 '''
                                  ''',
                                  "A<->M\nB(7:5)<-B(7:5)xor|I(3:1)|"),
                                  
@@ -659,7 +685,7 @@ class Pps4Cpu:
     
     iodev  = 1
     ramdev = 0
-    def __init__(self, mode="trace"):
+    def __init__(self, mode="trace", ROM=None):
         '''
         registers are lists of '0' and '1'
         the index 0 is bit 0, index 1 is bit 1 and so forth
@@ -670,8 +696,10 @@ class Pps4Cpu:
         
         This way, we have reg[0] which is actually bit 0
         default mode is trace. If set mode to "dasm", then simply disassemble code
+        ROM is only used to determine indirect address of the TM instruction, and only in disassemnbly mode (offline)
         '''
         self.mode = mode
+        self.ROM  = ROM
         self.A  = Register(4*['0'])  #Accumulator
         self.X  = Register(4*['0'])  #Accumulator
         self.BL = Register(4*['0'])
@@ -689,7 +717,8 @@ class Pps4Cpu:
         self.DIA  = Register(4*['0'])  #Discrete input register group A
         self.DIB  = Register(4*['0'])  #Discrete input register group B
 
-        self.I1 = Register(8*['0'])
+        #self.I1 = Register(8*['0'])
+        self.I1 = None
         self.I2 = Register(8*['0'])
         self.lastI1 = None 
         self.nextIis2Cycles = False
@@ -710,7 +739,16 @@ class Pps4Cpu:
         print ("DIA:", self.DIA, "\tDIB", self.DIB, "\tDOA", self.DOA)
         print ('cur ram loaded', self.ramd)
             
-             
+    def htmlshortcontext(self):    
+        ret =  "A: {0:01X}    X: {1:01X}".format(self.A.toInt(), self.X.toInt())
+        ret+= "<br>"
+        ret+= "B: {0:03X}".format((self.BL+self.BM+self.BU).toInt())
+        ret+= "<br>"
+        ret+=  "C: {0:01X}    FF1: {1:01X}    FF2: {2:01X}".format(self.C.toInt(), self.FF1.toInt(), self.FF2.toInt())
+
+        return ret
+    
+    
     def is2CyclesInst(self, inst):
         '''
          2 cycles insts are:
@@ -724,7 +762,9 @@ class Pps4Cpu:
         '''
         if inst >= 0 and inst<= 3:
             return(True)
-        if inst >= 0xC0 and inst<= 0xFF:
+        if inst >= 0xC0 and inst<= 0xCF:
+            return(True)
+        if inst >= 0xD0 and inst<= 0xFF and self.mode != "dasm":
             return(True)
         if inst >= 0x50 and inst<= 0x5F:
             return(True)
@@ -732,7 +772,7 @@ class Pps4Cpu:
             return(True)
         return False
         
-    def cyclephi12(self, ramd):
+    def cyclephi2(self, ramd):
         '''
         First part of the cpu cycle.
         CPU set addresses to the ROM byte it wants to read (P)
@@ -741,17 +781,28 @@ class Pps4Cpu:
         '''
         self.ramd = Register("{0:04b}".format(ramd))
         
+        #Now need to manage case IOL
+        if self.I1 == Register(b"00011100") and not self.nextIis2Cycles:
+            #print("etape derniere in cyclephi2", self.ramd)
+            self.A = self.ramd[:]
+            
         return self.AB.toInt(), self.wio
         
-    def cyclephi1(self, romi):
+    def cyclephi4(self, romi):
         '''
-        First part of the cpu cycle.
-        CPU: - set addresses to the next RAM byte it wants to read
+        First part of the cpu cycle (phi4)
+        
+        CPU: - read and execute instruction Ii
+             - set addresses to the next RAM byte it wants to read
              - return the disassembly text of what it has executed
              - says if next action is ram or io
         
         romi contains the instruction.
+        ROM can be used if it is defined for TM instruction only
+        it is to determine the indirect target address
         '''
+        isThisaSetByt = False #default
+
         self.wio    = Pps4Cpu.rd #default
         self.wramio = Pps4Cpu.ramdev #default
         #print("handling", "{0:08b}".format(romi))
@@ -766,28 +817,50 @@ class Pps4Cpu:
             self.I1 = Register("{0:08b}".format(romi))
             #print("first  inst", self.I1, "{0:08b}".format(romi))
             if self.is2CyclesInst(romi):
-                #we are in the first half of a 2-cycle inst
-                self.nextIis2Cycles = True
-                #Caution! There is the case of TM or LB
-                if self.I1[6:] == Register(b"11") and \
-                   (self.I1.bit(4) or self.I1.bit(5)):  #TM
-                    self.AB = self.I1[:6]+Register(b"000011")
-                    self.P  = incr(self.P[:6])+self.P[6:]
-                elif self.I1[4:] == Register(b"1100"):  #LB
-                    self.SB = self.SA[:]
-                    self.SA = self.P[:]                    
-                    self.P = self.I1[:4] + Register(b"00001100")
+                if self.P[:6] == Register(b"111111") and self.mode == "dasm":
+                    #this is a typical case of impossible instruction
+                    #because we are at the frontier of a page for a bi-cycle instruction
+                    #so we created the set nib instruction with isThisaSetByt
+                    self.nextIis2Cycles = False
+                    isThisaSetByt = True    
+                    self.P.incr()
                 else:
-                    #standard case of 2 cycles instructions
-                    self.P = incr(self.P[:6])+self.P[6:]
-                    self.AB = self.P[:]
-                #print("self.P", self.P)
-                return (self.BL+self.BM+self.BU).toInt(), None, self.wramio 
+                    #we are in the first half of a 2-cycle inst
+                    self.nextIis2Cycles = True
+                    #Caution! There is the case of TM or LB
+                    if self.I1[6:] == Register(b"11") and \
+                       (self.I1.bit(4) or self.I1.bit(5)):  #TM
+                        self.AB = self.I1[:6]+Register(b"000011")
+                        #self.P  = incr(self.P[:6])+self.P[6:]
+                        if self.mode != "dasm":
+                            self.P  = incr(self.P[:6])+self.P[6:]
+                            self.SB, self.SA = self.SA[:], self.P[:]
+                            self.P  = self.I1[:6]+Register(b"000011")
+                        else:
+                            self.P.incr()
+                    elif self.I1[4:] == Register(b"1100"):  #LB
+                        if self.mode != "dasm":
+                            self.SB = self.SA[:]
+                            self.P  = incr(self.P[:6])+self.P[6:]
+                            self.SA = self.P[:]                    
+                            self.P = self.I1[:4] + Register(b"00001100")
+                        else:
+                            self.P.incr()                            
+                    else:
+                        #standard case of 2 cycles instructions
+                        if self.mode != "dasm":
+                            self.P = incr(self.P[:6])+self.P[6:]
+                            self.AB = self.P[:]
+                        else:
+                            self.P.incr()                            
+                    #print("self.P", self.P)
+                    return (self.BL+self.BM+self.BU).toInt(), None, self.wramio 
             else:
+                #this is a one cycle instruction
                 self.nextIis2Cycles = False
             
         #print("self.P", self.P)
-        ldis = self.cpuexe()
+        ldis = self.cpuexe(isThisaSetByt)
         self.AB = self.P[:]
         
         #SAG handling
@@ -795,7 +868,7 @@ class Pps4Cpu:
             return (self.BL+Register(b"00000000")).toInt(), ldis, self.wramio
         return (self.BL+self.BM+self.BU).toInt(), ldis, self.wramio
         
-    def cpuexe(self):
+    def cpuexe(self, isThisaSetByt=False):
         
         if self.nextIis2Cycles:
             ldis = self.P.toInt()-1, self.I1.toInt(), self.I2.toInt()
@@ -809,7 +882,11 @@ class Pps4Cpu:
         #     self.P = incr(self.P[:6])+self.P[6:]
         #     self.skipNext = False
         self.skipNext = False  #just for info, does not take part in anything else
-        myphrase = self.instdoc()
+        if isThisaSetByt:
+            myphrase = "SET NIB\t#{0:01X}".format(self.I1.toInt())
+        else:
+            myphrase, pipo = self.instdoc()
+                
         
         self.nextIis2Cycles = False
         return ldis, myphrase
@@ -824,7 +901,9 @@ class Pps4Cpu:
             #simulate
             ctxtxt=""
             if self.mode != "dasm":
-                if self.lastI1 == Register(b"00000000"):
+                #The left clause will be evaluated first, and then the right one only if the first one is False.
+                #This is why you can do stuff like:
+                if self.lastI1 is not None and self.lastI1 == Register(b"00000000"):
                     #this is a string of LBL's only first counts others are nop
                     ctxtxt="\t"+"(NOP: series of LBL's)"
                 else:
@@ -832,25 +911,28 @@ class Pps4Cpu:
                     self.BM = ~self.I2[4:8]
                     self.BL = ~self.I2[0:4]
 
-            self.P = incr(self.P[:6])+self.P[6:]
-            
+                self.P = incr(self.P[:6])+self.P[6:]
+            else:
+                self.P.incr()
             #render phrase
             instcode="LBL"
-            instphrase = instcode+"\t"+"{0:04X}".format((~self.I2).toInt())
+            instphrase = instcode+"\t"+"{0:03X}".format((~self.I2).toInt())
             instphrase += ctxtxt
-            return instphrase
+            return instphrase, None
 
         '''LABL (11)''' 
         if self.I1 == Register(b"00010001"):     
             #simulate
             if self.mode != "dasm":
                 self.A = self.BL[:]
-            self.P = incr(self.P[:6])+self.P[6:]
+                self.P = incr(self.P[:6])+self.P[6:]
+            else:
+                self.P.incr()
 
             #render phrase
             instcode="LABL"
             instphrase = instcode
-            return instphrase
+            return instphrase, None
 
         '''LBUA (04)''' 
         if self.I1 == Register(b"00000100"):     
@@ -858,96 +940,112 @@ class Pps4Cpu:
             if self.mode != "dasm":
                 self.BU = self.A[:]
                 self.A = self.ramd
-            self.P = incr(self.P[:6])+self.P[6:]
+                self.P = incr(self.P[:6])+self.P[6:]
+            else:
+                self.P.incr()
 
             #render phrase
             instcode="LBUA"
             instphrase = instcode
-            return instphrase
+            return instphrase, None
 
         '''LBMX (10)''' 
         if self.I1 == Register(b"00010000"):     
             #simulate
             if self.mode != "dasm":
                 self.BM = self.X[:]
-            self.P = incr(self.P[:6])+self.P[6:]
+                self.P = incr(self.P[:6])+self.P[6:]
+            else:
+                self.P.incr()
 
             #render phrase
             instcode="LBMX"
             instphrase = instcode
-            return instphrase
+            return instphrase, None
 
         '''RF2 (25)''' 
         if self.I1 == Register(b"00100101"):     
             #simulate
             if self.mode != "dasm":
                 self.FF2 = Register(b"0")
-            self.P = incr(self.P[:6])+self.P[6:]
+                self.P = incr(self.P[:6])+self.P[6:]
+            else:
+                self.P.incr()
 
             #render phrase
             instcode="RF2"
             instphrase = instcode
-            return instphrase
+            return instphrase, None
 
         '''SC (20)''' 
         if self.I1 == Register(b"00100000"):     
             #simulate
             if self.mode != "dasm":
                 self.C = Register(b"1")
-            self.P = incr(self.P[:6])+self.P[6:]
+                self.P = incr(self.P[:6])+self.P[6:]
+            else:
+                self.P.incr()
 
             #render phrase
             instcode="SC"
             instphrase = instcode
-            return instphrase
+            return instphrase, None
 
         '''RC (20)''' 
         if self.I1 == Register(b"00100100"):     
             #simulate
             if self.mode != "dasm":
                 self.C = Register(b"0")
-            self.P = incr(self.P[:6])+self.P[6:]
+                self.P = incr(self.P[:6])+self.P[6:]
+            else:
+                self.P.incr()
 
             #render phrase
             instcode="RC"
             instphrase = instcode
-            return instphrase
+            return instphrase, None
 
         '''SF2 (21)''' 
         if self.I1 == Register(b"00100001"):     
             #simulate
             if self.mode != "dasm":
                 self.FF2 = Register(b"1")
-            self.P = incr(self.P[:6])+self.P[6:]
+                self.P = incr(self.P[:6])+self.P[6:]
+            else:
+                self.P.incr()
 
             #render phrase
             instcode="SF2"
             instphrase = instcode
-            return instphrase
+            return instphrase, None
 
         '''SF1 (22)''' 
         if self.I1 == Register(b"00100010"):     
             #simulate
             if self.mode != "dasm":
                 self.FF1 = Register(b"1")
-            self.P = incr(self.P[:6])+self.P[6:]
+                self.P = incr(self.P[:6])+self.P[6:]
+            else:
+                self.P.incr()
 
             #render phrase
             instcode="SF1"
             instphrase = instcode
-            return instphrase
+            return instphrase, None
 
         '''RF1 (26)''' 
         if self.I1 == Register(b"00100110"):     
             #simulate
             if self.mode != "dasm":
                 self.FF1 = Register(b"0")
-            self.P = incr(self.P[:6])+self.P[6:]
+                self.P = incr(self.P[:6])+self.P[6:]
+            else:
+                self.P.incr()
 
             #render phrase
             instcode="RF1"
             instphrase = instcode
-            return instphrase
+            return instphrase, None
 
         #CYS (6F)  
         if self.I1 == Register(b"01101111"):     
@@ -955,36 +1053,42 @@ class Pps4Cpu:
             if self.mode != "dasm":
                 self.A, self.SA[:4], self.SA[4:8], self.SA[8:] = self.SA[:4], self.SA[4:8], self.SA[8:], self.A
             
-            self.P = incr(self.P[:6])+self.P[6:]
+                self.P = incr(self.P[:6])+self.P[6:]
+            else:
+                self.P.incr()
 
             #render phrase
             instcode="CYS"
             instphrase = instcode
-            return instphrase
+            return instphrase, None
 
         '''AND (0D) ''' 
         if self.I1 == Register(b"00001101"):     
             #simulate
             if self.mode != "dasm":
                 self.A = self.A & self.ramd
-            self.P = incr(self.P[:6])+self.P[6:]
+                self.P = incr(self.P[:6])+self.P[6:]
+            else:
+                self.P.incr()
 
             #render phrase
             instcode="AND"
             instphrase = instcode
-            return instphrase
+            return instphrase, None
 
         '''COMP (0E) ''' 
         if self.I1 == Register(b"00001110"):     
             #simulate
             if self.mode != "dasm":
                 self.A = ~self.A
-            self.P = incr(self.P[:6])+self.P[6:]
+                self.P = incr(self.P[:6])+self.P[6:]
+            else:
+                self.P.incr()
 
             #render phrase
             instcode="COMP"
             instphrase = instcode
-            return instphrase
+            return instphrase, None
 
         '''ADCSK (08)'''  
         if self.I1 == Register(b"00001000"):     
@@ -1007,13 +1111,15 @@ class Pps4Cpu:
                     ctxtxt="\t(C=1 ==> skip)"
                 else:
                     ctxtxt=""  
-            self.P = incr(self.P[:6])+self.P[6:]
+                self.P = incr(self.P[:6])+self.P[6:]
+            else:
+                self.P.incr()
             
                   
             #render phrase
             instcode="ADCSK"
             instphrase = instcode+ctxtxt
-            return instphrase
+            return instphrase, None
 
         '''ADSK (09)'''  
         if self.I1 == Register(b"00001001"):     
@@ -1029,12 +1135,14 @@ class Pps4Cpu:
                     ctxtxt="\t(C=1 ==> skip)"
                 else:
                     ctxtxt=""  
-            self.P = incr(self.P[:6])+self.P[6:]
+                self.P = incr(self.P[:6])+self.P[6:]
+            else:
+                self.P.incr()
                   
             #render phrase
             instcode="ADSK"
             instphrase = instcode+ctxtxt
-            return instphrase
+            return instphrase, None
 
         '''ADC (0A)'''  
         if self.I1 == Register(b"00001010"):     
@@ -1053,12 +1161,14 @@ class Pps4Cpu:
                 if carry1 == '1' and carry2 == '1':
                     print("dubious case in ADC, carry and carry2 are set")
 
-            self.P = incr(self.P[:6])+self.P[6:]
+                self.P = incr(self.P[:6])+self.P[6:]
+            else:
+                self.P.incr()
             
             #render phrase
             instcode="ADC"
             instphrase = instcode+ctxtxt
-            return instphrase
+            return instphrase, None
 
         '''AD (0B)'''  
         if self.I1 == Register(b"00001011"):     
@@ -1066,36 +1176,42 @@ class Pps4Cpu:
             if self.mode != "dasm":
                 carry, self.A = self.A.binAdd(self.ramd)
                 self.C = Register(carry)
-            self.P = incr(self.P[:6])+self.P[6:]
+                self.P = incr(self.P[:6])+self.P[6:]
+            else:
+                self.P.incr()
             
             #render phrase
             instcode="AD"
             instphrase = instcode
-            return instphrase
+            return instphrase, None
 
         '''EOR (0C)'''  
         if self.I1 == Register(b"00001100"):     
             #simulate
             if self.mode != "dasm":
                 self.A = self.A ^ self.ramd
-            self.P = incr(self.P[:6])+self.P[6:]
+                self.P = incr(self.P[:6])+self.P[6:]
+            else:
+                self.P.incr()
 
             #render phrase
             instcode="EOR"
             instphrase = instcode
-            return instphrase
+            return instphrase, None
 
         #OR (0F)  
         if self.I1 == Register(b"00001111"):     
             #simulate
             if self.mode != "dasm":
                 self.A = self.A | self.ramd
-            self.P = incr(self.P[:6])+self.P[6:]
+                self.P = incr(self.P[:6])+self.P[6:]
+            else:
+                self.P.incr()
 
             #render phrase
             instcode="OR"
             instphrase = instcode
-            return instphrase
+            return instphrase, None
 
         '''SKF2 (14)'''  
         if self.I1 == Register(b"00010100"):     
@@ -1112,12 +1228,14 @@ class Pps4Cpu:
                     self.skipNext = True
                     self.P = incr(self.P[:6])+self.P[6:]
                     #print("skipnext is True from incr", self.skipNext)
-            self.P = incr(self.P[:6])+self.P[6:]
+                self.P = incr(self.P[:6])+self.P[6:]
+            else:
+                self.P.incr()
 
             #render phrase
             instcode="SKF2"
             instphrase = instcode
-            return instphrase
+            return instphrase, None
 
         '''SKF1 (16)'''  
         if self.I1 == Register(b"00010110"):     
@@ -1134,12 +1252,14 @@ class Pps4Cpu:
                     self.skipNext = True
                     self.P = incr(self.P[:6])+self.P[6:]
                     #print("skipnext is True from incr", self.skipNext)
-            self.P = incr(self.P[:6])+self.P[6:]
+                self.P = incr(self.P[:6])+self.P[6:]
+            else:
+                self.P.incr()
 
             #render phrase
             instcode="SKF1"
             instphrase = instcode
-            return instphrase
+            return instphrase, None
         
         '''SKC (15)'''  
         if self.I1 == Register(b"00010101"):     
@@ -1156,12 +1276,14 @@ class Pps4Cpu:
                     self.skipNext = True
                     self.P = incr(self.P[:6])+self.P[6:]
                     #print("skipnext is True from incr", self.skipNext)
-            self.P = incr(self.P[:6])+self.P[6:]
+                self.P = incr(self.P[:6])+self.P[6:]
+            else:
+                self.P.incr()
 
             #render phrase
             instcode="SKC"
             instphrase = instcode
-            return instphrase
+            return instphrase, None
           
         '''SKZ (1E)'''  
         if self.I1 == Register(b"00011110"):     
@@ -1174,12 +1296,14 @@ class Pps4Cpu:
                     self.P = incr(self.P[:6])+self.P[6:]
                     self.skipNext = True
                     #print("skipnext is True from incr", self.skipNext)
-            self.P = incr(self.P[:6])+self.P[6:]
+                self.P = incr(self.P[:6])+self.P[6:]
+            else:
+                self.P.incr()
 
             #render phrase
             instcode="SKZ"
             instphrase = instcode
-            return instphrase
+            return instphrase, None
           
         #DECB (1F)  
         if self.I1 == Register(b"00011111"):     
@@ -1198,12 +1322,14 @@ class Pps4Cpu:
                     ctxtxt = "(BL={0:1X})".format(self.BL.toInt())
 
                     #print("skipnext is True from incr", self.skipNext)
-            self.P = incr(self.P[:6])+self.P[6:]
+                self.P = incr(self.P[:6])+self.P[6:]
+            else:
+                self.P.incr()
 
             #render phrase
             instcode="DECB"
             instphrase = instcode+"\t" + ctxtxt
-            return instphrase
+            return instphrase, None
  
         '''SKBI (40..4F)'''  
         if self.I1[4:] == Register(b"0100"):     
@@ -1218,12 +1344,14 @@ class Pps4Cpu:
                     self.P = incr(self.P[:6])+self.P[6:]
                 else:
                     ctxtxt = "(BL={0:1X})".format(self.BL.toInt())                    
-            self.P = incr(self.P[:6])+self.P[6:]
+                self.P = incr(self.P[:6])+self.P[6:]
+            else:
+                self.P.incr()
 
             #render phrase
             instcode="SKBI\t{0:1X}".format(self.I1[:4].toInt())
             instphrase = instcode+"\t" + ctxtxt
-            return instphrase
+            return instphrase, None
             
         #INCB (17)  
         if self.I1 == Register(b"00010111"):     
@@ -1242,168 +1370,193 @@ class Pps4Cpu:
                     ctxtxt = "(BL={0:1X})".format(self.BL.toInt())
                     
                     #print("skipnext is True from incr", self.skipNext)
-            self.P = incr(self.P[:6])+self.P[6:]
+                self.P = incr(self.P[:6])+self.P[6:]
+            else:
+                self.P.incr()
 
             #render phrase
             instcode="INCB"
             instphrase = instcode+"\t" + ctxtxt
-            return instphrase
+            return instphrase, None
             
         #XS (06)  
         if self.I1 == Register(b"00000110"):     
             #simulate
             if self.mode != "dasm":
-                self.SA, self.SB = self.SB, self.SA
-            self.P = incr(self.P[:6])+self.P[6:]
+                self.SA, self.SB = self.SB[:], self.SA[:]
+                self.P = incr(self.P[:6])+self.P[6:]
+            else:
+                self.P.incr()
 
             #render phrase
             instcode="XS"
             instphrase = instcode
-            return instphrase
+            return instphrase, None
             
         #XABL (19)  
         if self.I1 == Register(b"00011001"):     
             #simulate
             ctxtxt = ""
             if self.mode != "dasm":
-                self.A, self.BL = self.BL, self.A
+                self.A, self.BL = self.BL[:], self.A[:]
                 ctxtxt = "\t(A<=>BL, A<={0:01X}, {1:01X}=>BL)".format(self.A.toInt(), self.BL.toInt())
-            self.P = incr(self.P[:6])+self.P[6:]
+                self.P = incr(self.P[:6])+self.P[6:]
+            else:
+                self.P.incr()
 
             #render phrase
             instcode="XABL"
             instphrase = instcode+"\t" + ctxtxt
-            return instphrase
+            return instphrase, None
             
         #XBMX (18)  
         if self.I1 == Register(b"00011000"):     
             #simulate
             if self.mode != "dasm":
-                self.X, self.BM = self.BM, self.X
-            self.P = incr(self.P[:6])+self.P[6:]
+                self.X, self.BM = self.BM[:], self.X[:]
+                self.P = incr(self.P[:6])+self.P[6:]
+            else:
+                self.P.incr()
 
             #render phrase
             instcode="XBMX"
             instphrase = instcode
-            return instphrase
+            return instphrase, None
             
         #XAX (1A)  
         if self.I1 == Register(b"00011010"):     
             #simulate
             if self.mode != "dasm":
-                self.X, self.A = self.A, self.X
-            self.P = incr(self.P[:6])+self.P[6:]
+                self.X, self.A = self.A[:], self.X[:]
+                self.P = incr(self.P[:6])+self.P[6:]
+            else:
+                self.P.incr()
 
             #render phrase
             instcode="XAX"
             instphrase = instcode
-            return instphrase
+            return instphrase, None
             
         #LAX (12)  
         if self.I1 == Register(b"00010010"):     
             #simulate
             if self.mode != "dasm":
                 self.A = self.X[:]
-            self.P = incr(self.P[:6])+self.P[6:]
+                self.P = incr(self.P[:6])+self.P[6:]
+            else:
+                self.P.incr()
 
             #render phrase
             instcode="LAX"
             instphrase = instcode
-            return instphrase
+            return instphrase, None
             
         #LXA (1B)  
         if self.I1 == Register(b"00011011"):     
             #simulate
             if self.mode != "dasm":
                 self.X = self.A[:]
-            self.P = incr(self.P[:6])+self.P[6:]
+                self.P = incr(self.P[:6])+self.P[6:]
+            else:
+                self.P.incr()
 
             #render phrase
             instcode="LXA"
             instphrase = instcode
-            return instphrase
+            return instphrase, None
             
         #DOA (1D)  
         if self.I1 == Register(b"00011101"):     
             #simulate
             if self.mode != "dasm":
                 self.DOA = self.A[:]
-            self.P = incr(self.P[:6])+self.P[6:]
+                self.P = incr(self.P[:6])+self.P[6:]
+            else:
+                self.P.incr()
 
             #render phrase
             instcode="DOA"
             instphrase = instcode
-            return instphrase
+            return instphrase, None
             
         #DIB (23)  
         if self.I1 == Register(b"00100011"):     
             #simulate
             if self.mode != "dasm":
                 self.A = self.DIB[:]
-            self.P = incr(self.P[:6])+self.P[6:]
+                self.P = incr(self.P[:6])+self.P[6:]
+            else:
+                self.P.incr()
 
             #render phrase
             instcode="DIB"
             instphrase = instcode
-            return instphrase
+            return instphrase, None
             
         #DIA (27)  
         if self.I1 == Register(b"00100111"):     
             #simulate
             if self.mode != "dasm":
                 self.A = self.DIA[:]
-            self.P = incr(self.P[:6])+self.P[6:]
+                self.P = incr(self.P[:6])+self.P[6:]
+            else:
+                self.P.incr()
 
             #render phrase
             instcode="DIA"
             instphrase = instcode
-            return instphrase
+            return instphrase, None
             
         #RTN (05)  
         if self.I1 == Register(b"00000101"):     
             #simulate
             if self.mode != "dasm":
                 self.P = self.SA[:]
-                self.SA, self.SB = self.SB, self.SA
+                self.SA, self.SB = self.SB[:], self.SA[:]
             else:
-                self.P = incr(self.P[:6])+self.P[6:]
+                self.P.incr()
                 
 
             #render phrase
             instcode="RTN"
             instphrase = instcode
-            return instphrase
+            return instphrase, None
             
         #RTNSK (07)  
         if self.I1 == Register(b"00000111"):     
             #simulate
             if self.mode != "dasm":
                 self.P = self.SA[:]
-                self.SA, self.SB = self.SB, self.SA
+                self.SA, self.SB = self.SB[:], self.SA[:]
                 self.P = incr(self.P[:6])+self.P[6:]   #to be confirmed
             else:
-                self.P = incr(self.P[:6])+self.P[6:]
+                self.P.incr()
             
             #render phrase
             instcode="RTNSK"
             instphrase = instcode
-            return instphrase
+            return instphrase, None
             
         #IOL (1C) is todo at the moment. 
         if self.I1 == Register(b"00011100"):     
             #simulate
-            ctxtxt=""
-            self.P = incr(self.P[:6])+self.P[6:]
+            ctxtxt= "\t"+"{0:01X}".format(self.I2.toInt())
             if self.mode != "dasm":
+                self.P = incr(self.P[:6])+self.P[6:]
                 self.wramio = Pps4Cpu.iodev #default
-                self.ramout = self.A
+                self.ramout = self.A 
+                #A affectation is made in cyclephase2() when data is available from io device
+                # print("===2=== this is the value received in A at IOL", self.ramd)
+                # self.A = self.ramd[:]
                 opt = "SOS" if self.I2.bit(0) else "SES"
-                ctxtxt = "\t"+"{0:01X} (B=0x{2:03X} A={3:01X})".format(self.I2.toInt(), opt, (self.BL+self.BM+self.BU).toInt(), self.A.toInt())
-               
+                ctxtxt = "\t"+"{0:01X} (B=0x{2:03X} sent A={3:01X})".format(self.I2.toInt(), opt, (self.BL+self.BM+self.BU).toInt(), self.A.toInt())
+            else:
+                self.P.incr()
+                   
             #render phrase
             instcode="IOL"
             instphrase = instcode+"\t" + ctxtxt
-            return instphrase
+            return instphrase, None
 
         #EX (38..3F). 
         if self.I1[3:] == Register(b"00111"):     
@@ -1415,19 +1568,21 @@ class Pps4Cpu:
                 ctxtxt   = "mem({0:03X})<={1:01X}, {2:01X}=>Acc".format(addrcible.toInt(),
                                                                           self.A.toInt(),
                                                                           self.ramd.toInt())
-                self.A, self.ramout = self.ramd, self.A
+                self.A, self.ramout = self.ramd[:], self.A[:]
                 self.wio = Pps4Cpu.wr #default
     
                 
                 self.BM[:3] = self.BM[:3] ^ ~self.I1[:3]
 
-            self.P = incr(self.P[:6])+self.P[6:]
+                self.P = incr(self.P[:6])+self.P[6:]
+            else:
+                self.P.incr()
 
             #render phrase
             instcode="EX"
             instphrase = instcode+"\t"+"{0:01X}".format((~self.I1[:3]).toInt())
             instphrase += "\t"+ctxtxt
-            return instphrase
+            return instphrase, None
             
             
         #EXD (28..2F). 
@@ -1453,7 +1608,9 @@ class Pps4Cpu:
                     self.P = incr(self.P[:6])+self.P[6:]
                     self.skipNext = True
 
-            self.P = incr(self.P[:6])+self.P[6:]
+                self.P = incr(self.P[:6])+self.P[6:]
+            else:
+                self.P.incr()
                 
             #print("apres", self.BL, self.BM, self.BU)
 
@@ -1462,46 +1619,53 @@ class Pps4Cpu:
             instcode="EXD"
             instphrase = instcode+"\t"+"{0:01X}".format((~self.I1[:3]).toInt())
             instphrase += "\t"+ctxtxt
-            return instphrase
+            return instphrase, None
             
         '''T Transfer is in range 80..BF'''
         if self.I1.bit(7) and not self.I1.bit(6):
             #simulate
+            target_addr = self.I1[:6]+self.P[6:]
+            ctxtxt="\t"+"{0:03X}".format( target_addr.toInt() )
             if self.mode != "dasm":
-                self.P = self.I1[:6]+self.P[6:]
+                self.P = target_addr
             else:
                 #pass
-                self.P = incr(self.P[:6])+self.P[6:]
+                #print("Target address", "{0:03X}".format( self.P.toInt()), "{0:03X}".format( target_addr.toInt()))
+                self.P.incr()
                 
             
             #render phrase
             instcode="T"
-            instphrase = instcode+"\t"+"{0:04X}".format( (self.I1[:6]+self.P[6:]).toInt() )
-            return instphrase
+            instphrase = instcode+ctxtxt
+            return instphrase, target_addr.toInt()
         
         '''SAG (13)'''
         if self.I1 == Register(b"00010011"): 
             #simulate
-            self.P = incr(self.P[:6])+self.P[6:]
+            if self.mode != "dasm":
+                self.P = incr(self.P[:6])+self.P[6:]
+            else:
+                self.P.incr()
+
             #raise Exception(f"The SAG instruction is not yet implemented")
             
             #render phrase
             instcode="SAG"
             instphrase = instcode
-            return instphrase
+            return instphrase, None
 
-        #Transfer Long is in range 50..5F
+        '''TL Transfer Long is in range 50..5F'''
         if self.I1[4:] == Register(b"0101"): 
             #simulate
             if self.mode != "dasm":
-                self.P = self.I2[:8]+self.I1[:4]
+                self.P = self.I2[:]+self.I1[:4]
             else:
-                self.P = incr(self.P[:6])+self.P[6:]
+                self.P.incr()
             
             #render phrase
             instcode="TL"
-            instphrase = instcode+"\t"+"{0:04X}".format( (self.I2[:8]+self.I1[:4]).toInt())
-            return instphrase
+            instphrase = instcode+"\t"+"{0:03X}".format( (self.I2[:]+self.I1[:4]).toInt() )
+            return instphrase, (self.I2[:]+self.I1[:4]).toInt()
 
         #LD Load Accumulator from Memory is 30..37
         if self.I1[3:] == Register(b"00110"):
@@ -1513,73 +1677,83 @@ class Pps4Cpu:
                 self.BM[:3] = self.BM[:3] ^ ~self.I1[:3]
                 ctxtxt = "\tA<={0:01X} (from @{1:03X})".format(self.ramd.toInt(), addrcur.toInt())
                 
-            self.P     = incr(self.P[:6])+self.P[6:]
+                self.P     = incr(self.P[:6])+self.P[6:]
+            else:
+                self.P.incr()
             
             #render phrase
             instcode="LD"
             instphrase = instcode+"\t"+"{0:01X}".format((~self.I1[:3]).toInt())
             instphrase += ctxtxt
-            return instphrase
+            return instphrase, None
                 
         '''
         TM Transfer and mark Indirect is D0..FF
-        TM is special because you need to put an address the address bus which
-        will not be equal to the current P
+        TM is special because you need to put an address on the address bus which
+        will not be equal to the current P and then restore the old one to continue
         '''
         if self.I1[6:] == Register(b"11") and \
            (self.I1.bit(4) or self.I1.bit(5)):
             #simulate
-            ctxtxt = "\t{0:04X}".format((self.I2+Register(b"0001")).toInt())
             if self.mode != "dasm":
-                self.SB, self.SA = self.SA, self.P[:]
+                target_address = self.I2+Register(b"0001")
+                ctxtxt = "\t{0:03X} (via ({1:02X}))".format((self.I2+Register(b"0001")).toInt(), self.I1.toInt())
+                #self.SB, self.SA = self.SA[:], self.P[:]
                 #self.SA    = incr(self.P[:6])+self.P[6:]
                 #self.SA    = self.P[:6]+self.P[6:]
                 self.P[8:] = Register(b"0001")
-                self.P[:8] = self.I2
+                self.P[:8] = self.I2[:]
             else:
-                self.P     = incr(self.P[:6])+self.P[6:]
+                ####Achtung, things to do here for dasm mode?
+                ctxtxt = "\t({0:02X})".format(self.I1.toInt())
+                if self.ROM is not None:
+                    target_address = Register("{0:08b}".format(self.ROM[self.I1.toInt()]))+Register(b"0001")
+                    ctxtxt += "\t(target addr={0:03X})".format(target_address.toInt())
+                self.P.incr()
                 
             #render phrase
             instcode="TM"
             instphrase = instcode+ctxtxt
-            return instphrase
+            return instphrase, target_address.toInt()
         
         #TML Transfer and mark Long is 01, 02 or 03
         if self.I1 == Register(b"00000001") or \
            self.I1 == Register(b"00000010") or \
            self.I1 == Register(b"00000011"): 
             #simulate
-            ctxtxt = "\t{0:04X}".format((self.I2+self.I1[:4]).toInt())
+            ctxtxt = "\t{0:03X}".format((self.I2+self.I1[:4]).toInt())
             if self.mode != "dasm":
-                self.SB, self.SA = self.SA, incr(self.P[:6])+self.P[6:]
+                self.SB, self.SA = self.SA[:], incr(self.P[:6])+self.P[6:]
                 #self.SA    = incr(self.P[:6])+self.P[6:]
                 self.P[8:] = self.I1[:4]
-                self.P[:8] = self.I2
+                self.P[:8] = self.I2[:]
             else:
-                self.P     = incr(self.P[:6])+self.P[6:]
+                self.P.incr()
             
             #render phrase
             instcode="TML"
             instphrase = instcode+ctxtxt
-            return instphrase
+            return instphrase, (self.I2+self.I1[:4]).toInt()
         
         #LDI is in range 70..7F
         if self.I1[4:] == Register(b"0111"):
             #simulate
             ctxtxt=""
             if self.mode != "dasm":
-                if self.lastI1[4:] == Register(b"0111"):
+                if self.lastI1 is not None and self.lastI1[4:] == Register(b"0111"):
                     #this is a string of LDI's only first counts others are nop
                     ctxtxt = "\t"+"(NOP: series of LDI's)"
                 else:
                     self.A = self.I1[:4] ^ Register(b"1111")
-            self.P = incr(self.P[:6])+self.P[6:]
+                self.P = incr(self.P[:6])+self.P[6:]
+            else:
+                self.P.incr()
             
             #render phrase
             instcode="LDI"
             instcode = instcode+"\t"+"{0:01X}".format( (self.I1[:4] ^ Register(b"1111")).toInt() )
             instphrase = instcode+ctxtxt
-            return instphrase
+            return instphrase, None
             
             
         '''
@@ -1600,21 +1774,23 @@ class Pps4Cpu:
                     self.P = incr(self.P[:6])+self.P[6:]
                     self.skipNext = True
                     
-            self.P = incr(self.P[:6])+self.P[6:]
+                self.P = incr(self.P[:6])+self.P[6:]
+            else:
+                self.P.incr()
             
             #render phrase
             if self.I1[:4] == Register(b"0101"):
                 #this is a DC
                 instcode="DC"
                 instphrase = instcode
-                return instphrase
+                return instphrase, None
             else:
                 instcode="ADI"
                 instphrase = instcode+"\t"+"{0:1X}".format((~self.I1[:4]).toInt())
                 instphrase+=ctxtxt
                 if self.C == Register(b"1"):
                     instphrase+="\twill skip"
-                return instphrase
+                return instphrase, None
 
         # self.P = incr(self.P[:6])+self.P[6:]
         # return ""
@@ -1630,7 +1806,7 @@ class Pps4Cpu:
             #simulate
             ctxtxt=""
             if self.mode != "dasm":
-                if self.lastI1[4:] == Register(b"1100"):
+                if self.lastI1 is not None and self.lastI1[4:] == Register(b"1100"):
                     #this is a string of LB's only first counts others are nop
                     ctxtxt = "\t"+"(NOP: series of LB's)"
                 else:
@@ -1639,21 +1815,26 @@ class Pps4Cpu:
                     self.BL = ~(self.I2[:4])
                     
                     self.P = self.SA[:]
-                    self.SA, self.SB = self.SB, self.SA
+                    self.SA, self.SB = self.SB[:], self.SA[:]
     
-                self.P = incr(self.P[:6])+self.P[6:]
+                #already done in phase 1 of the instruction
+                #self.P = incr(self.P[:6])+self.P[6:]
                 print("Debug: called LB=============================================")
             else:
-                self.P = incr(self.P[:6])+self.P[6:]
+                self.P.incr()
                 
             #render phrase
             instcode="LB"
             instphrase = instcode+"\t"+"{0:02X}".format((~self.I2).toInt())
             instphrase += ctxtxt
-            return instphrase
+            return instphrase, None
 
 
-        self.P = incr(self.P[:6])+self.P[6:]
-        return ""
+        if self.mode != "dasm":
+            self.P = incr(self.P[:6])+self.P[6:]
+        else:
+            self.P.incr()
+        raise Exception(f"should not get there")
+        return "", None
     
     
