@@ -1540,7 +1540,7 @@ class Pps4Cpu:
         #IOL (1C) is todo at the moment. 
         if self.I1 == Register(b"00011100"):     
             #simulate
-            ctxtxt= "\t"+"{0:01X}".format(self.I2.toInt())
+            ctxtxt= "{0:01X}".format(self.I2.toInt())
             if self.mode != "dasm":
                 self.P = incr(self.P[:6])+self.P[6:]
                 self.wramio = Pps4Cpu.iodev #default

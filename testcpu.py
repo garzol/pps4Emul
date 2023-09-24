@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from pps4.cpum import ROM12, RAM, Pps4Cpu
 from pps4.A17IO import A17IO    
 from pps4._10696 import GPIO10696
+from pps4._10788 import GPKD10788
 from pps4.register import Register
 from pps4.cpum import PPS4InstSet
 
@@ -20,33 +21,44 @@ if __name__ == '__main__':
             infodict[vi] = k 
             
 
-    fb = open("pps4/A1752EFA1753EE.bin", "rb")
+    #fb = open("pps4/A1752EFA1753EE.bin", "rb")
+    fb = open("pps4/recel_screech.bin", "rb")
     prom = ROM12(fb)  
     fb.close()
     pram = RAM(256)
     cpu = Pps4Cpu()
+    
     a170x2  = A17IO(0x2)
     a170x4  = A17IO(0x4)
-    gpio0x3 = GPIO10696(0x3)
+    gpio0x3 = GPIO10696(0xD)
+    gkpd    = GPKD10788(0xF)
+    
+    # a170x2  = A17IO(0x2)
+    # a170x4  = A17IO(0x4)
+    # gpio0x3 = GPIO10696(0x3)
+    
+    
     print("===ROM===")
     prom.show(length=10)
     print("===RAM===")  
     pram.show()
 
 
-    print("===A17 switch matrix===")
+    print("===A17 1/switch matrix===")
     print("a17", "id=#{0:01X}".format(a170x2.id))
     
-    print("===A17 solenoid control===")
+    print("===A17 2/solenoid control===")
     print("a17", "id=#{0:01X}".format(a170x4.id))
     
     print("===CPU===")
     ramv = 0
-    ram_addr = (cpu.BL+cpu.BM+cpu.BU).toInt()
     for i in range(2500):
+
+        ram_addr = (cpu.BL+cpu.BM+cpu.BU).toInt()
         rom_addr = cpu.P.toInt()
 
-        cpu.ramd = Register("{0:04b}".format(ramv))
+        #cpu.ramd = Register("{0:04b}".format(ramv))
+        cpu.cyclephi2(ramv)
 
         #print("main: {1}\t{0:04X}\t{2:02X}".format(rom_addr, acc, 0), cpu.P)
         romi = prom.mem[rom_addr]
@@ -54,7 +66,7 @@ if __name__ == '__main__':
         '''
         #second half of main cycle (phi3, phi4)
         '''
-        next_ram_addr, ldis, wioioram = cpu.cyclephi1(romi)
+        next_ram_addr, ldis, wioioram = cpu.cyclephi4(romi)
         wiorw    = cpu.wio
         
         #print("{0:02X}".format(cpu.I1.toInt()), wioioram, wiorw)
@@ -79,6 +91,12 @@ if __name__ == '__main__':
             if ret is not None:
                 ramviol = ret.toInt()
                 print("10696 device", gpio0x3.id, "returned", ramviol)
+
+            ret = gkpd.handle(i, cpu.I2.toInt(), cpu.A, cpu.BL, cpu.BM)
+            if ret is not None:
+                ramviol = ret.toInt()
+                print("10788 device", gkpd.id, "returned", ramviol)
+            
             if ramviol is not None:
                 cpu.A = Register("{0:04b}".format(ramviol))
         ram_addr = next_ram_addr
@@ -166,16 +184,54 @@ if __name__ == '__main__':
     # # print(cpu.P)
     #
     #
-    print("-----Achtung----------")
-    cpu = Pps4Cpu(mode="dasm")
-    i=0
+    #######################
+    #
+    #
+    #   disassembly only
+    #
+    #
+    #######################
+    romdistxt = list()
+    cpudis = Pps4Cpu(mode="dasm", ROM=prom.mem)
     romi=0
     rom_addr = 0
+    is2cycle = False
     while rom_addr<len(prom.mem):
         romi = prom.mem[rom_addr]
-        _, ldis, _ = cpu.cyclephi1(romi)
+        _, ldis, _ = cpudis.cyclephi4(romi)
         if ldis is not None:
-            print("main: {1:08d}\t{0:04X}\t{2:02X}\t{3}".format(rom_addr, i, cpu.P.toInt(), ldis))
-        i+=1
-        rom_addr+= 1
+            if ldis == "":
+                romdistxt.append(["**********STOP******************", "no infos"])
+                break
+            
+            #print("ldis", ldis)  #exemple ldis: ldis ((0, 129, None), 'T\t0001')
+            infos = PPS4InstSet.Doc[infodict[ldis[0][1]]]
+            if is2cycle:
+                is2cycle = False
+                romdistxt.append([rom_addr-1, ldis, infos])
+            else:
+                romdistxt.append([rom_addr, ldis, infos])
 
+            rom_addr+=1
+        else:
+            is2cycle = True
+            rom_addr+=1
+    
+    #exemple of linedist:        
+    #[2302, ((2302, 82, 30), 'TL\t21E'), ('Transfer Long', 2, '\n                                 This instruction executes a transfer to any ROM \n                                 word on any page. It occupies two ROM words and \n                                 requires two cycles for execution.\n                                 The first byte loads P(12:9) with field \n                                 I1(4:1) and then the second byte I2(8:1) is\n                                 placed in P(8:1)\n                                 ', '\n                                 N/A\n                                 ', 'P(12:9)<-I1(4:1)\nP(8:1)<-I2(8:1)')]
+
+    for linedis in romdistxt:
+        #print(linedis)
+        print("{0:03X}".format(linedis[1][0][0]), end='\t')
+        print("{0:02X}".format(linedis[1][0][1]), end='\t')
+        try:
+            print("{0:02X}".format(linedis[1][0][2]), end='\t')
+        except:
+            print('  ', end='\t')
+        if len(linedis[1][1])>20:
+            print(linedis[1][1], end='\t')
+        elif len(linedis[1][1])<4:
+            print(linedis[1][1], end='\t\t\t\t\t')
+        else:
+            print(linedis[1][1], end='\t\t\t\t')
+        print(";", linedis[2][0])
