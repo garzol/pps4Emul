@@ -37,11 +37,12 @@ if __name__ == '__main__':
     # a170x4  = A17IO(0x4)
     # gpio0x3 = GPIO10696(0x3)
     
-    
-    print("===ROM===")
-    prom.show(length=10)
-    print("===RAM===")  
-    pram.show()
+
+    if False:
+        print("===ROM===")
+        prom.show(length=10)
+        print("===RAM===")  
+        pram.show()
 
 
     print("===A17 1/switch matrix===")
@@ -52,7 +53,7 @@ if __name__ == '__main__':
     
     print("===CPU===")
     ramv = 0
-    for i in range(2500):
+    for i in range(2500000):
 
         ram_addr = (cpu.BL+cpu.BM+cpu.BU).toInt()
         rom_addr = cpu.P.toInt()
@@ -113,7 +114,7 @@ if __name__ == '__main__':
             #
 
         
-        if ldis is not None:
+        if ldis is not None and cpu.skipsubroutine == False:
             if ldis == "":
                 print("**********STOP******************", "no infos")
                 exit(0)
@@ -126,8 +127,12 @@ if __name__ == '__main__':
         # else:
         #     print("{1:08d}\t==============".format(rom_addr, i))
 
-    a170x2.stop()    
-    pram.show()
+    a170x2.stop()  
+    if False:  
+        pram.show()
+    
+    
+    
     # print(prom.countinstoccur())   
     #
     #
@@ -144,7 +149,8 @@ if __name__ == '__main__':
     #ax.plot(a170x2.ftick, a170x2.fdir, label="dir")
     ax.plot(a170x2.ftick, a170x2.fdir, label="dir")
     ax.legend()
-    plt.show()    
+    if False:
+        plt.show()    
         #print("\t\t{0:04X} {1:02X}".format(ram_addr, ramv))
     # x=Register(b"01000111")
     # y=Register(b"11000111")
@@ -191,47 +197,48 @@ if __name__ == '__main__':
     #
     #
     #######################
-    romdistxt = list()
-    cpudis = Pps4Cpu(mode="dasm", ROM=prom.mem)
-    romi=0
-    rom_addr = 0
-    is2cycle = False
-    while rom_addr<len(prom.mem):
-        romi = prom.mem[rom_addr]
-        _, ldis, _ = cpudis.cyclephi4(romi)
-        if ldis is not None:
-            if ldis == "":
-                romdistxt.append(["**********STOP******************", "no infos"])
-                break
-            
-            #print("ldis", ldis)  #exemple ldis: ldis ((0, 129, None), 'T\t0001')
-            infos = PPS4InstSet.Doc[infodict[ldis[0][1]]]
-            if is2cycle:
-                is2cycle = False
-                romdistxt.append([rom_addr-1, ldis, infos])
-            else:
-                romdistxt.append([rom_addr, ldis, infos])
-
-            rom_addr+=1
-        else:
-            is2cycle = True
-            rom_addr+=1
+    if False:
+        romdistxt = list()
+        cpudis = Pps4Cpu(mode="dasm", ROM=prom.mem)
+        romi=0
+        rom_addr = 0
+        is2cycle = False
+        while rom_addr<len(prom.mem):
+            romi = prom.mem[rom_addr]
+            _, ldis, _ = cpudis.cyclephi4(romi)
+            if ldis is not None:
+                if ldis == "":
+                    romdistxt.append(["**********STOP******************", "no infos"])
+                    break
+                
+                #print("ldis", ldis)  #exemple ldis: ldis ((0, 129, None), 'T\t0001')
+                infos = PPS4InstSet.Doc[infodict[ldis[0][1]]]
+                if is2cycle:
+                    is2cycle = False
+                    romdistxt.append([rom_addr-1, ldis, infos])
+                else:
+                    romdistxt.append([rom_addr, ldis, infos])
     
-    #exemple of linedist:        
-    #[2302, ((2302, 82, 30), 'TL\t21E'), ('Transfer Long', 2, '\n                                 This instruction executes a transfer to any ROM \n                                 word on any page. It occupies two ROM words and \n                                 requires two cycles for execution.\n                                 The first byte loads P(12:9) with field \n                                 I1(4:1) and then the second byte I2(8:1) is\n                                 placed in P(8:1)\n                                 ', '\n                                 N/A\n                                 ', 'P(12:9)<-I1(4:1)\nP(8:1)<-I2(8:1)')]
-
-    for linedis in romdistxt:
-        #print(linedis)
-        print("{0:03X}".format(linedis[1][0][0]), end='\t')
-        print("{0:02X}".format(linedis[1][0][1]), end='\t')
-        try:
-            print("{0:02X}".format(linedis[1][0][2]), end='\t')
-        except:
-            print('  ', end='\t')
-        if len(linedis[1][1])>20:
-            print(linedis[1][1], end='\t')
-        elif len(linedis[1][1])<4:
-            print(linedis[1][1], end='\t\t\t\t\t')
-        else:
-            print(linedis[1][1], end='\t\t\t\t')
-        print(";", linedis[2][0])
+                rom_addr+=1
+            else:
+                is2cycle = True
+                rom_addr+=1
+        
+        #exemple of linedist:        
+        #[2302, ((2302, 82, 30), 'TL\t21E'), ('Transfer Long', 2, '\n                                 This instruction executes a transfer to any ROM \n                                 word on any page. It occupies two ROM words and \n                                 requires two cycles for execution.\n                                 The first byte loads P(12:9) with field \n                                 I1(4:1) and then the second byte I2(8:1) is\n                                 placed in P(8:1)\n                                 ', '\n                                 N/A\n                                 ', 'P(12:9)<-I1(4:1)\nP(8:1)<-I2(8:1)')]
+    
+        for linedis in romdistxt:
+            #print(linedis)
+            print("{0:03X}".format(linedis[1][0][0]), end='\t')
+            print("{0:02X}".format(linedis[1][0][1]), end='\t')
+            try:
+                print("{0:02X}".format(linedis[1][0][2]), end='\t')
+            except:
+                print('  ', end='\t')
+            if len(linedis[1][1])>20:
+                print(linedis[1][1], end='\t')
+            elif len(linedis[1][1])<4:
+                print(linedis[1][1], end='\t\t\t\t\t')
+            else:
+                print(linedis[1][1], end='\t\t\t\t')
+            print(";", linedis[2][0])

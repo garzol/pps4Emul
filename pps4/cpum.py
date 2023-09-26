@@ -728,6 +728,7 @@ class Pps4Cpu:
         self.wio    = None
         self.wramio = None
         
+        self.skipsubroutine = False
   
     def printcontext(self):
         print (" A:", self.A, "\tX:", self.X)
@@ -1509,7 +1510,10 @@ class Pps4Cpu:
             return instphrase, None
             
         #RTN (05)  
-        if self.I1 == Register(b"00000101"):     
+        if self.I1 == Register(b"00000101"):    
+            if self.skipsubroutine == True:
+                print("restart tracing")   
+            self.skipsubroutine = False 
             #simulate
             if self.mode != "dasm":
                 self.P = self.SA[:]
@@ -1524,7 +1528,10 @@ class Pps4Cpu:
             return instphrase, None
             
         #RTNSK (07)  
-        if self.I1 == Register(b"00000111"):     
+        if self.I1 == Register(b"00000111"):  
+            if self.skipsubroutine == True:
+                print("restart tracing")   
+            self.skipsubroutine = False 
             #simulate
             if self.mode != "dasm":
                 self.P = self.SA[:]
@@ -1541,7 +1548,7 @@ class Pps4Cpu:
         #IOL (1C) is todo at the moment. 
         if self.I1 == Register(b"00011100"):     
             #simulate
-            ctxtxt= "\t"+"{0:01X}".format(self.I2.toInt())
+            ctxtxt= "{0:01X}".format(self.I2.toInt())
             if self.mode != "dasm":
                 self.P = incr(self.P[:6])+self.P[6:]
                 self.wramio = Pps4Cpu.iodev #default
@@ -1550,7 +1557,7 @@ class Pps4Cpu:
                 # print("===2=== this is the value received in A at IOL", self.ramd)
                 # self.A = self.ramd[:]
                 opt = "SOS" if self.I2.bit(0) else "SES"
-                ctxtxt = "\t"+"{0:01X} (B=0x{2:03X} sent A={3:01X})".format(self.I2.toInt(), opt, (self.BL+self.BM+self.BU).toInt(), self.A.toInt())
+                ctxtxt = "{0:01X} (B=0x{2:03X} sent A={3:01X})".format(self.I2.toInt(), opt, (self.BL+self.BM+self.BU).toInt(), self.A.toInt())
             else:
                 self.P.incr()
                    
@@ -1712,6 +1719,11 @@ class Pps4Cpu:
                     ctxtxt += "\t(target addr={0:03X})".format(target_address.toInt())
                 self.P.incr()
                 
+            #manage skippings
+            if target_address.toInt() == 0x1D2:
+                self.skipsubroutine = True 
+                print("stop tracing inside 1D2")
+   
             #render phrase
             instcode="TM"
             instphrase = instcode+ctxtxt
@@ -1730,6 +1742,11 @@ class Pps4Cpu:
                 self.P[:8] = self.I2[:]
             else:
                 self.P.incr()
+
+            #manage skippings
+            if (self.I2+self.I1[:4]).toInt() == 0x1D2:
+                self.skipsubroutine = True 
+                print("stop tracing inside 1D2")
             
             #render phrase
             instcode="TML"
