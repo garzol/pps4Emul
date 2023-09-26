@@ -861,6 +861,7 @@ class Pps4Cpu:
             
         #print("self.P", self.P)
         ldis = self.cpuexe(isThisaSetByt)
+        #print("ldis", ldis)
         self.AB = self.P[:]
         
         #SAG handling
@@ -882,14 +883,14 @@ class Pps4Cpu:
         #     self.P = incr(self.P[:6])+self.P[6:]
         #     self.skipNext = False
         self.skipNext = False  #just for info, does not take part in anything else
+        dest_addr = None
         if isThisaSetByt:
             myphrase = "SET NIB\t#{0:01X}".format(self.I1.toInt())
         else:
-            myphrase, pipo = self.instdoc()
-                
-        
+            myphrase, dest_addr = self.instdoc()
+                        
         self.nextIis2Cycles = False
-        return ldis, myphrase
+        return ldis, myphrase, dest_addr
     
     def instdoc(self):
         '''
@@ -1540,7 +1541,7 @@ class Pps4Cpu:
         #IOL (1C) is todo at the moment. 
         if self.I1 == Register(b"00011100"):     
             #simulate
-            ctxtxt= "{0:01X}".format(self.I2.toInt())
+            ctxtxt= "\t"+"{0:01X}".format(self.I2.toInt())
             if self.mode != "dasm":
                 self.P = incr(self.P[:6])+self.P[6:]
                 self.wramio = Pps4Cpu.iodev #default
