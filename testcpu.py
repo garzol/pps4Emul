@@ -23,7 +23,7 @@ if __name__ == '__main__':
 
     #fb = open("pps4/A1752EFA1753EE.bin", "rb")
     fb = open("pps4/recel_screech.bin", "rb")
-    prom = ROM12(fb)  
+    prom = ROM12(fb)  #creation of a rom area from binary file
     fb.close()
     pram = RAM(256)
     cpu = Pps4Cpu()
