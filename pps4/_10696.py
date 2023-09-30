@@ -30,11 +30,15 @@ class GPIO10696(object):
         
     def stop(self):
         pass
-                
-    def handle(self, tick, cmd, acc):   
+          
+          
+    def handle(self, tick, cpu, addr):  
+        '''
+        addr is not used. Only for standardization with other devices
+        ''' 
         self.tick = tick
-        cmd  = Register("{0:08b}".format(cmd))
-        acc  = Register("{0:08b}".format(acc))
+        cmd  = cpu.I2
+        acc  = cpu.A
         ret = None 
         if cmd[4:].toInt() == self.id:
             print("10696", self.id, "received", cmd, acc)

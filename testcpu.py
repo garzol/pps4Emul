@@ -37,8 +37,10 @@ if __name__ == '__main__':
     # a170x4  = A17IO(0x4)
     # gpio0x3 = GPIO10696(0x3)
     
-
+    devices = [a170x2, a170x4, gpio0x3, gkpd]
+    
     if False:
+        #this how to access RAM or ROM
         print("===ROM===")
         prom.show(length=10)
         print("===RAM===")  
@@ -52,80 +54,95 @@ if __name__ == '__main__':
     print("a17", "id=#{0:01X}".format(a170x4.id))
     
     print("===CPU===")
+    cpu.P = Register("{0:012b}".format(0x5C0))
+    cpu.A = Register("{0:04b}".format(0x0))
+    cpu.BL = Register("{0:04b}".format(0x2))
+    cpu.BM = Register("{0:04b}".format(0x0))
+    cpu.BU = Register("{0:04b}".format(0x0))
+
+
     ramv = 0
-    for i in range(2500000):
+    cpu.trace(2000, prom, pram, devices, ramv)
 
-        ram_addr = (cpu.BL+cpu.BM+cpu.BU).toInt()
-        rom_addr = cpu.P.toInt()
-
-        #cpu.ramd = Register("{0:04b}".format(ramv))
-        cpu.cyclephi2(ramv)
-
-        #print("main: {1}\t{0:04X}\t{2:02X}".format(rom_addr, acc, 0), cpu.P)
-        romi = prom.mem[rom_addr]
-        
-        '''
-        #second half of main cycle (phi3, phi4)
-        '''
-        next_ram_addr, ldis, wioioram = cpu.cyclephi4(romi)
-        wiorw    = cpu.wio
-        
-        #print("{0:02X}".format(cpu.I1.toInt()), wioioram, wiorw)
-        if wioioram == Pps4Cpu.ramdev:
-            ramv = pram.mem[ram_addr]
-            if wiorw == Pps4Cpu.wr:
-                #print("write:", acc, ram_addr)
-                pram.mem[ram_addr] = cpu.ramout.toInt()
-        elif wioioram == Pps4Cpu.iodev:
-            #print(cpu.A, ram_addr, cpu.I2.toInt())
-            #print("ioldevice reception of A={0:01X}, B={1:03X}, I2={2:02X}".format(cpu.A.toInt(), ram_addr, cpu.I2.toInt()))
-            ramviol = None
-            ret = a170x2.handle(i, cpu.I2.toInt(), ram_addr, cpu.A.toInt())
-            if ret is not None:
-                ramviol = 8 if ret == Register('1') else 0
-                print("A17 device", a170x2.id, "returned", ramviol)
-            ret = a170x4.handle(i, cpu.I2.toInt(), ram_addr, cpu.A.toInt())
-            if ret is not None:
-                ramviol = 8 if ret == Register('1') else 0
-                print("A17 device", a170x4.id, "returned", ramviol)
-            ret = gpio0x3.handle(i, cpu.I2.toInt(), cpu.A.toInt())
-            if ret is not None:
-                ramviol = ret.toInt()
-                print("10696 device", gpio0x3.id, "returned", ramviol)
-
-            ret = gkpd.handle(i, cpu.I2.toInt(), cpu.A, cpu.BL, cpu.BM)
-            if ret is not None:
-                ramviol = ret.toInt()
-                print("10788 device", gkpd.id, "returned", ramviol)
-            
-            if ramviol is not None:
-                cpu.A = Register("{0:04b}".format(ramviol))
-        ram_addr = next_ram_addr
- 
-  
-            # if ldis is not None:
-            #     if ldis == "":
-            #         distxt.append(["{0:08d}".format(i), "**********STOP******************", "no infos"])
-            #         break
-            #
-            #     #print("ldis", ldis)  #exemple ldis: ldis ((0, 129, None), 'T\t0001')
-            #     infos = PPS4InstSet.Doc[infodict[ldis[0][1]]]
-            #     distxt.append(["{0:08d}".format(i), ldis, infos])
-            #
-
-        
-        if ldis is not None and cpu.skipsubroutine == False:
-            if ldis == "":
-                print("**********STOP******************", "no infos")
-                exit(0)
-            infos = PPS4InstSet.Doc[infodict[ldis[0][1]]]
-            if ldis[0][2] is not None:
-                print("{1:08d}\t{2:03X}\t{3:02X}\t{4:02X}\t{5}".format(rom_addr, i, int(ldis[0][0]), int(ldis[0][1]), int(ldis[0][2]), ldis[1]))
-            else:
-                print("{1:08d}\t{2:03X}\t{3:02X}\t  \t{4}".format(rom_addr, i, int(ldis[0][0]), int(ldis[0][1]), ldis[1]))
-                
-        # else:
-        #     print("{1:08d}\t==============".format(rom_addr, i))
+    # for i in range(2000):
+    #
+    #     ram_addr = (cpu.BL+cpu.BM+cpu.BU).toInt()
+    #     rom_addr = cpu.P.toInt()
+    #
+    #     #cpu.ramd = Register("{0:04b}".format(ramv))
+    #     cpu.cyclephi2(ramv)
+    #
+    #     #print("main: {1}\t{0:04X}\t{2:02X}".format(rom_addr, acc, 0), cpu.P)
+    #     romi = prom.mem[rom_addr]
+    #
+    #     '''
+    #     #second half of main cycle (phi3, phi4)
+    #     '''
+    #     next_ram_addr, ldis, wioioram = cpu.cyclephi4(romi)
+    #     wiorw    = cpu.wio
+    #
+    #     #print("{0:02X}".format(cpu.I1.toInt()), wioioram, wiorw)
+    #     if wioioram == Pps4Cpu.ramdev:
+    #         ramv = pram.mem[ram_addr]
+    #         if wiorw == Pps4Cpu.wr:
+    #             print("write:", i, "RAM(@",ram_addr,")<-", cpu.ramout, "next_ram:", next_ram_addr)
+    #             pram.mem[ram_addr] = cpu.ramout.toInt()
+    #     elif wioioram == Pps4Cpu.iodev:
+    #         #print(cpu.A, ram_addr, cpu.I2.toInt())
+    #         #print("ioldevice reception of A={0:01X}, B={1:03X}, I2={2:02X}".format(cpu.A.toInt(), ram_addr, cpu.I2.toInt()))
+    #         ramviol = None
+    #         #def handle(self, tick, cpu, addr):   
+    #         ret = a170x2.handle(i, cpu, ram_addr)
+    #         if ret is not None:
+    #             ramviol = ret.toInt()
+    #             #ramviol = 8 if ret == Register('1') else 0
+    #             #print("A17 device", a170x2.id, "returned", ramviol)
+    #         ret = a170x4.handle(i, cpu, ram_addr)
+    #         if ret is not None:
+    #             #print("newret", ret)
+    #             #ramviol = 8 if ret == Register('1') else 0
+    #             #print("A17 device", a170x4.id, "returned", ramviol)
+    #             ramviol = ret.toInt()
+    #         #ram_addr is not used here
+    #         ret = gpio0x3.handle(i, cpu, ram_addr)
+    #         if ret is not None:
+    #             ramviol = ret.toInt()
+    #             #print("10696 device", gpio0x3.id, "returned", ramviol)
+    #
+    #         #ram_addr is not used here
+    #         ret = gkpd.handle(i, cpu, ram_addr)
+    #         if ret is not None:
+    #             ramviol = ret.toInt()
+    #             #print("10788 device", gkpd.id, "returned", ramviol)
+    #
+    #         if ramviol is not None:
+    #             cpu.A = Register("{0:04b}".format(ramviol))
+    #     ram_addr = next_ram_addr
+    #
+    #
+    #         # if ldis is not None:
+    #         #     if ldis == "":
+    #         #         distxt.append(["{0:08d}".format(i), "**********STOP******************", "no infos"])
+    #         #         break
+    #         #
+    #         #     #print("ldis", ldis)  #exemple ldis: ldis ((0, 129, None), 'T\t0001')
+    #         #     infos = PPS4InstSet.Doc[infodict[ldis[0][1]]]
+    #         #     distxt.append(["{0:08d}".format(i), ldis, infos])
+    #         #
+    #
+    #
+    #     if ldis is not None and cpu.skipsubroutine == False and True:
+    #         if ldis == "":
+    #             print("**********STOP******************", "no infos")
+    #             exit(0)
+    #         infos = PPS4InstSet.Doc[infodict[ldis[0][1]]]
+    #         if ldis[0][2] is not None:
+    #             print("{1:08d}\t{2:03X}\t{3:02X}\t{4:02X}\t{5}".format(rom_addr, i, int(ldis[0][0]), int(ldis[0][1]), int(ldis[0][2]), ldis[1]))
+    #         else:
+    #             print("{1:08d}\t{2:03X}\t{3:02X}\t  \t{4}".format(rom_addr, i, int(ldis[0][0]), int(ldis[0][1]), ldis[1]))
+    #
+    #     # else:
+    #     #     print("{1:08d}\t==============".format(rom_addr, i))
 
     a170x2.stop()  
     if False:  
@@ -224,7 +241,7 @@ if __name__ == '__main__':
                 is2cycle = True
                 rom_addr+=1
         
-        #exemple of linedist:        
+        #exemple of linedis:        
         #[2302, ((2302, 82, 30), 'TL\t21E'), ('Transfer Long', 2, '\n                                 This instruction executes a transfer to any ROM \n                                 word on any page. It occupies two ROM words and \n                                 requires two cycles for execution.\n                                 The first byte loads P(12:9) with field \n                                 I1(4:1) and then the second byte I2(8:1) is\n                                 placed in P(8:1)\n                                 ', '\n                                 N/A\n                                 ', 'P(12:9)<-I1(4:1)\nP(8:1)<-I2(8:1)')]
     
         for linedis in romdistxt:

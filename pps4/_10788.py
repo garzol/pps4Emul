@@ -36,12 +36,15 @@ class GPKD10788(object):
     def stop(self):
         pass
                 
-    def handle(self, tick, cmd, acc, bl, bm):  
+    def handle(self, tick, cpu, addr):  
         '''
-        acc is the content of A (4-BIT REGISTER)
+        addr is not used here
         ''' 
         self.tick = tick
-        cmd  = Register("{0:08b}".format(cmd))
+        cmd  = cpu.I2
+        acc  = cpu.A
+        bl   = cpu.BL 
+        bm   = cpu.BM
         #acc  = Register("{0:08b}".format(acc))
         ret = None 
         if cmd[4:].toInt() == self.id:

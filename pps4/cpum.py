@@ -1512,7 +1512,8 @@ class Pps4Cpu:
         #RTN (05)  
         if self.I1 == Register(b"00000101"):    
             if self.skipsubroutine == True:
-                print("restart tracing")   
+                pass
+                #print("restart tracing")   
             self.skipsubroutine = False 
             #simulate
             if self.mode != "dasm":
@@ -1530,7 +1531,8 @@ class Pps4Cpu:
         #RTNSK (07)  
         if self.I1 == Register(b"00000111"):  
             if self.skipsubroutine == True:
-                print("restart tracing")   
+                pass
+                #print("restart tracing")   
             self.skipsubroutine = False 
             #simulate
             if self.mode != "dasm":
@@ -1722,7 +1724,7 @@ class Pps4Cpu:
             #manage skippings
             if target_address.toInt() == 0x1D2:
                 self.skipsubroutine = True 
-                print("stop tracing inside 1D2")
+                #print("stop tracing inside 1D2")
    
             #render phrase
             instcode="TM"
@@ -1746,7 +1748,7 @@ class Pps4Cpu:
             #manage skippings
             if (self.I2+self.I1[:4]).toInt() == 0x1D2:
                 self.skipsubroutine = True 
-                print("stop tracing inside 1D2")
+                #print("stop tracing inside 1D2")
             
             #render phrase
             instcode="TML"
@@ -1855,4 +1857,64 @@ class Pps4Cpu:
         raise Exception(f"should not get there")
         return "", None
     
+
+
+
+    def trace(self, nbcycl, prom, pram, devices, ramv=0):
+        '''
+        '''        
+        infodict=dict()
+        for k,v in PPS4InstSet.HexCod.items():
+            for vi in v:
+                infodict[vi] = k 
+        
+        for i in range(nbcycl):
+    
+            ram_addr = (self.BL+self.BM+self.BU).toInt()
+            rom_addr = self.P.toInt()
+    
+            #cpu.ramd = Register("{0:04b}".format(ramv))
+            self.cyclephi2(ramv)
+    
+            #print("main: {1}\t{0:04X}\t{2:02X}".format(rom_addr, acc, 0), cpu.P)
+            romi = prom.mem[rom_addr]
+            
+            '''
+            #second half of main cycle (phi3, phi4)
+            '''
+            next_ram_addr, ldis, wioioram = self.cyclephi4(romi)
+            wiorw    = self.wio
+            
+            #print("{0:02X}".format(cpu.I1.toInt()), wioioram, wiorw)
+            if wioioram == Pps4Cpu.ramdev:
+                ramv = pram.mem[ram_addr]
+                if wiorw == Pps4Cpu.wr:
+                    print("write:", i, "RAM(@",ram_addr,")<-", self.ramout, "next_ram:", next_ram_addr)
+                    pram.mem[ram_addr] = self.ramout.toInt()
+            elif wioioram == Pps4Cpu.iodev:
+                #print(cpu.A, ram_addr, cpu.I2.toInt())
+                #print("ioldevice reception of A={0:01X}, B={1:03X}, I2={2:02X}".format(cpu.A.toInt(), ram_addr, cpu.I2.toInt()))
+                ramviol = None
+                for device in devices:
+                    ret = device.handle(i, self, ram_addr)
+                    if ret is not None:
+                        ramviol = ret.toInt()
+                
+                if ramviol is not None:
+                    self.A = Register("{0:04b}".format(ramviol))
+            ram_addr = next_ram_addr
+     
+      
+    
+            
+            if ldis is not None and self.skipsubroutine == False:
+                if ldis == "":
+                    print("**********STOP******************", "no infos")
+                    exit(0)
+                infos = PPS4InstSet.Doc[infodict[ldis[0][1]]]
+                if ldis[0][2] is not None:
+                    print("{1:08d}\t{2:03X}\t{3:02X}\t{4:02X}\t{5}".format(rom_addr, i, int(ldis[0][0]), int(ldis[0][1]), int(ldis[0][2]), ldis[1]))
+                else:
+                    print("{1:08d}\t{2:03X}\t{3:02X}\t  \t{4}".format(rom_addr, i, int(ldis[0][0]), int(ldis[0][1]), ldis[1]))
+                    
     

@@ -33,19 +33,25 @@ class A17IO(object):
         todo later
         '''
         pass
-                
-    def handle(self, tick, cmd, addr, acc):   
+    
+    #ret = a170x2.handle(i, cpu.I2.toInt(), ram_addr, cpu.A.toInt())  
+    #old call before 2023-09-30          
+    #def handle(self, tick, cmd, addr, acc):   
+    def handle(self, tick, cpu, addr):   
         self.tick = tick
-        cmd  = Register("{0:08b}".format(cmd))
+        #cmd  = Register("{0:08b}".format(cmd))
+        cmd  = cpu.I2
         addr = Register("{0:012b}".format(addr))
-        acc  = Register("{0:08b}".format(acc))
+        #acc  = Register("{0:08b}".format(acc))
+        acc  = cpu.A
         ret = None 
         if cmd[4:].toInt() == self.id:
             print("A17", self.id, "received", cmd, addr, acc)
             #provisory the value returned
             #depends on the case whether its input or output 
             #But for now we just get the value of the output buffer
-            ret = self.oio[addr[:4].toInt()]
+            #2023-09-30 added Register("000")+ to comply with the standard of devices return values
+            ret = Register("000")+self.oio[addr[:4].toInt()]
             if cmd.bit(0):
                 print("SOS")
                 print("IO(", addr[:4], ")<-", acc.bit(3))
