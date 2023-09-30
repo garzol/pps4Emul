@@ -3,9 +3,10 @@ PPS4 instruction set emulator
 
 cpum.py is the main program that executes PPS4 binary program. At point zero the program is preloaded with the gottlieb system 1 exploitation code for testing purposes.
 
-
 Use testcpu.py to run this program.
+
 PhD 2022-12-06
+
 ===
 
 
@@ -66,6 +67,8 @@ cpu.trace(ncycl, prom, pram, devices, ramv)
 
 you may also disassemble the rom, draw graphs, and many things. Read testcpu.py to see all
 
-PhD 2022-12-06
+PhD 2023-09-30
+
 phd@pps4.fr
-pps4.fr
+
+https://rockwell.pps4.fr
