@@ -1,5 +1,5 @@
-# pps4Emul
-PPS4 instruction set emulator
+# pps4Emul. Yet Another Rockwell pps-4 emulator "yarpe"
+PPS-4 instruction set emulator
 
 cpum.py is the main program that executes PPS4 binary program. At point zero the program is preloaded with the gottlieb system 1 exploitation code for testing purposes.
 
