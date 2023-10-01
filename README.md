@@ -2,9 +2,10 @@
 Yet Another Rockwell pps-4 emulator "yarpe"
 PPS-4 instruction set emulator
 
-cpum.py is the main program that executes PPS4 binary program. At point zero the program is preloaded with the gottlieb system 1 exploitation code for testing purposes.
+This a python package located in pps4.  
+cpum.py contains the functions that executes PPS4 binary program. At point zero the program is preloaded with the gottlieb system 1 exploitation code for testing purposes.
 
-Use testcpu.py to run this program.
+Use testcpu.py to run this program. testcpu.py is an application example you may look at to see what is possible and how to interface.
 
 PhD 2022-12-06
 
@@ -50,7 +51,10 @@ You are to write a python script like the one in example as testcpu.py
 
 `cpu.trace(ncycl, prom, pram, devices, ramv)`
 
-you may also disassemble the rom, draw graphs, and many things. Read testcpu.py to see all
+> 
+> you may also disassemble the rom, draw graphs, and many things. Read testcpu.py to see all
+>
+> 
 
 PhD 2023-09-30
 
