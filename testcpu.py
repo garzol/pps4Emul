@@ -54,7 +54,7 @@ if __name__ == '__main__':
     print("a17", "id=#{0:01X}".format(a170x4.id))
     
     print("===CPU===")
-    cpu.P = Register("{0:012b}".format(0x5C0))
+    cpu.P = Register("{0:012b}".format(0x005))
     cpu.A = Register("{0:04b}".format(0x0))
     cpu.BL = Register("{0:04b}".format(0x2))
     cpu.BM = Register("{0:04b}".format(0x0))

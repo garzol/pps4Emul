@@ -1191,8 +1191,10 @@ class Pps4Cpu:
         if self.I1 == Register(b"00001100"):     
             #simulate
             if self.mode != "dasm":
+                #print("EOR avant", self.A, self.ramd, self.BL, self.BM, self.BU)
                 self.A = self.A ^ self.ramd
                 self.P = incr(self.P[:6])+self.P[6:]
+                #print("EOR apres", self.A, self.ramd, self.BL, self.BM, self.BU)
             else:
                 self.P.incr()
 
@@ -1887,10 +1889,12 @@ class Pps4Cpu:
             
             #print("{0:02X}".format(cpu.I1.toInt()), wioioram, wiorw)
             if wioioram == Pps4Cpu.ramdev:
-                ramv = pram.mem[ram_addr]
+                #warning: respect the order write to ram first, then read ram
                 if wiorw == Pps4Cpu.wr:
-                    print("write:", i, "RAM(@",ram_addr,")<-", self.ramout, "next_ram:", next_ram_addr)
+                    print("write: {0:08d}  RAM(@{1:03X})<-{2}, next_ram: {3}".format(i,ram_addr, self.ramout, next_ram_addr))
                     pram.mem[ram_addr] = self.ramout.toInt()
+                ramv = pram.mem[ram_addr]                
+                    
             elif wioioram == Pps4Cpu.iodev:
                 #print(cpu.A, ram_addr, cpu.I2.toInt())
                 #print("ioldevice reception of A={0:01X}, B={1:03X}, I2={2:02X}".format(cpu.A.toInt(), ram_addr, cpu.I2.toInt()))
