@@ -1889,6 +1889,7 @@ class Pps4Cpu:
             
             #print("{0:02X}".format(cpu.I1.toInt()), wioioram, wiorw)
             if wioioram == Pps4Cpu.ramdev:
+                #2023-10-02 bug fix reversed to write before read
                 #warning: respect the order write to ram first, then read ram
                 if wiorw == Pps4Cpu.wr:
                     print("write: {0:08d}  RAM(@{1:03X})<-{2}, next_ram: {3}".format(i,ram_addr, self.ramout, next_ram_addr))
