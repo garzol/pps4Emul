@@ -54,15 +54,15 @@ if __name__ == '__main__':
     print("a17", "id=#{0:01X}".format(a170x4.id))
     
     print("===CPU===")
-    cpu.P = Register("{0:012b}".format(0x005))
+    cpu.P = Register("{0:012b}".format(0x000))
     cpu.A = Register("{0:04b}".format(0x0))
     cpu.BL = Register("{0:04b}".format(0x2))
     cpu.BM = Register("{0:04b}".format(0x0))
     cpu.BU = Register("{0:04b}".format(0x0))
 
-
+    cpu.zapthis = [0x1D2]
     ramv = 0
-    cpu.trace(2000, prom, pram, devices, ramv)
+    cpu.trace(2000000, prom, pram, devices, ramv)  
 
     # for i in range(2000):
     #

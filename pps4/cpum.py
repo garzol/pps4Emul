@@ -729,7 +729,8 @@ class Pps4Cpu:
         self.wramio = None
         
         self.skipsubroutine = False
-  
+        self.zapthis =[]
+        
     def printcontext(self):
         print (" A:", self.A, "\tX:", self.X)
         print ("BL:", self.BL, "\tBM", self.BM, "\tBU", self.BU)
@@ -1128,6 +1129,7 @@ class Pps4Cpu:
             #simulate
             ctxtxt=""
             if self.mode != "dasm":
+                #print("ADSK avant", self.A, self.ramd, self.BL, self.BM, self.BU)
                 carry, self.A = self.A.binAdd(self.ramd)
                 self.C = Register(carry)                
                 
@@ -1138,6 +1140,7 @@ class Pps4Cpu:
                 else:
                     ctxtxt=""  
                 self.P = incr(self.P[:6])+self.P[6:]
+                #print("ADSK apres", self.A, self.ramd, self.BL, self.BM, self.BU)
             else:
                 self.P.incr()
                   
@@ -1515,7 +1518,7 @@ class Pps4Cpu:
         if self.I1 == Register(b"00000101"):    
             if self.skipsubroutine == True:
                 pass
-                #print("restart tracing")   
+                print("===restart tracing")   
             self.skipsubroutine = False 
             #simulate
             if self.mode != "dasm":
@@ -1534,7 +1537,7 @@ class Pps4Cpu:
         if self.I1 == Register(b"00000111"):  
             if self.skipsubroutine == True:
                 pass
-                #print("restart tracing")   
+                print("===restart tracing")   
             self.skipsubroutine = False 
             #simulate
             if self.mode != "dasm":
@@ -1724,9 +1727,9 @@ class Pps4Cpu:
                 self.P.incr()
                 
             #manage skippings
-            if target_address.toInt() == 0x1D2:
+            if target_address.toInt() in self.zapthis:
                 self.skipsubroutine = True 
-                #print("stop tracing inside 1D2")
+                print("===stop tracing inside {0:03X}".format(target_address.toInt()))
    
             #render phrase
             instcode="TM"
@@ -1748,9 +1751,9 @@ class Pps4Cpu:
                 self.P.incr()
 
             #manage skippings
-            if (self.I2+self.I1[:4]).toInt() == 0x1D2:
+            if (self.I2+self.I1[:4]).toInt() in self.zapthis:
                 self.skipsubroutine = True 
-                #print("stop tracing inside 1D2")
+                print("===stop tracing inside {0:03X}".format((self.I2+self.I1[:4]).toInt()))
             
             #render phrase
             instcode="TML"
@@ -1869,10 +1872,11 @@ class Pps4Cpu:
         for k,v in PPS4InstSet.HexCod.items():
             for vi in v:
                 infodict[vi] = k 
+
+        ram_addr = (self.BL+self.BM+self.BU).toInt()
         
         for i in range(nbcycl):
     
-            ram_addr = (self.BL+self.BM+self.BU).toInt()
             rom_addr = self.P.toInt()
     
             #cpu.ramd = Register("{0:04b}".format(ramv))
@@ -1892,10 +1896,11 @@ class Pps4Cpu:
                 #2023-10-02 bug fix reversed to write before read
                 #warning: respect the order write to ram first, then read ram
                 if wiorw == Pps4Cpu.wr:
-                    print("write: {0:08d}  RAM(@{1:03X})<-{2}, next_ram: {3}".format(i,ram_addr, self.ramout, next_ram_addr))
+                    #print("write: {0:08d}  RAM(@{1:03X})<-{2}, next_ram: {3}".format(i,ram_addr, self.ramout, next_ram_addr))
                     pram.mem[ram_addr] = self.ramout.toInt()
-                ramv = pram.mem[ram_addr]                
-                    
+                    #pram.show()
+                ramv = pram.mem[next_ram_addr]                
+                #print("ramv: {0} which is mem(@{1:03X}), ramd={2}".format(ramv, next_ram_addr, self.ramd))    
             elif wioioram == Pps4Cpu.iodev:
                 #print(cpu.A, ram_addr, cpu.I2.toInt())
                 #print("ioldevice reception of A={0:01X}, B={1:03X}, I2={2:02X}".format(cpu.A.toInt(), ram_addr, cpu.I2.toInt()))
