@@ -62,7 +62,7 @@ if __name__ == '__main__':
 
     cpu.zapthis = [0x1D2]
     ramv = 0
-    cpu.trace(2000000, prom, pram, devices, ramv)  
+    cpu.trace(100000, prom, pram, devices, ramv)  
 
     # for i in range(2000):
     #

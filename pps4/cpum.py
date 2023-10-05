@@ -1883,7 +1883,11 @@ class Pps4Cpu:
             self.cyclephi2(ramv)
     
             #print("main: {1}\t{0:04X}\t{2:02X}".format(rom_addr, acc, 0), cpu.P)
-            romi = prom.mem[rom_addr]
+            try:
+                romi = prom.mem[rom_addr]
+            except:
+                print("{0:08d}".format(i), "**********segmentation fault at {0:03X}*************".format(rom_addr))
+                exit(0)
             
             '''
             #second half of main cycle (phi3, phi4)
