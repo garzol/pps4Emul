@@ -764,9 +764,9 @@ class Pps4Cpu:
         '''
         if inst >= 0 and inst<= 3:
             return(True)
-        if inst >= 0xC0 and inst<= 0xCF:
+        if inst >= 0xC0 and inst<= 0xCF and self.mode != "dasm":  #LB
             return(True)
-        if inst >= 0xD0 and inst<= 0xFF and self.mode != "dasm":
+        if inst >= 0xD0 and inst<= 0xFF and self.mode != "dasm":  #TM
             return(True)
         if inst >= 0x50 and inst<= 0x5F:
             return(True)
@@ -831,7 +831,7 @@ class Pps4Cpu:
                     self.nextIis2Cycles = True
                     #Caution! There is the case of TM or LB
                     if self.I1[6:] == Register(b"11") and \
-                       (self.I1.bit(4) or self.I1.bit(5)):  #TM
+                       (self.I1.bit(4) or self.I1.bit(5)):        #####TM
                         self.AB = self.I1[:6]+Register(b"000011")
                         #self.P  = incr(self.P[:6])+self.P[6:]
                         if self.mode != "dasm":
@@ -840,12 +840,17 @@ class Pps4Cpu:
                             self.P  = self.I1[:6]+Register(b"000011")
                         else:
                             self.P.incr()
-                    elif self.I1[4:] == Register(b"1100"):  #LB
-                        if self.mode != "dasm":
+                    elif self.I1[4:] == Register(b"1100"):        #####LB
+                        #here we need to execute the following ALSO if dasm or not
+                        #because we need to adjust the P in both case
+                        if self.mode != "dasm" or True:
                             self.SB = self.SA[:]
                             self.P  = incr(self.P[:6])+self.P[6:]
                             self.SA = self.P[:]                    
                             self.P = self.I1[:4] + Register(b"00001100")
+                            #End of "LB part1"
+                            #next part of the execution in "LB part2"
+                        #still here for legacy, but dead code
                         else:
                             self.P.incr()                            
                     else:
@@ -863,7 +868,6 @@ class Pps4Cpu:
             
         #print("self.P", self.P)
         ldis = self.cpuexe(isThisaSetByt)
-        #print("ldis", ldis)
         self.AB = self.P[:]
         
         #SAG handling
@@ -872,9 +876,15 @@ class Pps4Cpu:
         return (self.BL+self.BM+self.BU).toInt(), ldis, self.wramio
         
     def cpuexe(self, isThisaSetByt=False):
-        
+        #from here:
+        #self.nextIis2Cycles ==False ==> this is a 1cycl instruction
+        #self.nextIis2Cycles ==True  ==> the second part I2 was just executed
         if self.nextIis2Cycles:
-            ldis = self.P.toInt()-1, self.I1.toInt(), self.I2.toInt()
+            #LB case to handle:
+            if self.I1[6:] == Register(b"11"): #lb or tm case
+                ldis = self.SA.toInt()-1, self.I1.toInt(), self.I2.toInt()
+            else:
+                ldis = self.P.toInt()-1, self.I1.toInt(), self.I2.toInt()
         else:
             ldis = self.P.toInt(), self.I1.toInt(), None
         #print("skipnext", self.skipNext)
@@ -900,6 +910,7 @@ class Pps4Cpu:
         '''
         LBL (00)
         ''' 
+        
         if self.I1 == Register(b"00000000"):     
             #simulate
             ctxtxt=""
@@ -1518,7 +1529,7 @@ class Pps4Cpu:
         if self.I1 == Register(b"00000101"):    
             if self.skipsubroutine == True:
                 pass
-                print("===restart tracing")   
+                #print("===restart tracing")   
             self.skipsubroutine = False 
             #simulate
             if self.mode != "dasm":
@@ -1537,7 +1548,7 @@ class Pps4Cpu:
         if self.I1 == Register(b"00000111"):  
             if self.skipsubroutine == True:
                 pass
-                print("===restart tracing")   
+                #print("===restart tracing")   
             self.skipsubroutine = False 
             #simulate
             if self.mode != "dasm":
@@ -1706,6 +1717,16 @@ class Pps4Cpu:
         TM Transfer and mark Indirect is D0..FF
         TM is special because you need to put an address on the address bus which
         will not be equal to the current P and then restore the old one to continue
+        This is a virtual 2-cycle instruction. The 2nd cycle is calculated from 
+        the 1st cycle instruction is equal to address in rom of the second which 
+        is the target address where to jump 
+        (after saving SA,SB, because it is a subroutine then there will be a RTN) 
+        Also, this is a 1cycle instruction, from the disassembly point of view,
+        since this is something like 0aaa    Dx    TM (Dx)
+        This is why we need to separate between dasm and trace, making it a 1cycl 
+        instruction in dasm mode and a 2cycl in trace mode.
+        In dasm mode, if the chunk of rom to be disassembled includes the table 
+        at address D0..FF, then one can display the target address by reading it directly.
         '''
         if self.I1[6:] == Register(b"11") and \
            (self.I1.bit(4) or self.I1.bit(5)):
@@ -1716,25 +1737,28 @@ class Pps4Cpu:
                 #self.SB, self.SA = self.SA[:], self.P[:]
                 #self.SA    = incr(self.P[:6])+self.P[6:]
                 #self.SA    = self.P[:6]+self.P[6:]
+                #print("current P inside TM: {0:03X}".format(self.P.toInt()))
                 self.P[8:] = Register(b"0001")
                 self.P[:8] = self.I2[:]
             else:
-                ####Achtung, things to do here for dasm mode?
+                ####Achtung, things to do here for dasm mode
                 ctxtxt = "\t({0:02X})".format(self.I1.toInt())
+                #TODO: check what to do when ROM does not start at 0 (offset case)
                 if self.ROM is not None:
                     target_address = Register("{0:08b}".format(self.ROM[self.I1.toInt()]))+Register(b"0001")
-                    ctxtxt += "\t(target addr={0:03X})".format(target_address.toInt())
+                    ctxtxt += "\t;(target addr={0:03X})".format(target_address.toInt())
                 self.P.incr()
                 
             #manage skippings
             if target_address.toInt() in self.zapthis:
                 self.skipsubroutine = True 
-                print("===stop tracing inside {0:03X}".format(target_address.toInt()))
+                #print("===stop tracing inside {0:03X}".format(target_address.toInt()))
    
             #render phrase
             instcode="TM"
             instphrase = instcode+ctxtxt
             return instphrase, target_address.toInt()
+        
         
         #TML Transfer and mark Long is 01, 02 or 03
         if self.I1 == Register(b"00000001") or \
@@ -1753,7 +1777,7 @@ class Pps4Cpu:
             #manage skippings
             if (self.I2+self.I1[:4]).toInt() in self.zapthis:
                 self.skipsubroutine = True 
-                print("===stop tracing inside {0:03X}".format((self.I2+self.I1[:4]).toInt()))
+                #print("===stop tracing inside {0:03X}".format((self.I2+self.I1[:4]).toInt()))
             
             #render phrase
             instcode="TML"
@@ -1823,35 +1847,48 @@ class Pps4Cpu:
         '''
         LB is in range C0..CF
         (while TM Transfer and mark Indirect is D0..FF)
-        LB is special because you need to put an address the address bus which
+        LB is special because you need to put an address on the address bus which
         will not be equal to the current P
         LB, like LBL is ignored in a string of it, except the first one
+                            #LB begin in "LB part1"
+                            #now it is   "LB part2"
+        
         '''
         if self.I1[4:] == Register(b"1100"):
             #simulate
             ctxtxt=""
+            #no difference whether dasm or not
             if self.mode != "dasm":
                 if self.lastI1 is not None and self.lastI1[4:] == Register(b"1100"):
                     #this is a string of LB's only first counts others are nop
+                    #suspicion that there is more to do here...
                     ctxtxt = "\t"+"(NOP: series of LB's)"
                 else:
+                    #print("LB call1: {0:03X}\t{1:02X}".format(self.P.toInt(), self.I2.toInt()))
                     self.BU = Register(b"0000")
                     self.BM = ~(self.I2[4:])
                     self.BL = ~(self.I2[:4])
                     
                     self.P = self.SA[:]
                     self.SA, self.SB = self.SB[:], self.SA[:]
+                    ctxtxt = "\t"+"({0:02X}): B<={1:03X}".format((self.I1).toInt(), (~self.I2).toInt())
+                    #print("LB call2: {0:03X}\t{1:03X}".format(self.P.toInt(), (self.BL+self.BM+self.BU).toInt()))
     
                 #already done in phase 1 of the instruction
                 #self.P = incr(self.P[:6])+self.P[6:]
-                print("Debug: called LB=============================================")
+                #print("Debug: called LB=============================================")
             else:
+                ####Achtung, things to do here for dasm mode
+                ctxtxt = "\t({0:02X})".format(self.I1.toInt())
+                #TODO: check what to do when ROM does not start at 0 (offset case)
+                if self.ROM is not None:
+                    target_B = ~(Register("{0:08b}".format(self.ROM[self.I1.toInt()])))+Register(b"0000")
+                    ctxtxt += "\t(B<={0:03X})".format(target_B.toInt())
                 self.P.incr()
                 
             #render phrase
             instcode="LB"
-            instphrase = instcode+"\t"+"{0:02X}".format((~self.I2).toInt())
-            instphrase += ctxtxt
+            instphrase = instcode+ctxtxt
             return instphrase, None
 
 
@@ -1887,8 +1924,7 @@ class Pps4Cpu:
                 romi = prom.mem[rom_addr]
             except:
                 print("{0:08d}".format(i), "**********segmentation fault at {0:03X}*************".format(rom_addr))
-                exit(0)
-            
+                exit(0)            
             '''
             #second half of main cycle (phi3, phi4)
             '''
