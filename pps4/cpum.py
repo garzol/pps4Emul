@@ -844,12 +844,17 @@ class Pps4Cpu:
                         #here we need to execute the following ALSO if dasm or not
                         #because we need to adjust the P in both case
                         if self.mode != "dasm" or True:
-                            self.SB = self.SA[:]
-                            self.P  = incr(self.P[:6])+self.P[6:]
-                            self.SA = self.P[:]                    
-                            self.P = self.I1[:4] + Register(b"00001100")
-                            #End of "LB part1"
-                            #next part of the execution in "LB part2"
+                            #but do nothing if we are in a string of LBs
+                            if self.lastI1 is not None and self.lastI1[4:] == Register(b"1100"):
+                                pass
+                                #self.P  = incr(self.P[:6])+self.P[6:]
+                            else:
+                                self.SB = self.SA[:]
+                                self.P  = incr(self.P[:6])+self.P[6:]
+                                self.SA = self.P[:]                    
+                                self.P = self.I1[:4] + Register(b"00001100")
+                                #End of "LB part1"
+                                #next part of the execution in "LB part2"
                         #still here for legacy, but dead code
                         else:
                             self.P.incr()                            
@@ -880,8 +885,10 @@ class Pps4Cpu:
         #self.nextIis2Cycles ==False ==> this is a 1cycl instruction
         #self.nextIis2Cycles ==True  ==> the second part I2 was just executed
         if self.nextIis2Cycles:
-            #LB case to handle:
-            if self.I1[6:] == Register(b"11"): #lb or tm case
+            #LB or TM but not a string of LBs case to handle:
+            if self.I1[4:] == Register(b"1100") and self.lastI1 is not None and self.lastI1[4:] == Register(b"1100"):
+                ldis = self.P.toInt(), self.I1.toInt(), None
+            elif self.I1[6:] == Register(b"11"):
                 ldis = self.SA.toInt()-1, self.I1.toInt(), self.I2.toInt()
             else:
                 ldis = self.P.toInt()-1, self.I1.toInt(), self.I2.toInt()
