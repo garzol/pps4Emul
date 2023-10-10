@@ -5,6 +5,7 @@ Created on 6 déc. 2022
 
 start of iol handling
 '''
+from cProfile import run
 import matplotlib.pyplot as plt
 
 from pps4.cpum import ROM12, RAM, Pps4Cpu
@@ -14,7 +15,7 @@ from pps4._10788 import GPKD10788
 from pps4.register import Register
 from pps4.cpum import PPS4InstSet
 
-if __name__ == '__main__':
+def entryPoint():
     infodict=dict()
     for k,v in PPS4InstSet.HexCod.items():
         for vi in v:
@@ -259,3 +260,11 @@ if __name__ == '__main__':
             else:
                 print(linedis[1][1], end='\t\t\t\t')
             print(";", linedis[2][0])
+            
+            
+            
+if __name__ == '__main__':
+    run('''entryPoint()''')
+    
+
+            
