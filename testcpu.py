@@ -264,7 +264,8 @@ def entryPoint():
             
             
 if __name__ == '__main__':
-    run('''entryPoint()''')
+    entryPoint()
+    #run('''entryPoint()''')
     
 
             
