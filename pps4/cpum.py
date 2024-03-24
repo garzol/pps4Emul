@@ -4,6 +4,11 @@ Created on 26 nov. 2022
 @author: garzol
 
 IOL is done
+
+Changelog:
+2024-03-20:
+Changed DASM syntax for hex values: added prefix 0X to cope with our just created assembler tool
+Changed SET NIB... for SETB 0XAB format
 '''
 import random
 from .register import Register
@@ -904,7 +909,7 @@ class Pps4Cpu:
         self.skipNext = False  #just for info, does not take part in anything else
         dest_addr = None
         if isThisaSetByt:
-            myphrase = "SET NIB\t#{0:01X}".format(self.I1.toInt())
+            myphrase = "SETB \t0X{0:02X}".format(self.I1.toInt())
         else:
             myphrase, dest_addr = self.instdoc()
                         
@@ -926,7 +931,7 @@ class Pps4Cpu:
                 #This is why you can do stuff like:
                 if self.lastI1 is not None and self.lastI1 == Register(b"00000000"):
                     #this is a string of LBL's only first counts others are nop
-                    ctxtxt="\t"+"(NOP: series of LBL's)"
+                    ctxtxt=";\t"+"(NOP: series of LBL's)"
                 else:
                     self.BU = Register(b"0000")
                     self.BM = ~self.I2[4:8]
@@ -937,7 +942,7 @@ class Pps4Cpu:
                 self.P.incr()
             #render phrase
             instcode="LBL"
-            instphrase = instcode+"\t"+"{0:03X}".format((~self.I2).toInt())
+            instphrase = instcode+"\t"+"0X{0:03X}".format((~self.I2).toInt())
             instphrase += ctxtxt
             return instphrase, None
 
@@ -1129,7 +1134,7 @@ class Pps4Cpu:
                 if self.C == Register('1'):
                     #skip next ROM word
                     self.P = incr(self.P[:6])+self.P[6:]
-                    ctxtxt="\t(C=1 ==> skip)"
+                    ctxtxt=";\t(C=1 ==> skip)"
                 else:
                     ctxtxt=""  
                 self.P = incr(self.P[:6])+self.P[6:]
@@ -1154,7 +1159,7 @@ class Pps4Cpu:
                 if carry == '1':
                     #skip next ROM word
                     self.P = incr(self.P[:6])+self.P[6:]
-                    ctxtxt="\t(C=1 ==> skip)"
+                    ctxtxt=";\t(C=1 ==> skip)"
                 else:
                     ctxtxt=""  
                 self.P = incr(self.P[:6])+self.P[6:]
@@ -1374,7 +1379,7 @@ class Pps4Cpu:
                 self.P.incr()
 
             #render phrase
-            instcode="SKBI\t{0:1X}".format(self.I1[:4].toInt())
+            instcode="SKBI\t0X{0:1X}".format(self.I1[:4].toInt())
             instphrase = instcode+"\t" + ctxtxt
             return instphrase, None
             
@@ -1573,7 +1578,7 @@ class Pps4Cpu:
         #IOL (1C) is todo at the moment. 
         if self.I1 == Register(b"00011100"):     
             #simulate
-            ctxtxt= "{0:01X}".format(self.I2.toInt())
+            ctxtxt= "0X{0:01X}".format(self.I2.toInt())
             if self.mode != "dasm":
                 self.P = incr(self.P[:6])+self.P[6:]
                 self.wramio = Pps4Cpu.iodev #default
@@ -1658,7 +1663,7 @@ class Pps4Cpu:
         if self.I1.bit(7) and not self.I1.bit(6):
             #simulate
             target_addr = self.I1[:6]+self.P[6:]
-            ctxtxt="\t"+"{0:03X}".format( target_addr.toInt() )
+            ctxtxt="\t"+"0X{0:03X}".format( target_addr.toInt() )
             if self.mode != "dasm":
                 self.P = target_addr
             else:
@@ -1697,7 +1702,7 @@ class Pps4Cpu:
             
             #render phrase
             instcode="TL"
-            instphrase = instcode+"\t"+"{0:03X}".format( (self.I2[:]+self.I1[:4]).toInt() )
+            instphrase = instcode+"\t"+"0X{0:03X}".format( (self.I2[:]+self.I1[:4]).toInt() )
             return instphrase, (self.I2[:]+self.I1[:4]).toInt()
 
         #LD Load Accumulator from Memory is 30..37
@@ -1716,7 +1721,7 @@ class Pps4Cpu:
             
             #render phrase
             instcode="LD"
-            instphrase = instcode+"\t"+"{0:01X}".format((~self.I1[:3]).toInt())
+            instphrase = instcode+"\t"+"0X{0:01X}".format((~self.I1[:3]).toInt())
             instphrase += ctxtxt
             return instphrase, None
                 
@@ -1749,11 +1754,11 @@ class Pps4Cpu:
                 self.P[:8] = self.I2[:]
             else:
                 ####Achtung, things to do here for dasm mode
-                ctxtxt = "\t({0:02X})".format(self.I1.toInt())
+                ctxtxt = "\t(0X{0:02X})".format(self.I1.toInt())
                 #TODO: check what to do when ROM does not start at 0 (offset case)
                 if self.ROM is not None:
                     target_address = Register("{0:08b}".format(self.ROM[self.I1.toInt()]))+Register(b"0001")
-                    ctxtxt += "\t;(target addr={0:03X})".format(target_address.toInt())
+                    ctxtxt += "\t(@<=0X{0:03X})".format(target_address.toInt())
                 self.P.incr()
                 
             #manage skippings
@@ -1772,7 +1777,7 @@ class Pps4Cpu:
            self.I1 == Register(b"00000010") or \
            self.I1 == Register(b"00000011"): 
             #simulate
-            ctxtxt = "\t{0:03X}".format((self.I2+self.I1[:4]).toInt())
+            ctxtxt = "\t0X{0:03X}".format((self.I2+self.I1[:4]).toInt())
             if self.mode != "dasm":
                 self.SB, self.SA = self.SA[:], incr(self.P[:6])+self.P[6:]
                 #self.SA    = incr(self.P[:6])+self.P[6:]
@@ -1807,7 +1812,7 @@ class Pps4Cpu:
             
             #render phrase
             instcode="LDI"
-            instcode = instcode+"\t"+"{0:01X}".format( (self.I1[:4] ^ Register(b"1111")).toInt() )
+            instcode = instcode+"\t"+"0X{0:01X}".format( (self.I1[:4] ^ Register(b"1111")).toInt() )
             instphrase = instcode+ctxtxt
             return instphrase, None
             
@@ -1842,10 +1847,10 @@ class Pps4Cpu:
                 return instphrase, None
             else:
                 instcode="ADI"
-                instphrase = instcode+"\t"+"{0:1X}".format((~self.I1[:4]).toInt())
+                instphrase = instcode+"\t"+"0X{0:1X}".format((~self.I1[:4]).toInt())
                 instphrase+=ctxtxt
                 if self.C == Register(b"1"):
-                    instphrase+="\twill skip"
+                    instphrase+="\t;will skip"
                 return instphrase, None
 
         # self.P = incr(self.P[:6])+self.P[6:]
@@ -1886,11 +1891,11 @@ class Pps4Cpu:
                 #print("Debug: called LB=============================================")
             else:
                 ####Achtung, things to do here for dasm mode
-                ctxtxt = "\t({0:02X})".format(self.I1.toInt())
+                ctxtxt = "\t(0X{0:02X})".format(self.I1.toInt())
                 #TODO: check what to do when ROM does not start at 0 (offset case)
                 if self.ROM is not None:
                     target_B = ~(Register("{0:08b}".format(self.ROM[self.I1.toInt()])))+Register(b"0000")
-                    ctxtxt += "\t(B<={0:03X})".format(target_B.toInt())
+                    ctxtxt += "\t(B<=0X{0:03X})".format(target_B.toInt())
                 self.P.incr()
                 
             #render phrase
@@ -1903,7 +1908,7 @@ class Pps4Cpu:
             self.P = incr(self.P[:6])+self.P[6:]
         else:
             self.P.incr()
-        raise Exception(f"should not get there")
+        raise Exception(f";should not get there")
         return "", None
     
 
