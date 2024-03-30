@@ -643,7 +643,7 @@ class RAM:
 class ROM12(RAM):
     def __init__(self, fprom):
         self.mem = bytearray(fprom.read())
-
+        #print("in ROM12", len(self.mem))
     def countinstoccur(self):
         cntinst={x: 0 for x in range(0,256)}
 

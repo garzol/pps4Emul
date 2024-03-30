@@ -1,0 +1,34 @@
+1805:put 1054F in @27..@23
+1818:;put @20<-1
+1823:; B is now 60, put @60<-2
+1827:; B is now 70, put @70<-0
+1831:; B is now back to 60++, @61<-B
+1836:; B is now 71, @71<-0
+1840:; B is set to 81, @81<-4
+1845:; B is now 91, @91<-F
+1849:; B is now A1, @A1<-2
+1853:; B is now B1, @B1<-E
+1857:; B is now 80, @80<-4
+1861:; B is now 90, @90<-3
+1865:; B is now A0, @A0<-D
+1869:; B is now B0, @B0<-9
+1913:; B is set to F8, @F8<-E
+1918:; @F7<-C
+1922:; @F6<-C
+1926:; @F5<-A @F4<-A @F3<-A @F2<-A @F1<-A @F0<-A
+1932:; @0A<-2
+1937:; B is now 1A, @1A<-1
+1941:; B is now 2A, @2A<-3
+1945:; B is now 6A, @6A<-C
+1949:; B is now 7A, @7A<-C
+1953:; B is set to 8A, @8A<-1
+1958:; B is now AA, @AA<-2
+1962:; B is now CA, @CA<-3
+1966:; B is now EA, @EA<-1
+1970:; B is now FA, @FA<-1
+1974:; B is set to 62, @62<-C
+1979:; B is now 72, @72<-C
+1983:; B is set to 82, @82<-F
+1988:; B is now 92, @92<-F
+1992:; B is now A2, @A2<-F
+1996:; B is now B2, @B2<-F

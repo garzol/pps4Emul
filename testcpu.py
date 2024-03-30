@@ -20,9 +20,16 @@ if __name__ == '__main__':
         for vi in v:
             infodict[vi] = k 
             
-
+    #myfile = "pps4/recel_mrevil.bin"
+    #myfile = "pps4/SpaceGame-Recel/System_III_H_invA_invD.bin"
+    #myfile = "pps4/SpaceGame-Recel/recel_spacegame.bin"
     #fb = open("pps4/A1752EFA1753EE.bin", "rb")
-    fb = open("pps4/recel_screech.bin", "rb")
+    #fb = open("pps4/recel_screech.bin", "rb")
+    #fb = open("pps4/recelbm.bin", "rb")
+    myfile = "hm6508fmt.bin"
+    fb = open(myfile, "rb")
+    print("opening:", myfile)
+    
     prom = ROM12(fb)  #creation of a rom area from binary file
     fb.close()
     pram = RAM(256)
@@ -62,7 +69,8 @@ if __name__ == '__main__':
 
     cpu.zapthis = [0x1D2]
     ramv = 0
-    cpu.trace(100000, prom, pram, devices, ramv)  
+    if False:
+        cpu.trace(100000, prom, pram, devices, ramv)  
 
     # for i in range(2000):
     #
@@ -214,12 +222,13 @@ if __name__ == '__main__':
     #
     #
     #######################
-    if False:
+    if True:
         romdistxt = list()
         cpudis = Pps4Cpu(mode="dasm", ROM=prom.mem)
         romi=0
         rom_addr = 0
         is2cycle = False
+        #print("====rom len", len(prom.mem))
         while rom_addr<len(prom.mem):
             romi = prom.mem[rom_addr]
             _, ldis, _ = cpudis.cyclephi4(romi)

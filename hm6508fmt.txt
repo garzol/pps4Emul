@@ -1,0 +1,3417 @@
+;opening: hm6508fmt.bin
+;===A17 1/switch matrix===
+;a17 id=#2
+;===A17 2/solenoid control===
+;a17 id=#4
+;===CPU===
+;All preceding is don't care since we only disassemble...
+;this is the program for "formatting" an hm6508. beginning at 0x800. the rest is standard recel rom code.
+
+
+000	81	  	T	001				; Transfer
+001	26	  	RF1					; Reset FF1
+002	25	  	RF2					; Reset FF2
+003	56	C0	TL	6C0				; Transfer Long
+005	00	76	LBL	089				; Load B Long
+007	7F	  	LDI	0				; Load Accumulator Immediate
+008	3E	  	EX	1					; Exchange Accumulator and Memory
+009	75	  	LDI	A				; Load Accumulator Immediate
+00A	3F	  	EX	0					; Exchange Accumulator and Memory
+00B	00	36	LBL	0C9				; Load B Long
+00D	11	  	LABL				; Load Accumulator with BL
+00E	1D	  	DOA					; Discrete Output
+00F	58	F8	TL	8F8				; Transfer Long
+011	27	  	DIA					; Discrete Input Group A
+012	3F	  	EX	0					; Exchange Accumulator and Memory
+013	0C	  	EOR					; Logical Exclusive-OR
+014	1E	  	SKZ					; Skip on Accumulator Zero
+015	A0	  	T	020				; Transfer
+016	36	  	LD	1				; Load Accumulator from Memory
+017	7E	  	LDI	1				; Load Accumulator Immediate
+018	09	  	ADSK				; Add and skip on carry-out
+019	A2	  	T	022				; Transfer
+01A	3E	  	EX	1					; Exchange Accumulator and Memory
+01B	35	  	LD	2				; Load Accumulator from Memory
+01C	0C	  	EOR					; Logical Exclusive-OR
+01D	1E	  	SKZ					; Skip on Accumulator Zero
+01E	A6	  	T	026				; Transfer
+01F	35	  	LD	2				; Load Accumulator from Memory
+020	34	  	LD	3				; Load Accumulator from Memory
+021	35	  	LD	2				; Load Accumulator from Memory
+022	2E	  	EXD	1					; Exchange Accumulator and Memory and decrement BL
+023	8D	  	T	00D				; Transfer
+024	50	80	TL	080				; Transfer Long
+026	0E	  	COMP				; Complement
+027	0D	  	AND					; Logical AND
+028	3D	  	EX	2					; Exchange Accumulator and Memory
+029	0E	  	COMP				; Complement
+02A	0D	  	AND					; Logical AND
+02B	1E	  	SKZ					; Skip on Accumulator Zero
+02C	AE	  	T	02E				; Transfer
+02D	A0	  	T	020				; Transfer
+02E	3F	  	EX	0					; Exchange Accumulator and Memory
+02F	1B	  	LXA					; Load X Register from Accumulator
+030	77	  	LDI	8				; Load Accumulator Immediate
+031	0D	  	AND					; Logical AND
+032	1E	  	SKZ					; Skip on Accumulator Zero
+033	BD	  	T	03D				; Transfer
+034	7B	  	LDI	4				; Load Accumulator Immediate
+035	0D	  	AND					; Logical AND
+036	1E	  	SKZ					; Skip on Accumulator Zero
+037	BD	  	T	03D				; Transfer
+038	7D	  	LDI	2				; Load Accumulator Immediate
+039	0D	  	AND					; Logical AND
+03A	1E	  	SKZ					; Skip on Accumulator Zero
+03B	BD	  	T	03D				; Transfer
+03C	7E	  	LDI	1				; Load Accumulator Immediate
+03D	50	40	TL	040				; Transfer Long
+03F	91	  	T	011				; Transfer
+040	1A	  	XAX					; Exchange Accumulator and X
+041	3D	  	EX	2					; Exchange Accumulator and Memory
+042	11	  	LABL				; Load Accumulator with BL
+043	67	  	ADI	8				; Add Immediate and skip on carry-out
+044	86	  	T	046				; Transfer
+045	8B	  	T	04B				; Transfer
+046	16	  	SKF1				; Skip if FF1 Equals 1
+047	89	  	T	049				; Transfer
+048	8B	  	T	04B				; Transfer
+049	6D	  	ADI	2				; Add Immediate and skip on carry-out
+04A	B9	  	T	079				; Transfer
+04B	12	  	LAX					; Load Accumulator from X Register
+04C	0F	  	OR					; Logical OR
+04D	3D	  	EX	2					; Exchange Accumulator and Memory
+04E	12	  	LAX					; Load Accumulator from X Register
+04F	0E	  	COMP				; Complement
+050	6B	  	ADI	4				; Add Immediate and skip on carry-out
+051	6E	  	ADI	1				; Add Immediate and skip on carry-out
+052	93	  	T	053				; Transfer
+053	67	  	ADI	8				; Add Immediate and skip on carry-out
+054	62	  	ADI	D				; Add Immediate and skip on carry-out
+055	96	  	T	056				; Transfer
+056	1B	  	LXA					; Load X Register from Accumulator
+057	19	  	XABL					; Exchange Accumulator and BL
+058	00	F0	LBL	00F				; Load B Long
+05A	3F	  	EX	0					; Exchange Accumulator and Memory
+05B	37	  	LD	0				; Load Accumulator from Memory
+05C	09	  	ADSK				; Add and skip on carry-out
+05D	AC	  	T	06C				; Transfer
+05E	1A	  	XAX					; Exchange Accumulator and X
+05F	3F	  	EX	0					; Exchange Accumulator and Memory
+060	37	  	LD	0				; Load Accumulator from Memory
+061	0B	  	AD					; Add
+062	3F	  	EX	0					; Exchange Accumulator and Memory
+063	1A	  	XAX					; Exchange Accumulator and X
+064	1E	  	SKZ					; Skip on Accumulator Zero
+065	7F	  	LDI	0				; Load Accumulator Immediate
+066	77	  	LDI	8				; Load Accumulator Immediate
+067	0B	  	AD					; Add
+068	1A	  	XAX					; Exchange Accumulator and X
+069	70	  	LDI	F				; Load Accumulator Immediate
+06A	1A	  	XAX					; Exchange Accumulator and X
+06B	AE	  	T	06E				; Transfer
+06C	14	  	SKF2				; Skip if FF2 Equals 1
+06D	BB	  	T	07B				; Transfer
+06E	0E	  	COMP				; Complement
+06F	06	  	XS					; Exchange SA and SB
+070	6F	  	CYS					; Cycle SA register and Accumulator
+071	12	  	LAX					; Load Accumulator from X Register
+072	6F	  	CYS					; Cycle SA register and Accumulator
+073	12	  	LAX					; Load Accumulator from X Register
+074	6E	  	ADI	1				; Add Immediate and skip on carry-out
+075	78	  	LDI	7				; Load Accumulator Immediate
+076	75	  	LDI	A				; Load Accumulator Immediate
+077	6F	  	CYS					; Cycle SA register and Accumulator
+078	05	  	RTN					; Return
+079	50	1F	TL	01F				; Transfer Long
+07B	50	0B	TL	00B				; Transfer Long
+07D	BE	  	T	07E				; Transfer
+07E	50	11	TL	011				; Transfer Long
+080	7E	  	LDI	1				; Load Accumulator Immediate
+081	00	76	LBL	089				; Load B Long
+083	09	  	ADSK				; Add and skip on carry-out
+084	94	  	T	094				; Transfer
+085	3E	  	EX	1					; Exchange Accumulator and Memory
+086	7E	  	LDI	1				; Load Accumulator Immediate
+087	09	  	ADSK				; Add and skip on carry-out
+088	94	  	T	094				; Transfer
+089	75	  	LDI	A				; Load Accumulator Immediate
+08A	3C	  	EX	3					; Exchange Accumulator and Memory
+08B	7E	  	LDI	1				; Load Accumulator Immediate
+08C	09	  	ADSK				; Add and skip on carry-out
+08D	91	  	T	091				; Transfer
+08E	3E	  	EX	1					; Exchange Accumulator and Memory
+08F	7E	  	LDI	1				; Load Accumulator Immediate
+090	0B	  	AD					; Add
+091	3F	  	EX	0					; Exchange Accumulator and Memory
+092	56	76	TL	676				; Transfer Long
+094	3F	  	EX	0					; Exchange Accumulator and Memory
+095	00	76	LBL	089				; Load B Long
+097	36	  	LD	1				; Load Accumulator from Memory
+098	1E	  	SKZ					; Skip on Accumulator Zero
+099	BA	  	T	0BA				; Transfer
+09A	7C	  	LDI	3				; Load Accumulator Immediate
+09B	0B	  	AD					; Add
+09C	1E	  	SKZ					; Skip on Accumulator Zero
+09D	BA	  	T	0BA				; Transfer
+09E	7F	  	LDI	0				; Load Accumulator Immediate
+09F	1B	  	LXA					; Load X Register from Accumulator
+0A0	1C	DB	IOL	DB				; Input/Output Long
+0A2	12	  	LAX					; Load Accumulator from X Register
+0A3	6E	  	ADI	1				; Add Immediate and skip on carry-out
+0A4	9F	  	T	09F				; Transfer
+0A5	14	  	SKF2				; Skip if FF2 Equals 1
+0A6	AE	  	T	0AE				; Transfer
+0A7	00	B6	LBL	049				; Load B Long
+0A9	78	  	LDI	7				; Load Accumulator Immediate
+0AA	09	  	ADSK				; Add and skip on carry-out
+0AB	65	  	DC					; Decimal Correction
+0AC	3F	  	EX	0					; Exchange Accumulator and Memory
+0AD	BC	  	T	0BC				; Transfer
+0AE	16	  	SKF1				; Skip if FF1 Equals 1
+0AF	B1	  	T	0B1				; Transfer
+0B0	BC	  	T	0BC				; Transfer
+0B1	00	BD	LBL	042				; Load B Long
+0B3	7E	  	LDI	1				; Load Accumulator Immediate
+0B4	0D	  	AND					; Logical AND
+0B5	1E	  	SKZ					; Skip on Accumulator Zero
+0B6	B8	  	T	0B8				; Transfer
+0B7	AD	  	T	0AD				; Transfer
+0B8	54	87	TL	487				; Transfer Long
+0BA	50	0B	TL	00B				; Transfer Long
+0BC	56	14	TL	614				; Transfer Long
+0BE	00	00	LBL	0FF				; Load B Long
+0C0	B7	  	T	0F7				; Transfer
+0C1	16	  	SKF1				; Skip if FF1 Equals 1
+0C2	AE	  	T	0EE				; Transfer
+0C3	BF	  	T	0FF				; Transfer
+0C4	BE	  	T	0FE				; Transfer
+0C5	4E	  	SKBI	E					; Skip if BL equals to Immediate.
+0C6	EA	  	TM	(EA)	;(target addr=163)	; Transfer and Mark Indirect
+0C7	1F	  	DECB					; Decrement BL
+0C8	BD	  	T	0FD				; Transfer
+0C9	B5	  	T	0F5				; Transfer
+0CA	A5	  	T	0E5				; Transfer
+0CB	AD	  	T	0ED				; Transfer
+0CC	46	  	SKBI	6					; Skip if BL equals to Immediate.
+0CD	A6	  	T	0E6				; Transfer
+0CE	E9	  	TM	(E9)	;(target addr=162)	; Transfer and Mark Indirect
+0CF	E8	  	TM	(E8)	;(target addr=161)	; Transfer and Mark Indirect
+0D0	17	  	INCB					; Increment BL
+0D1	18	  	XBMX				; Exchange BM and X
+0D2	22	  	SF1					; Set FF1
+0D3	23	  	DIB					; Discrete Input Group B
+0D4	2D	  	EXD	2					; Exchange Accumulator and Memory and decrement BL
+0D5	2E	  	EXD	1					; Exchange Accumulator and Memory and decrement BL
+0D6	7B	  	LDI	4				; Load Accumulator Immediate
+0D7	5C	40	TL	C40				; Transfer Long
+0D9	41	  	SKBI	1					; Skip if BL equals to Immediate.
+0DA	42	  	SKBI	2					; Skip if BL equals to Immediate.
+0DB	43	  	SKBI	3					; Skip if BL equals to Immediate.
+0DC	49	  	SKBI	9					; Skip if BL equals to Immediate.
+0DD	4A	  	SKBI	A					; Skip if BL equals to Immediate.
+0DE	4B	  	SKBI	B					; Skip if BL equals to Immediate.
+0DF	4C	  	SKBI	C					; Skip if BL equals to Immediate.
+0E0	80	  	T	0C0				; Transfer
+0E1	81	  	T	0C1				; Transfer
+0E2	82	  	T	0C2				; Transfer
+0E3	83	  	T	0C3				; Transfer
+0E4	51	52	TL	152				; Transfer Long
+0E6	53	54	TL	354				; Transfer Long
+0E8	61	  	ADI	E				; Add Immediate and skip on carry-out
+0E9	62	  	ADI	D				; Add Immediate and skip on carry-out
+0EA	63	  	ADI	C				; Add Immediate and skip on carry-out
+0EB	64	  	ADI	B				; Add Immediate and skip on carry-out
+0EC	69	  	ADI	6				; Add Immediate and skip on carry-out
+0ED	6A	  	ADI	5				; Add Immediate and skip on carry-out
+0EE	6B	  	ADI	4				; Add Immediate and skip on carry-out
+0EF	6C	  	ADI	3				; Add Immediate and skip on carry-out
+0F0	71	  	LDI	E				; Load Accumulator Immediate
+0F1	72	  	LDI	D				; Load Accumulator Immediate
+0F2	73	  	LDI	C				; Load Accumulator Immediate
+0F3	74	  	LDI	B				; Load Accumulator Immediate
+0F4	91	  	T	0D1				; Transfer
+0F5	92	  	T	0D2				; Transfer
+0F6	93	  	T	0D3				; Transfer
+0F7	94	  	T	0D4				; Transfer
+0F8	99	  	T	0D9				; Transfer
+0F9	B5	  	T	0F5				; Transfer
+0FA	B7	  	T	0F7				; Transfer
+0FB	AC	  	T	0EC				; Transfer
+0FC	9D	  	T	0DD				; Transfer
+0FD	B9	  	T	0F9				; Transfer
+0FE	BB	  	T	0FB				; Transfer
+0FF	AE	  	T	0EE				; Transfer
+100	22	  	SF1					; Set FF1
+101	50	05	TL	005				; Transfer Long
+103	26	  	RF1					; Reset FF1
+104	81	  	T	101				; Transfer
+105	C0	  	LB	(C0)	(B<=048)				; Load B Indirect
+106	0F	  	OR					; Logical OR
+107	3F	  	EX	0					; Exchange Accumulator and Memory
+108	25	  	RF2					; Reset FF2
+109	CF	  	LB	(CF)	(B<=017)				; Load B Indirect
+10A	C0	  	LB	(C0)	(B<=048)				; Load B Indirect
+10B	78	  	LDI	7				; Load Accumulator Immediate
+10C	0D	  	AND					; Logical AND
+10D	3F	  	EX	0					; Exchange Accumulator and Memory
+10E	01	00	TML	100				; Transfer and Mark Long
+110	8E	  	T	10E				; Transfer
+111	CF	  	LB	(CF)	(B<=017)				; Load B Indirect
+112	77	  	LDI	8				; Load Accumulator Immediate
+113	0F	  	OR					; Logical OR
+114	3F	  	EX	0					; Exchange Accumulator and Memory
+115	21	  	SF2					; Set FF2
+116	8A	  	T	10A				; Transfer
+117	7E	  	LDI	1				; Load Accumulator Immediate
+118	24	  	RC					; Reset Carry flip-flop
+119	16	  	SKF1				; Skip if FF1 Equals 1
+11A	05	  	RTN					; Return
+11B	0B	  	AD					; Add
+11C	3F	  	EX	0					; Exchange Accumulator and Memory
+11D	15	  	SKC					; Skip on Carry flip-flop
+11E	05	  	RTN					; Return
+11F	70	  	LDI	F				; Load Accumulator Immediate
+120	3F	  	EX	0					; Exchange Accumulator and Memory
+121	07	  	RTNSK				; Return and Skip
+122	7E	  	LDI	1				; Load Accumulator Immediate
+123	24	  	RC					; Reset Carry flip-flop
+124	16	  	SKF1				; Skip if FF1 Equals 1
+125	A6	  	T	126				; Transfer
+126	69	  	ADI	6				; Add Immediate and skip on carry-out
+127	09	  	ADSK				; Add and skip on carry-out
+128	65	  	DC					; Decimal Correction
+129	3F	  	EX	0					; Exchange Accumulator and Memory
+12A	15	  	SKC					; Skip on Carry flip-flop
+12B	05	  	RTN					; Return
+12C	07	  	RTNSK				; Return and Skip
+12D	7E	  	LDI	1				; Load Accumulator Immediate
+12E	1B	  	LXA					; Load X Register from Accumulator
+12F	24	  	RC					; Reset Carry flip-flop
+130	69	  	ADI	6				; Add Immediate and skip on carry-out
+131	09	  	ADSK				; Add and skip on carry-out
+132	65	  	DC					; Decimal Correction
+133	3F	  	EX	0					; Exchange Accumulator and Memory
+134	15	  	SKC					; Skip on Carry flip-flop
+135	BC	  	T	13C				; Transfer
+136	7E	  	LDI	1				; Load Accumulator Immediate
+137	17	  	INCB					; Increment BL
+138	BA	  	T	13A				; Transfer
+139	BC	  	T	13C				; Transfer
+13A	48	  	SKBI	8					; Skip if BL equals to Immediate.
+13B	AF	  	T	12F				; Transfer
+13C	12	  	LAX					; Load Accumulator from X Register
+13D	05	  	RTN					; Return
+13E	55	B1	TL	5B1				; Transfer Long
+140	7E	  	LDI	1				; Load Accumulator Immediate
+141	7D	  	LDI	2				; Load Accumulator Immediate
+142	7B	  	LDI	4				; Load Accumulator Immediate
+143	77	  	LDI	8				; Load Accumulator Immediate
+144	16	  	SKF1				; Skip if FF1 Equals 1
+145	05	  	RTN					; Return
+146	0F	  	OR					; Logical OR
+147	3F	  	EX	0					; Exchange Accumulator and Memory
+148	05	  	RTN					; Return
+149	71	  	LDI	E				; Load Accumulator Immediate
+14A	72	  	LDI	D				; Load Accumulator Immediate
+14B	74	  	LDI	B				; Load Accumulator Immediate
+14C	78	  	LDI	7				; Load Accumulator Immediate
+14D	16	  	SKF1				; Skip if FF1 Equals 1
+14E	05	  	RTN					; Return
+14F	0D	  	AND					; Logical AND
+150	87	  	T	147				; Transfer
+151	7E	  	LDI	1				; Load Accumulator Immediate
+152	7D	  	LDI	2				; Load Accumulator Immediate
+153	7B	  	LDI	4				; Load Accumulator Immediate
+154	77	  	LDI	8				; Load Accumulator Immediate
+155	16	  	SKF1				; Skip if FF1 Equals 1
+156	05	  	RTN					; Return
+157	0D	  	AND					; Logical AND
+158	1E	  	SKZ					; Skip on Accumulator Zero
+159	05	  	RTN					; Return
+15A	26	  	RF1					; Reset FF1
+15B	05	  	RTN					; Return
+15C	16	  	SKF1				; Skip if FF1 Equals 1
+15D	9F	  	T	15F				; Transfer
+15E	9A	  	T	15A				; Transfer
+15F	22	  	SF1					; Set FF1
+160	05	  	RTN					; Return
+161	7E	  	LDI	1				; Load Accumulator Immediate
+162	7D	  	LDI	2				; Load Accumulator Immediate
+163	7B	  	LDI	4				; Load Accumulator Immediate
+164	77	  	LDI	8				; Load Accumulator Immediate
+165	0D	  	AND					; Logical AND
+166	1E	  	SKZ					; Skip on Accumulator Zero
+167	9F	  	T	15F				; Transfer
+168	05	  	RTN					; Return
+169	7E	  	LDI	1				; Load Accumulator Immediate
+16A	7D	  	LDI	2				; Load Accumulator Immediate
+16B	7B	  	LDI	4				; Load Accumulator Immediate
+16C	77	  	LDI	8				; Load Accumulator Immediate
+16D	0D	  	AND					; Logical AND
+16E	1E	  	SKZ					; Skip on Accumulator Zero
+16F	05	  	RTN					; Return
+170	9F	  	T	15F				; Transfer
+171	7E	  	LDI	1				; Load Accumulator Immediate
+172	7D	  	LDI	2				; Load Accumulator Immediate
+173	7B	  	LDI	4				; Load Accumulator Immediate
+174	77	  	LDI	8				; Load Accumulator Immediate
+175	16	  	SKF1				; Skip if FF1 Equals 1
+176	05	  	RTN					; Return
+177	0D	  	AND					; Logical AND
+178	1E	  	SKZ					; Skip on Accumulator Zero
+179	9A	  	T	15A				; Transfer
+17A	05	  	RTN					; Return
+17B	70	  	LDI	F				; Load Accumulator Immediate
+17C	09	  	ADSK				; Add and skip on carry-out
+17D	07	  	RTNSK				; Return and Skip
+17E	87	  	T	147				; Transfer
+180	00	  	SET NIB	#0				; Load B Long
+180	7E	  	LDI	1				; Load Accumulator Immediate
+181	7D	  	LDI	2				; Load Accumulator Immediate
+182	7B	  	LDI	4				; Load Accumulator Immediate
+183	77	  	LDI	8				; Load Accumulator Immediate
+184	16	  	SKF1				; Skip if FF1 Equals 1
+185	05	  	RTN					; Return
+186	1B	  	LXA					; Load X Register from Accumulator
+187	0D	  	AND					; Logical AND
+188	1E	  	SKZ					; Skip on Accumulator Zero
+189	8E	  	T	18E				; Transfer
+18A	1A	  	XAX					; Exchange Accumulator and X
+18B	0B	  	AD					; Add
+18C	3F	  	EX	0					; Exchange Accumulator and Memory
+18D	05	  	RTN					; Return
+18E	0E	  	COMP				; Complement
+18F	0D	  	AND					; Logical AND
+190	8C	  	T	18C				; Transfer
+191	7E	  	LDI	1				; Load Accumulator Immediate
+192	7D	  	LDI	2				; Load Accumulator Immediate
+193	7B	  	LDI	4				; Load Accumulator Immediate
+194	77	  	LDI	8				; Load Accumulator Immediate
+195	0D	  	AND					; Logical AND
+196	1E	  	SKZ					; Skip on Accumulator Zero
+197	07	  	RTNSK				; Return and Skip
+198	05	  	RTN					; Return
+199	37	  	LD	0				; Load Accumulator from Memory
+19A	1E	  	SKZ					; Skip on Accumulator Zero
+19B	05	  	RTN					; Return
+19C	07	  	RTNSK				; Return and Skip
+19D	7E	  	LDI	1				; Load Accumulator Immediate
+19E	0D	  	AND					; Logical AND
+19F	1E	  	SKZ					; Skip on Accumulator Zero
+1A0	A2	  	T	1A2				; Transfer
+1A1	05	  	RTN					; Return
+1A2	1C	D6	IOL	D6				; Input/Output Long
+1A4	73	  	LDI	C				; Load Accumulator Immediate
+1A5	0D	  	AND					; Logical AND
+1A6	3F	  	EX	0					; Exchange Accumulator and Memory
+1A7	17	  	INCB					; Increment BL
+1A8	12	  	LAX					; Load Accumulator from X Register
+1A9	0C	  	EOR					; Logical Exclusive-OR
+1AA	1E	  	SKZ					; Skip on Accumulator Zero
+1AB	05	  	RTN					; Return
+1AC	00	96	LBL	069				; Load B Long
+1AE	00	97	LBL	068				; Load B Long
+1B0	7E	  	LDI	1				; Load Accumulator Immediate
+1B1	0B	  	AD					; Add
+1B2	3F	  	EX	0					; Exchange Accumulator and Memory
+1B3	51	03	TL	103				; Transfer Long
+1B5	52	00	TL	200				; Transfer Long
+1B7	54	E2	TL	4E2				; Transfer Long
+1B9	58	D0	TL	8D0				; Transfer Long
+1BB	58	E0	TL	8E0				; Transfer Long
+1BD	00	55	LBL	0AA				; Load B Long
+1BF	B2	  	T	1B2				; Transfer
+1C0	13	  	SAG					; Special Address Generation
+1C1	37	  	LD	0				; Load Accumulator from Memory
+1C2	0C	  	EOR					; Logical Exclusive-OR
+1C3	1E	  	SKZ					; Skip on Accumulator Zero
+1C4	07	  	RTNSK				; Return and Skip
+1C5	17	  	INCB					; Increment BL
+1C6	12	  	LAX					; Load Accumulator from X Register
+1C7	0C	  	EOR					; Logical Exclusive-OR
+1C8	1E	  	SKZ					; Skip on Accumulator Zero
+1C9	07	  	RTNSK				; Return and Skip
+1CA	05	  	RTN					; Return
+1CB	00	16	LBL	0E9				; Load B Long
+1CD	7E	  	LDI	1				; Load Accumulator Immediate
+1CE	0D	  	AND					; Logical AND
+1CF	1E	  	SKZ					; Skip on Accumulator Zero
+1D0	05	  	RTN					; Return
+1D1	07	  	RTNSK				; Return and Skip
+1D2	7F	  	LDI	0				; Load Accumulator Immediate
+1D3	19	  	XABL					; Exchange Accumulator and BL
+1D4	13	  	SAG					; Special Address Generation
+1D5	3F	  	EX	0					; Exchange Accumulator and Memory
+1D6	17	  	INCB					; Increment BL
+1D7	78	  	LDI	7				; Load Accumulator Immediate
+1D8	13	  	SAG					; Special Address Generation
+1D9	3F	  	EX	0					; Exchange Accumulator and Memory
+1DA	7F	  	LDI	0				; Load Accumulator Immediate
+1DB	9C	  	T	1DC				; Transfer
+1DC	6E	  	ADI	1				; Add Immediate and skip on carry-out
+1DD	9B	  	T	1DB				; Transfer
+1DE	17	  	INCB					; Increment BL
+1DF	9A	  	T	1DA				; Transfer
+1E0	17	  	INCB					; Increment BL
+1E1	24	  	RC					; Reset Carry flip-flop
+1E2	7E	  	LDI	1				; Load Accumulator Immediate
+1E3	13	  	SAG					; Special Address Generation
+1E4	0B	  	AD					; Add
+1E5	13	  	SAG					; Special Address Generation
+1E6	3F	  	EX	0					; Exchange Accumulator and Memory
+1E7	15	  	SKC					; Skip on Carry flip-flop
+1E8	9A	  	T	1DA				; Transfer
+1E9	1F	  	DECB					; Decrement BL
+1EA	13	  	SAG					; Special Address Generation
+1EB	3F	  	EX	0					; Exchange Accumulator and Memory
+1EC	19	  	XABL					; Exchange Accumulator and BL
+1ED	05	  	RTN					; Return
+1EE	18	  	XBMX				; Exchange BM and X
+1EF	3F	  	EX	0					; Exchange Accumulator and Memory
+1F0	7F	  	LDI	0				; Load Accumulator Immediate
+1F1	1B	  	LXA					; Load X Register from Accumulator
+1F2	1C	DB	IOL	DB				; Input/Output Long
+1F4	12	  	LAX					; Load Accumulator from X Register
+1F5	6E	  	ADI	1				; Add Immediate and skip on carry-out
+1F6	B1	  	T	1F1				; Transfer
+1F7	7E	  	LDI	1				; Load Accumulator Immediate
+1F8	1B	  	LXA					; Load X Register from Accumulator
+1F9	37	  	LD	0				; Load Accumulator from Memory
+1FA	18	  	XBMX				; Exchange BM and X
+1FB	57	72	TL	772				; Transfer Long
+1FD	00	00	LBL	0FF				; Load B Long
+200	00	  	SET NIB	#0				; Load B Long
+200	CD	  	LB	(CD)	(B<=059)				; Load B Indirect
+201	3F	  	EX	0					; Exchange Accumulator and Memory
+202	7C	  	LDI	3				; Load Accumulator Immediate
+203	0D	  	AND					; Logical AND
+204	6E	  	ADI	1				; Add Immediate and skip on carry-out
+205	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+206	3F	  	EX	0					; Exchange Accumulator and Memory
+207	73	  	LDI	C				; Load Accumulator Immediate
+208	0D	  	AND					; Logical AND
+209	68	  	ADI	7				; Add Immediate and skip on carry-out
+20A	6C	  	ADI	3				; Add Immediate and skip on carry-out
+20B	8C	  	T	20C				; Transfer
+20C	68	  	ADI	7				; Add Immediate and skip on carry-out
+20D	66	  	ADI	9				; Add Immediate and skip on carry-out
+20E	8F	  	T	20F				; Transfer
+20F	3F	  	EX	0					; Exchange Accumulator and Memory
+210	16	  	SKF1				; Skip if FF1 Equals 1
+211	05	  	RTN					; Return
+212	22	  	SF1					; Set FF1
+213	00	A7	LBL	058				; Load B Long
+215	37	  	LD	0				; Load Accumulator from Memory
+216	60	  	ADI	F				; Add Immediate and skip on carry-out
+217	05	  	RTN					; Return
+218	3F	  	EX	0					; Exchange Accumulator and Memory
+219	17	  	INCB					; Increment BL
+21A	37	  	LD	0				; Load Accumulator from Memory
+21B	1B	  	LXA					; Load X Register from Accumulator
+21C	58	FE	TL	8FE				; Transfer Long
+21E	C8	  	LB	(C8)	(B<=042)				; Load B Indirect
+21F	CB	  	LB	(CB)	(B<=052)				; Load B Indirect
+220	7D	  	LDI	2				; Load Accumulator Immediate
+221	0D	  	AND					; Logical AND
+222	1E	  	SKZ					; Skip on Accumulator Zero
+223	B0	  	T	230				; Transfer
+224	42	  	SKBI	2					; Skip if BL equals to Immediate.
+225	AA	  	T	22A				; Transfer
+226	11	  	LABL				; Load Accumulator with BL
+227	67	  	ADI	8				; Add Immediate and skip on carry-out
+228	19	  	XABL					; Exchange Accumulator and BL
+229	A1	  	T	221				; Transfer
+22A	18	  	XBMX				; Exchange BM and X
+22B	12	  	LAX					; Load Accumulator from X Register
+22C	18	  	XBMX				; Exchange BM and X
+22D	64	  	ADI	B				; Add Immediate and skip on carry-out
+22E	9F	  	T	21F				; Transfer
+22F	05	  	RTN					; Return
+230	19	  	XABL					; Exchange Accumulator and BL
+231	13	  	SAG					; Special Address Generation
+232	3F	  	EX	0					; Exchange Accumulator and Memory
+233	12	  	LAX					; Load Accumulator from X Register
+234	13	  	SAG					; Special Address Generation
+235	0B	  	AD					; Add
+236	19	  	XABL					; Exchange Accumulator and BL
+237	12	  	LAX					; Load Accumulator from X Register
+238	60	  	ADI	F				; Add Immediate and skip on carry-out
+239	BA	  	T	23A				; Transfer
+23A	52	42	TL	242				; Transfer Long
+23C	58	E0	TL	8E0				; Transfer Long
+23E	55	B0	TL	5B0				; Transfer Long
+240	12	  	LAX					; Load Accumulator from X Register
+241	6E	  	ADI	1				; Add Immediate and skip on carry-out
+242	1B	  	LXA					; Load X Register from Accumulator
+243	1C	D6	IOL	D6				; Input/Output Long
+245	D2	  	TM	(D2)	;(target addr=122)	; Transfer and Mark Indirect
+246	93	  	T	253				; Transfer
+247	17	  	INCB					; Increment BL
+248	8A	  	T	24A				; Transfer
+249	8C	  	T	24C				; Transfer
+24A	48	  	SKBI	8					; Skip if BL equals to Immediate.
+24B	80	  	T	240				; Transfer
+24C	11	  	LABL				; Load Accumulator with BL
+24D	65	  	DC					; Decimal Correction
+24E	19	  	XABL					; Exchange Accumulator and BL
+24F	70	  	LDI	F				; Load Accumulator Immediate
+250	1C	D3	IOL	D3				; Input/Output Long
+252	DA	  	TM	(DA)	;(target addr=142)	; Transfer and Mark Indirect
+253	11	  	LABL				; Load Accumulator with BL
+254	6D	  	ADI	2				; Add Immediate and skip on carry-out
+255	98	  	T	258				; Transfer
+256	71	  	LDI	E				; Load Accumulator Immediate
+257	9E	  	T	25E				; Transfer
+258	69	  	ADI	6				; Add Immediate and skip on carry-out
+259	9B	  	T	25B				; Transfer
+25A	A0	  	T	260				; Transfer
+25B	6D	  	ADI	2				; Add Immediate and skip on carry-out
+25C	A0	  	T	260				; Transfer
+25D	79	  	LDI	6				; Load Accumulator Immediate
+25E	52	A2	TL	2A2				; Transfer Long
+260	19	  	XABL					; Exchange Accumulator and BL
+261	67	  	ADI	8				; Add Immediate and skip on carry-out
+262	7D	  	LDI	2				; Load Accumulator Immediate
+263	75	  	LDI	A				; Load Accumulator Immediate
+264	19	  	XABL					; Exchange Accumulator and BL
+265	37	  	LD	0				; Load Accumulator from Memory
+266	67	  	ADI	8				; Add Immediate and skip on carry-out
+267	AA	  	T	26A				; Transfer
+268	52	85	TL	285				; Transfer Long
+26A	6B	  	ADI	4				; Add Immediate and skip on carry-out
+26B	BA	  	T	27A				; Transfer
+26C	19	  	XABL					; Exchange Accumulator and BL
+26D	6A	  	ADI	5				; Add Immediate and skip on carry-out
+26E	19	  	XABL					; Exchange Accumulator and BL
+26F	35	  	LD	2				; Load Accumulator from Memory
+270	0C	  	EOR					; Logical Exclusive-OR
+271	1E	  	SKZ					; Skip on Accumulator Zero
+272	BC	  	T	27C				; Transfer
+273	3F	  	EX	0					; Exchange Accumulator and Memory
+274	2D	  	EXD	2					; Exchange Accumulator and Memory and decrement BL
+275	42	  	SKBI	2					; Skip if BL equals to Immediate.
+276	B8	  	T	278				; Transfer
+277	BA	  	T	27A				; Transfer
+278	4A	  	SKBI	A					; Skip if BL equals to Immediate.
+279	AF	  	T	26F				; Transfer
+27A	51	03	TL	103				; Transfer Long
+27C	52	80	TL	280				; Transfer Long
+27E	55	38	TL	538				; Transfer Long
+280	35	  	LD	2				; Load Accumulator from Memory
+281	0E	  	COMP				; Complement
+282	09	  	ADSK				; Add and skip on carry-out
+283	A0	  	T	2A0				; Transfer
+284	25	  	RF2					; Reset FF2
+285	19	  	XABL					; Exchange Accumulator and BL
+286	67	  	ADI	8				; Add Immediate and skip on carry-out
+287	7D	  	LDI	2				; Load Accumulator Immediate
+288	75	  	LDI	A				; Load Accumulator Immediate
+289	19	  	XABL					; Exchange Accumulator and BL
+28A	1C	D3	IOL	D3				; Input/Output Long
+28C	DB	  	TM	(DB)	;(target addr=143)	; Transfer and Mark Indirect
+28D	19	  	XABL					; Exchange Accumulator and BL
+28E	6A	  	ADI	5				; Add Immediate and skip on carry-out
+28F	19	  	XABL					; Exchange Accumulator and BL
+290	35	  	LD	2				; Load Accumulator from Memory
+291	2D	  	EXD	2					; Exchange Accumulator and Memory and decrement BL
+292	42	  	SKBI	2					; Skip if BL equals to Immediate.
+293	95	  	T	295				; Transfer
+294	97	  	T	297				; Transfer
+295	4A	  	SKBI	A					; Skip if BL equals to Immediate.
+296	90	  	T	290				; Transfer
+297	14	  	SKF2				; Skip if FF2 Equals 1
+298	9A	  	T	29A				; Transfer
+299	A0	  	T	2A0				; Transfer
+29A	21	  	SF2					; Set FF2
+29B	00	96	LBL	069				; Load B Long
+29D	7C	  	LDI	3				; Load Accumulator Immediate
+29E	7E	  	LDI	1				; Load Accumulator Immediate
+29F	D1	  	TM	(D1)	;(target addr=118)	; Transfer and Mark Indirect
+2A0	51	03	TL	103				; Transfer Long
+2A2	19	  	XABL					; Exchange Accumulator and BL
+2A3	37	  	LD	0				; Load Accumulator from Memory
+2A4	1B	  	LXA					; Load X Register from Accumulator
+2A5	17	  	INCB					; Increment BL
+2A6	37	  	LD	0				; Load Accumulator from Memory
+2A7	00	FF	LBL	000				; Load B Long
+2A9	39	  	EX	6					; Exchange Accumulator and Memory
+2AA	01	C0	TML	1C0				; Transfer and Mark Long
+2AC	B9	  	T	2B9				; Transfer
+2AD	00	8F	LBL	070				; Load B Long
+2AF	01	C0	TML	1C0				; Transfer and Mark Long
+2B1	B9	  	T	2B9				; Transfer
+2B2	00	7F	LBL	080				; Load B Long
+2B4	01	C0	TML	1C0				; Transfer and Mark Long
+2B6	BB	  	T	2BB				; Transfer
+2B7	52	DF	TL	2DF				; Transfer Long
+2B9	00	96	LBL	069				; Load B Long
+2BB	00	97	LBL	068				; Load B Long
+2BD	9E	  	T	29E				; Transfer
+2BE	58	C0	TL	8C0				; Transfer Long
+2C0	1A	  	XAX					; Exchange Accumulator and X
+2C1	1C	21	IOL	21				; Input/Output Long
+2C3	17	  	INCB					; Increment BL
+2C4	8D	  	T	2CD				; Transfer
+2C5	00	EA	LBL	015				; Load B Long
+2C7	36	  	LD	1				; Load Accumulator from Memory
+2C8	3E	  	EX	1					; Exchange Accumulator and Memory
+2C9	0E	  	COMP				; Complement
+2CA	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+2CB	87	  	T	2C7				; Transfer
+2CC	53	13	TL	313				; Transfer Long
+2CE	56	93	TL	693				; Transfer Long
+2D0	C8	  	LB	(C8)	(B<=042)				; Load B Indirect
+2D1	C9	  	LB	(C9)	(B<=04A)				; Load B Indirect
+2D2	73	  	LDI	C				; Load Accumulator Immediate
+2D3	0D	  	AND					; Logical AND
+2D4	3E	  	EX	1					; Exchange Accumulator and Memory
+2D5	73	  	LDI	C				; Load Accumulator Immediate
+2D6	0D	  	AND					; Logical AND
+2D7	3F	  	EX	0					; Exchange Accumulator and Memory
+2D8	4A	  	SKBI	A					; Skip if BL equals to Immediate.
+2D9	91	  	T	2D1				; Transfer
+2DA	70	  	LDI	F				; Load Accumulator Immediate
+2DB	78	  	LDI	7				; Load Accumulator Immediate
+2DC	77	  	LDI	8				; Load Accumulator Immediate
+2DD	51	05	TL	105				; Transfer Long
+2DF	C8	  	LB	(C8)	(B<=042)				; Load B Indirect
+2E0	F5	  	TM	(F5)	;(target addr=192)	; Transfer and Mark Indirect
+2E1	A3	  	T	2E3				; Transfer
+2E2	AC	  	T	2EC				; Transfer
+2E3	C9	  	LB	(C9)	(B<=04A)				; Load B Indirect
+2E4	F5	  	TM	(F5)	;(target addr=192)	; Transfer and Mark Indirect
+2E5	A7	  	T	2E7				; Transfer
+2E6	AC	  	T	2EC				; Transfer
+2E7	CA	  	LB	(CA)	(B<=05A)				; Load B Indirect
+2E8	F5	  	TM	(F5)	;(target addr=192)	; Transfer and Mark Indirect
+2E9	AB	  	T	2EB				; Transfer
+2EA	AC	  	T	2EC				; Transfer
+2EB	CB	  	LB	(CB)	(B<=052)				; Load B Indirect
+2EC	17	  	INCB					; Increment BL
+2ED	52	60	TL	260				; Transfer Long
+2EF	77	  	LDI	8				; Load Accumulator Immediate
+2F0	1C	D2	IOL	D2				; Input/Output Long
+2F2	53	C7	TL	3C7				; Transfer Long
+2F4	00	FA	LBL	005				; Load B Long
+2F6	7F	  	LDI	0				; Load Accumulator Immediate
+2F7	1C	41	IOL	41				; Input/Output Long
+2F9	00	FC	LBL	003				; Load B Long
+2FB	7F	  	LDI	0				; Load Accumulator Immediate
+2FC	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+2FD	7F	  	LDI	0				; Load Accumulator Immediate
+2FE	55	C0	TL	5C0				; Transfer Long
+300	16	  	SKF1				; Skip if FF1 Equals 1
+301	97	  	T	317				; Transfer
+302	00	BD	LBL	042				; Load B Long
+304	7E	  	LDI	1				; Load Accumulator Immediate
+305	0D	  	AND					; Logical AND
+306	1E	  	SKZ					; Skip on Accumulator Zero
+307	8A	  	T	30A				; Transfer
+308	58	FC	TL	8FC				; Transfer Long
+30A	C7	  	LB	(C7)	(B<=0E0)				; Load B Indirect
+30B	F4	  	TM	(F4)	;(target addr=191)	; Transfer and Mark Indirect
+30C	8F	  	T	30F				; Transfer
+30D	58	00	TL	800				; Transfer Long
+30F	58	FA	TL	8FA				; Transfer Long
+311	52	12	TL	212				; Transfer Long
+313	14	  	SKF2				; Skip if FF2 Equals 1
+314	80	  	T	300				; Transfer
+315	16	  	SKF1				; Skip if FF1 Equals 1
+316	91	  	T	311				; Transfer
+317	00	96	LBL	069				; Load B Long
+319	D6	  	TM	(D6)	;(target addr=17B)	; Transfer and Mark Indirect
+31A	A0	  	T	320				; Transfer
+31B	00	97	LBL	068				; Load B Long
+31D	D6	  	TM	(D6)	;(target addr=17B)	; Transfer and Mark Indirect
+31E	B8	  	T	338				; Transfer
+31F	BA	  	T	33A				; Transfer
+320	00	87	LBL	078				; Load B Long
+322	F8	  	TM	(F8)	;(target addr=199)	; Transfer and Mark Indirect
+323	B4	  	T	334				; Transfer
+324	C3	  	LB	(C3)	(B<=040)				; Load B Indirect
+325	D2	  	TM	(D2)	;(target addr=122)	; Transfer and Mark Indirect
+326	AA	  	T	32A				; Transfer
+327	76	  	LDI	9				; Load Accumulator Immediate
+328	3F	  	EX	0					; Exchange Accumulator and Memory
+329	9B	  	T	31B				; Transfer
+32A	00	54	LBL	0AB				; Load B Long
+32C	D4	  	TM	(D4)	;(target addr=12D)	; Transfer and Mark Indirect
+32D	00	4C	LBL	0B3				; Load B Long
+32F	D4	  	TM	(D4)	;(target addr=12D)	; Transfer and Mark Indirect
+330	79	  	LDI	6				; Load Accumulator Immediate
+331	1C	D6	IOL	D6				; Input/Output Long
+333	9B	  	T	31B				; Transfer
+334	C5	  	LB	(C5)	(B<=0B1)				; Load B Indirect
+335	F6	  	TM	(F6)	;(target addr=193)	; Transfer and Mark Indirect
+336	9B	  	T	31B				; Transfer
+337	A4	  	T	324				; Transfer
+338	53	40	TL	340				; Transfer Long
+33A	C8	  	LB	(C8)	(B<=042)				; Load B Indirect
+33B	F4	  	TM	(F4)	;(target addr=191)	; Transfer and Mark Indirect
+33C	BE	  	T	33E				; Transfer
+33D	8F	  	T	30F				; Transfer
+33E	54	AF	TL	4AF				; Transfer Long
+340	81	  	T	341				; Transfer
+341	82	  	T	342				; Transfer
+342	C5	  	LB	(C5)	(B<=0B1)				; Load B Indirect
+343	F5	  	TM	(F5)	;(target addr=192)	; Transfer and Mark Indirect
+344	86	  	T	346				; Transfer
+345	91	  	T	351				; Transfer
+346	26	  	RF1					; Reset FF1
+347	F4	  	TM	(F4)	;(target addr=191)	; Transfer and Mark Indirect
+348	8D	  	T	34D				; Transfer
+349	C4	  	LB	(C4)	(B<=041)				; Load B Indirect
+34A	F8	  	TM	(F8)	;(target addr=199)	; Transfer and Mark Indirect
+34B	A3	  	T	363				; Transfer
+34C	91	  	T	351				; Transfer
+34D	CF	  	LB	(CF)	(B<=017)				; Load B Indirect
+34E	F5	  	TM	(F5)	;(target addr=192)	; Transfer and Mark Indirect
+34F	91	  	T	351				; Transfer
+350	A3	  	T	363				; Transfer
+351	C4	  	LB	(C4)	(B<=041)				; Load B Indirect
+352	7F	  	LDI	0				; Load Accumulator Immediate
+353	16	  	SKF1				; Skip if FF1 Equals 1
+354	3F	  	EX	0					; Exchange Accumulator and Memory
+355	D2	  	TM	(D2)	;(target addr=122)	; Transfer and Mark Indirect
+356	9A	  	T	35A				; Transfer
+357	76	  	LDI	9				; Load Accumulator Immediate
+358	3F	  	EX	0					; Exchange Accumulator and Memory
+359	A3	  	T	363				; Transfer
+35A	CF	  	LB	(CF)	(B<=017)				; Load B Indirect
+35B	22	  	SF1					; Set FF1
+35C	D9	  	TM	(D9)	;(target addr=141)	; Transfer and Mark Indirect
+35D	00	5C	LBL	0A3				; Load B Long
+35F	D4	  	TM	(D4)	;(target addr=12D)	; Transfer and Mark Indirect
+360	79	  	LDI	6				; Load Accumulator Immediate
+361	1C	D6	IOL	D6				; Input/Output Long
+363	51	0E	TL	10E				; Transfer Long
+365	00	55	LBL	0AA				; Load B Long
+367	28	  	EXD	7					; Exchange Accumulator and Memory and decrement BL
+368	55	80	TL	580				; Transfer Long
+36A	57	8D	TL	78D				; Transfer Long
+36C	57	78	TL	778				; Transfer Long
+36E	57	EA	TL	7EA				; Transfer Long
+370	00	16	LBL	0E9				; Load B Long
+372	7E	  	LDI	1				; Load Accumulator Immediate
+373	0D	  	AND					; Logical AND
+374	00	86	LBL	079				; Load B Long
+376	1E	  	SKZ					; Skip on Accumulator Zero
+377	BC	  	T	37C				; Transfer
+378	7B	  	LDI	4				; Load Accumulator Immediate
+379	3F	  	EX	0					; Exchange Accumulator and Memory
+37A	53	80	TL	380				; Transfer Long
+37C	0B	  	AD					; Add
+37D	3F	  	EX	0					; Exchange Accumulator and Memory
+37E	50	0B	TL	00B				; Transfer Long
+380	C0	  	LB	(C0)	(B<=048)				; Load B Indirect
+381	F8	  	TM	(F8)	;(target addr=199)	; Transfer and Mark Indirect
+382	86	  	T	386				; Transfer
+383	CB	  	LB	(CB)	(B<=052)				; Load B Indirect
+384	F8	  	TM	(F8)	;(target addr=199)	; Transfer and Mark Indirect
+385	90	  	T	390				; Transfer
+386	22	  	SF1					; Set FF1
+387	C2	  	LB	(C2)	(B<=051)				; Load B Indirect
+388	D6	  	TM	(D6)	;(target addr=17B)	; Transfer and Mark Indirect
+389	95	  	T	395				; Transfer
+38A	1F	  	DECB					; Decrement BL
+38B	D6	  	TM	(D6)	;(target addr=17B)	; Transfer and Mark Indirect
+38C	92	  	T	392				; Transfer
+38D	C3	  	LB	(C3)	(B<=040)				; Load B Indirect
+38E	D6	  	TM	(D6)	;(target addr=17B)	; Transfer and Mark Indirect
+38F	96	  	T	396				; Transfer
+390	51	0E	TL	10E				; Transfer Long
+392	17	  	INCB					; Increment BL
+393	76	  	LDI	9				; Load Accumulator Immediate
+394	3F	  	EX	0					; Exchange Accumulator and Memory
+395	7F	  	LDI	0				; Load Accumulator Immediate
+396	70	  	LDI	F				; Load Accumulator Immediate
+397	00	87	LBL	078				; Load B Long
+399	3F	  	EX	0					; Exchange Accumulator and Memory
+39A	00	5E	LBL	0A1				; Load B Long
+39C	DE	  	TM	(DE)	;(target addr=14B)	; Transfer and Mark Indirect
+39D	C0	  	LB	(C0)	(B<=048)				; Load B Indirect
+39E	F8	  	TM	(F8)	;(target addr=199)	; Transfer and Mark Indirect
+39F	AD	  	T	3AD				; Transfer
+3A0	C9	  	LB	(C9)	(B<=04A)				; Load B Indirect
+3A1	E4	  	TM	(E4)	;(target addr=151)	; Transfer and Mark Indirect
+3A2	16	  	SKF1				; Skip if FF1 Equals 1
+3A3	A9	  	T	3A9				; Transfer
+3A4	CA	  	LB	(CA)	(B<=05A)				; Load B Indirect
+3A5	E4	  	TM	(E4)	;(target addr=151)	; Transfer and Mark Indirect
+3A6	16	  	SKF1				; Skip if FF1 Equals 1
+3A7	A9	  	T	3A9				; Transfer
+3A8	CB	  	LB	(CB)	(B<=052)				; Load B Indirect
+3A9	22	  	SF1					; Set FF1
+3AA	D8	  	TM	(D8)	;(target addr=140)	; Transfer and Mark Indirect
+3AB	54	80	TL	480				; Transfer Long
+3AD	CF	  	LB	(CF)	(B<=017)				; Load B Indirect
+3AE	7F	  	LDI	0				; Load Accumulator Immediate
+3AF	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+3B0	AE	  	T	3AE				; Transfer
+3B1	00	B0	LBL	04F				; Load B Long
+3B3	42	  	SKBI	2					; Skip if BL equals to Immediate.
+3B4	7F	  	LDI	0				; Load Accumulator Immediate
+3B5	7C	  	LDI	3				; Load Accumulator Immediate
+3B6	3E	  	EX	1					; Exchange Accumulator and Memory
+3B7	7F	  	LDI	0				; Load Accumulator Immediate
+3B8	2E	  	EXD	1					; Exchange Accumulator and Memory and decrement BL
+3B9	41	  	SKBI	1					; Skip if BL equals to Immediate.
+3BA	B3	  	T	3B3				; Transfer
+3BB	7F	  	LDI	0				; Load Accumulator Immediate
+3BC	3A	  	EX	5					; Exchange Accumulator and Memory
+3BD	79	  	LDI	6				; Load Accumulator Immediate
+3BE	54	7C	TL	47C				; Transfer Long
+3C0	22	  	SF1					; Set FF1
+3C1	C0	  	LB	(C0)	(B<=048)				; Load B Indirect
+3C2	F7	  	TM	(F7)	;(target addr=194)	; Transfer and Mark Indirect
+3C3	B1	  	T	3F1				; Transfer
+3C4	DF	  	TM	(DF)	;(target addr=14C)	; Transfer and Mark Indirect
+3C5	52	EF	TL	2EF				; Transfer Long
+3C7	C4	  	LB	(C4)	(B<=041)				; Load B Indirect
+3C8	D6	  	TM	(D6)	;(target addr=17B)	; Transfer and Mark Indirect
+3C9	B5	  	T	3F5				; Transfer
+3CA	C8	  	LB	(C8)	(B<=042)				; Load B Indirect
+3CB	F5	  	TM	(F5)	;(target addr=192)	; Transfer and Mark Indirect
+3CC	90	  	T	3D0				; Transfer
+3CD	DD	  	TM	(DD)	;(target addr=14A)	; Transfer and Mark Indirect
+3CE	C9	  	LB	(C9)	(B<=04A)				; Load B Indirect
+3CF	9B	  	T	3DB				; Transfer
+3D0	C9	  	LB	(C9)	(B<=04A)				; Load B Indirect
+3D1	F5	  	TM	(F5)	;(target addr=192)	; Transfer and Mark Indirect
+3D2	96	  	T	3D6				; Transfer
+3D3	DD	  	TM	(DD)	;(target addr=14A)	; Transfer and Mark Indirect
+3D4	CA	  	LB	(CA)	(B<=05A)				; Load B Indirect
+3D5	9B	  	T	3DB				; Transfer
+3D6	CA	  	LB	(CA)	(B<=05A)				; Load B Indirect
+3D7	F5	  	TM	(F5)	;(target addr=192)	; Transfer and Mark Indirect
+3D8	9E	  	T	3DE				; Transfer
+3D9	DD	  	TM	(DD)	;(target addr=14A)	; Transfer and Mark Indirect
+3DA	CB	  	LB	(CB)	(B<=052)				; Load B Indirect
+3DB	F4	  	TM	(F4)	;(target addr=191)	; Transfer and Mark Indirect
+3DC	A0	  	T	3E0				; Transfer
+3DD	B6	  	T	3F6				; Transfer
+3DE	CB	  	LB	(CB)	(B<=052)				; Load B Indirect
+3DF	DD	  	TM	(DD)	;(target addr=14A)	; Transfer and Mark Indirect
+3E0	C8	  	LB	(C8)	(B<=042)				; Load B Indirect
+3E1	D9	  	TM	(D9)	;(target addr=141)	; Transfer and Mark Indirect
+3E2	C0	  	LB	(C0)	(B<=048)				; Load B Indirect
+3E3	D0	  	TM	(D0)	;(target addr=117)	; Transfer and Mark Indirect
+3E4	C5	  	LB	(C5)	(B<=0B1)				; Load B Indirect
+3E5	E7	  	TM	(E7)	;(target addr=154)	; Transfer and Mark Indirect
+3E6	C0	  	LB	(C0)	(B<=048)				; Load B Indirect
+3E7	16	  	SKF1				; Skip if FF1 Equals 1
+3E8	74	  	LDI	B				; Load Accumulator Immediate
+3E9	72	  	LDI	D				; Load Accumulator Immediate
+3EA	09	  	ADSK				; Add and skip on carry-out
+3EB	B7	  	T	3F7				; Transfer
+3EC	7A	  	LDI	5				; Load Accumulator Immediate
+3ED	3F	  	EX	0					; Exchange Accumulator and Memory
+3EE	25	  	RF2					; Reset FF2
+3EF	51	03	TL	103				; Transfer Long
+3F1	CD	  	LB	(CD)	(B<=059)				; Load B Indirect
+3F2	F8	  	TM	(F8)	;(target addr=199)	; Transfer and Mark Indirect
+3F3	85	  	T	3C5				; Transfer
+3F4	B7	  	T	3F7				; Transfer
+3F5	CF	  	LB	(CF)	(B<=017)				; Load B Indirect
+3F6	D9	  	TM	(D9)	;(target addr=141)	; Transfer and Mark Indirect
+3F7	CD	  	LB	(CD)	(B<=059)				; Load B Indirect
+3F8	7F	  	LDI	0				; Load Accumulator Immediate
+3F9	3F	  	EX	0					; Exchange Accumulator and Memory
+3FA	78	  	LDI	7				; Load Accumulator Immediate
+3FB	1C	D6	IOL	D6				; Input/Output Long
+3FD	21	  	SF2					; Set FF2
+3FE	54	80	TL	480				; Transfer Long
+400	54	4C	TL	44C				; Transfer Long
+402	DA	  	TM	(DA)	;(target addr=142)	; Transfer and Mark Indirect
+403	12	  	LAX					; Load Accumulator from X Register
+404	B4	  	T	434				; Transfer
+405	01	CB	TML	1CB				; Transfer and Mark Long
+407	8B	  	T	40B				; Transfer
+408	00	7C	LBL	083				; Load B Long
+40A	D4	  	TM	(D4)	;(target addr=12D)	; Transfer and Mark Indirect
+40B	00	5F	LBL	0A0				; Load B Long
+40D	22	  	SF1					; Set FF1
+40E	E3	  	TM	(E3)	;(target addr=183)	; Transfer and Mark Indirect
+40F	E6	  	TM	(E6)	;(target addr=153)	; Transfer and Mark Indirect
+410	EB	  	TM	(EB)	;(target addr=164)	; Transfer and Mark Indirect
+411	16	  	SKF1				; Skip if FF1 Equals 1
+412	80	  	T	400				; Transfer
+413	A6	  	T	426				; Transfer
+414	01	CB	TML	1CB				; Transfer and Mark Long
+416	9A	  	T	41A				; Transfer
+417	00	64	LBL	09B				; Load B Long
+419	D4	  	TM	(D4)	;(target addr=12D)	; Transfer and Mark Indirect
+41A	00	4F	LBL	0B0				; Load B Long
+41C	37	  	LD	0				; Load Accumulator from Memory
+41D	A9	  	T	429				; Transfer
+41E	01	CB	TML	1CB				; Transfer and Mark Long
+420	A4	  	T	424				; Transfer
+421	00	74	LBL	08B				; Load B Long
+423	D4	  	TM	(D4)	;(target addr=12D)	; Transfer and Mark Indirect
+424	00	5E	LBL	0A1				; Load B Long
+426	7C	  	LDI	3				; Load Accumulator Immediate
+427	0D	  	AND					; Logical AND
+428	6E	  	ADI	1				; Add Immediate and skip on carry-out
+429	00	5E	LBL	0A1				; Load B Long
+42B	22	  	SF1					; Set FF1
+42C	1B	  	LXA					; Load X Register from Accumulator
+42D	73	  	LDI	C				; Load Accumulator Immediate
+42E	0D	  	AND					; Logical AND
+42F	6B	  	ADI	4				; Add Immediate and skip on carry-out
+430	82	  	T	402				; Transfer
+431	DE	  	TM	(DE)	;(target addr=14B)	; Transfer and Mark Indirect
+432	12	  	LAX					; Load Accumulator from X Register
+433	6E	  	ADI	1				; Add Immediate and skip on carry-out
+434	1B	  	LXA					; Load X Register from Accumulator
+435	00	16	LBL	0E9				; Load B Long
+437	F4	  	TM	(F4)	;(target addr=191)	; Transfer and Mark Indirect
+438	BD	  	T	43D				; Transfer
+439	00	44	LBL	0BB				; Load B Long
+43B	12	  	LAX					; Load Accumulator from X Register
+43C	D5	  	TM	(D5)	;(target addr=12E)	; Transfer and Mark Indirect
+43D	12	  	LAX					; Load Accumulator from X Register
+43E	54	40	TL	440				; Transfer Long
+440	00	4C	LBL	0B3				; Load B Long
+442	D5	  	TM	(D5)	;(target addr=12E)	; Transfer and Mark Indirect
+443	C2	  	LB	(C2)	(B<=051)				; Load B Indirect
+444	D3	  	TM	(D3)	;(target addr=123)	; Transfer and Mark Indirect
+445	8D	  	T	44D				; Transfer
+446	1F	  	DECB					; Decrement BL
+447	30	  	LD	7				; Load Accumulator from Memory
+448	0E	  	COMP				; Complement
+449	09	  	ADSK				; Add and skip on carry-out
+44A	90	  	T	450				; Transfer
+44B	30	  	LD	7				; Load Accumulator from Memory
+44C	D0	  	TM	(D0)	;(target addr=117)	; Transfer and Mark Indirect
+44D	22	  	SF1					; Set FF1
+44E	50	0B	TL	00B				; Transfer Long
+450	30	  	LD	7				; Load Accumulator from Memory
+451	3F	  	EX	0					; Exchange Accumulator and Memory
+452	17	  	INCB					; Increment BL
+453	76	  	LDI	9				; Load Accumulator Immediate
+454	3F	  	EX	0					; Exchange Accumulator and Memory
+455	8D	  	T	44D				; Transfer
+456	14	  	SKF2				; Skip if FF2 Equals 1
+457	58	00	TL	800				; Transfer Long
+459	A6	  	T	466				; Transfer
+45A	F8	  	TM	(F8)	;(target addr=199)	; Transfer and Mark Indirect
+45B	9E	  	T	45E				; Transfer
+45C	53	F7	TL	3F7				; Transfer Long
+45E	54	D3	TL	4D3				; Transfer Long
+460	9C	  	T	45C				; Transfer
+461	00	86	LBL	079				; Load B Long
+463	37	  	LD	0				; Load Accumulator from Memory
+464	6B	  	ADI	4				; Add Immediate and skip on carry-out
+465	A8	  	T	468				; Transfer
+466	51	0E	TL	10E				; Transfer Long
+468	69	  	ADI	6				; Add Immediate and skip on carry-out
+469	A6	  	T	466				; Transfer
+46A	7E	  	LDI	1				; Load Accumulator Immediate
+46B	0C	  	EOR					; Logical Exclusive-OR
+46C	1B	  	LXA					; Load X Register from Accumulator
+46D	C1	  	LB	(C1)	(B<=0E9)				; Load B Indirect
+46E	73	  	LDI	C				; Load Accumulator Immediate
+46F	0D	  	AND					; Logical AND
+470	1E	  	SKZ					; Skip on Accumulator Zero
+471	B3	  	T	473				; Transfer
+472	A6	  	T	466				; Transfer
+473	67	  	ADI	8				; Add Immediate and skip on carry-out
+474	7F	  	LDI	0				; Load Accumulator Immediate
+475	7E	  	LDI	1				; Load Accumulator Immediate
+476	19	  	XABL					; Exchange Accumulator and BL
+477	18	  	XBMX				; Exchange BM and X
+478	7E	  	LDI	1				; Load Accumulator Immediate
+479	0B	  	AD					; Add
+47A	3F	  	EX	0					; Exchange Accumulator and Memory
+47B	A6	  	T	466				; Transfer
+47C	1C	D3	IOL	D3				; Input/Output Long
+47E	58	00	TL	800				; Transfer Long
+480	7E	  	LDI	1				; Load Accumulator Immediate
+481	1C	D3	IOL	D3				; Input/Output Long
+483	01	D2	TML	1D2				; Transfer and Mark Long
+485	51	11	TL	111				; Transfer Long
+487	00	47	LBL	0B8				; Load B Long
+489	F8	  	TM	(F8)	;(target addr=199)	; Transfer and Mark Indirect
+48A	9F	  	T	49F				; Transfer
+48B	D2	  	TM	(D2)	;(target addr=122)	; Transfer and Mark Indirect
+48C	17	  	INCB					; Increment BL
+48D	75	  	LDI	A				; Load Accumulator Immediate
+48E	3F	  	EX	0					; Exchange Accumulator and Memory
+48F	CC	  	LB	(CC)	(B<=0B9)				; Load B Indirect
+490	35	  	LD	2				; Load Accumulator from Memory
+491	3C	  	EX	3					; Exchange Accumulator and Memory
+492	7F	  	LDI	0				; Load Accumulator Immediate
+493	3F	  	EX	0					; Exchange Accumulator and Memory
+494	00	B6	LBL	049				; Load B Long
+496	7E	  	LDI	1				; Load Accumulator Immediate
+497	0D	  	AND					; Logical AND
+498	1E	  	SKZ					; Skip on Accumulator Zero
+499	7D	  	LDI	2				; Load Accumulator Immediate
+49A	7B	  	LDI	4				; Load Accumulator Immediate
+49B	1C	D6	IOL	D6				; Input/Output Long
+49D	50	A7	TL	0A7				; Transfer Long
+49F	D2	  	TM	(D2)	;(target addr=122)	; Transfer and Mark Indirect
+4A0	A4	  	T	4A4				; Transfer
+4A1	D2	  	TM	(D2)	;(target addr=122)	; Transfer and Mark Indirect
+4A2	CC	  	LB	(CC)	(B<=0B9)				; Load B Indirect
+4A3	A9	  	T	4A9				; Transfer
+4A4	D2	  	TM	(D2)	;(target addr=122)	; Transfer and Mark Indirect
+4A5	8F	  	T	48F				; Transfer
+4A6	00	00	LBL	0FF				; Load B Long
+4A8	00	D6	LBL	029				; Load B Long
+4AA	F7	  	TM	(F7)	;(target addr=194)	; Transfer and Mark Indirect
+4AB	D6	  	TM	(D6)	;(target addr=17B)	; Transfer and Mark Indirect
+4AC	8F	  	T	48F				; Transfer
+4AD	1F	  	DECB					; Decrement BL
+4AE	D6	  	TM	(D6)	;(target addr=17B)	; Transfer and Mark Indirect
+4AF	00	B6	LBL	049				; Load B Long
+4B1	37	  	LD	0				; Load Accumulator from Memory
+4B2	1B	  	LXA					; Load X Register from Accumulator
+4B3	C8	  	LB	(C8)	(B<=042)				; Load B Indirect
+4B4	FC	  	TM	(FC)	;(target addr=19D)	; Transfer and Mark Indirect
+4B5	C9	  	LB	(C9)	(B<=04A)				; Load B Indirect
+4B6	FC	  	TM	(FC)	;(target addr=19D)	; Transfer and Mark Indirect
+4B7	CA	  	LB	(CA)	(B<=05A)				; Load B Indirect
+4B8	FC	  	TM	(FC)	;(target addr=19D)	; Transfer and Mark Indirect
+4B9	CB	  	LB	(CB)	(B<=052)				; Load B Indirect
+4BA	FC	  	TM	(FC)	;(target addr=19D)	; Transfer and Mark Indirect
+4BB	22	  	SF1					; Set FF1
+4BC	50	0B	TL	00B				; Transfer Long
+4BE	00	00	LBL	0FF				; Load B Long
+4C0	77	  	LDI	8				; Load Accumulator Immediate
+4C1	76	  	LDI	9				; Load Accumulator Immediate
+4C2	75	  	LDI	A				; Load Accumulator Immediate
+4C3	74	  	LDI	B				; Load Accumulator Immediate
+4C4	73	  	LDI	C				; Load Accumulator Immediate
+4C5	72	  	LDI	D				; Load Accumulator Immediate
+4C6	71	  	LDI	E				; Load Accumulator Immediate
+4C7	70	  	LDI	F				; Load Accumulator Immediate
+4C8	1C	D6	IOL	D6				; Input/Output Long
+4CA	16	  	SKF1				; Skip if FF1 Equals 1
+4CB	91	  	T	4D1				; Transfer
+4CC	14	  	SKF2				; Skip if FF2 Equals 1
+4CD	7D	  	LDI	2				; Load Accumulator Immediate
+4CE	7E	  	LDI	1				; Load Accumulator Immediate
+4CF	21	  	SF2					; Set FF2
+4D0	F9	  	TM	(F9)	;(target addr=1B5)	; Transfer and Mark Indirect
+4D1	50	05	TL	005				; Transfer Long
+4D3	CE	  	LB	(CE)	(B<=016)				; Load B Indirect
+4D4	D6	  	TM	(D6)	;(target addr=17B)	; Transfer and Mark Indirect
+4D5	98	  	T	4D8				; Transfer
+4D6	58	00	TL	800				; Transfer Long
+4D8	CF	  	LB	(CF)	(B<=017)				; Load B Indirect
+4D9	F6	  	TM	(F6)	;(target addr=193)	; Transfer and Mark Indirect
+4DA	7C	  	LDI	3				; Load Accumulator Immediate
+4DB	74	  	LDI	B				; Load Accumulator Immediate
+4DC	F9	  	TM	(F9)	;(target addr=1B5)	; Transfer and Mark Indirect
+4DD	B0	  	T	4F0				; Transfer
+4DE	03	93	TML	393				; Transfer and Mark Long
+4E0	00	00	LBL	0FF				; Load B Long
+4E2	C5	  	LB	(C5)	(B<=0B1)				; Load B Indirect
+4E3	F7	  	TM	(F7)	;(target addr=194)	; Transfer and Mark Indirect
+4E4	A9	  	T	4E9				; Transfer
+4E5	CE	  	LB	(CE)	(B<=016)				; Load B Indirect
+4E6	D0	  	TM	(D0)	;(target addr=117)	; Transfer and Mark Indirect
+4E7	05	  	RTN					; Return
+4E8	05	  	RTN					; Return
+4E9	CE	  	LB	(CE)	(B<=016)				; Load B Indirect
+4EA	D2	  	TM	(D2)	;(target addr=122)	; Transfer and Mark Indirect
+4EB	05	  	RTN					; Return
+4EC	3F	  	EX	0					; Exchange Accumulator and Memory
+4ED	05	  	RTN					; Return
+4EE	00	00	LBL	0FF				; Load B Long
+4F0	00	96	LBL	069				; Load B Long
+4F2	F8	  	TM	(F8)	;(target addr=199)	; Transfer and Mark Indirect
+4F3	BA	  	T	4FA				; Transfer
+4F4	1F	  	DECB					; Decrement BL
+4F5	F8	  	TM	(F8)	;(target addr=199)	; Transfer and Mark Indirect
+4F6	BA	  	T	4FA				; Transfer
+4F7	01	03	TML	103				; Transfer and Mark Long
+4F9	93	  	T	4D3				; Transfer
+4FA	C7	  	LB	(C7)	(B<=0E0)				; Load B Indirect
+4FB	DC	  	TM	(DC)	;(target addr=149)	; Transfer and Mark Indirect
+4FC	53	17	TL	317				; Transfer Long
+4FE	00	00	LBL	0FF				; Load B Long
+500	54	1E	TL	41E				; Transfer Long
+502	54	05	TL	405				; Transfer Long
+504	54	14	TL	414				; Transfer Long
+506	52	D0	TL	2D0				; Transfer Long
+508	54	61	TL	461				; Transfer Long
+50A	54	61	TL	461				; Transfer Long
+50C	53	70	TL	370				; Transfer Long
+50E	52	DC	TL	2DC				; Transfer Long
+510	00	FA	LBL	005				; Load B Long
+512	7F	  	LDI	0				; Load Accumulator Immediate
+513	1C	41	IOL	41				; Input/Output Long
+515	00	D6	LBL	029				; Load B Long
+517	7F	  	LDI	0				; Load Accumulator Immediate
+518	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+519	7F	  	LDI	0				; Load Accumulator Immediate
+51A	3F	  	EX	0					; Exchange Accumulator and Memory
+51B	55	40	TL	540				; Transfer Long
+51D	19	  	XABL					; Exchange Accumulator and BL
+51E	17	  	INCB					; Increment BL
+51F	37	  	LD	0				; Load Accumulator from Memory
+520	69	  	ADI	6				; Add Immediate and skip on carry-out
+521	6D	  	ADI	2				; Add Immediate and skip on carry-out
+522	A5	  	T	525				; Transfer
+523	55	6C	TL	56C				; Transfer Long
+525	7D	  	LDI	2				; Load Accumulator Immediate
+526	55	64	TL	564				; Transfer Long
+528	00	FD	LBL	002				; Load B Long
+52A	7F	  	LDI	0				; Load Accumulator Immediate
+52B	1C	41	IOL	41				; Input/Output Long
+52D	00	F9	LBL	006				; Load B Long
+52F	7F	  	LDI	0				; Load Accumulator Immediate
+530	1C	41	IOL	41				; Input/Output Long
+532	1C	41	IOL	41				; Input/Output Long
+534	17	  	INCB					; Increment BL
+535	7F	  	LDI	0				; Load Accumulator Immediate
+536	1C	41	IOL	41				; Input/Output Long
+538	00	FF	LBL	000				; Load B Long
+53A	77	  	LDI	8				; Load Accumulator Immediate
+53B	1C	41	IOL	41				; Input/Output Long
+53D	1E	  	SKZ					; Skip on Accumulator Zero
+53E	05	  	RTN					; Return
+53F	07	  	RTNSK				; Return and Skip
+540	00	FF	LBL	000				; Load B Long
+542	7F	  	LDI	0				; Load Accumulator Immediate
+543	3F	  	EX	0					; Exchange Accumulator and Memory
+544	03	66	TML	366				; Transfer and Mark Long
+546	7E	  	LDI	1				; Load Accumulator Immediate
+547	03	68	TML	368				; Transfer and Mark Long
+549	03	66	TML	366				; Transfer and Mark Long
+54B	7D	  	LDI	2				; Load Accumulator Immediate
+54C	03	68	TML	368				; Transfer and Mark Long
+54E	03	66	TML	366				; Transfer and Mark Long
+550	7B	  	LDI	4				; Load Accumulator Immediate
+551	03	68	TML	368				; Transfer and Mark Long
+553	03	66	TML	366				; Transfer and Mark Long
+555	77	  	LDI	8				; Load Accumulator Immediate
+556	03	68	TML	368				; Transfer and Mark Long
+558	00	D6	LBL	029				; Load B Long
+55A	35	  	LD	2				; Load Accumulator from Memory
+55B	2D	  	EXD	2					; Exchange Accumulator and Memory and decrement BL
+55C	35	  	LD	2				; Load Accumulator from Memory
+55D	19	  	XABL					; Exchange Accumulator and BL
+55E	42	  	SKBI	2					; Skip if BL equals to Immediate.
+55F	A2	  	T	562				; Transfer
+560	55	1D	TL	51D				; Transfer Long
+562	19	  	XABL					; Exchange Accumulator and BL
+563	17	  	INCB					; Increment BL
+564	18	  	XBMX				; Exchange BM and X
+565	1B	  	LXA					; Load X Register from Accumulator
+566	18	  	XBMX				; Exchange BM and X
+567	13	  	SAG					; Special Address Generation
+568	37	  	LD	0				; Load Accumulator from Memory
+569	19	  	XABL					; Exchange Accumulator and BL
+56A	12	  	LAX					; Load Accumulator from X Register
+56B	3F	  	EX	0					; Exchange Accumulator and Memory
+56C	00	D6	LBL	029				; Load B Long
+56E	24	  	RC					; Reset Carry flip-flop
+56F	7E	  	LDI	1				; Load Accumulator Immediate
+570	0B	  	AD					; Add
+571	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+572	15	  	SKC					; Skip on Carry flip-flop
+573	80	  	T	540				; Transfer
+574	47	  	SKBI	7					; Skip if BL equals to Immediate.
+575	AE	  	T	56E				; Transfer
+576	00	FA	LBL	005				; Load B Long
+578	77	  	LDI	8				; Load Accumulator Immediate
+579	1C	41	IOL	41				; Input/Output Long
+57B	19	  	XABL					; Exchange Accumulator and BL
+57C	03	6A	TML	36A				; Transfer and Mark Long
+57E	52	D0	TL	2D0				; Transfer Long
+580	0F	  	OR					; Logical OR
+581	1B	  	LXA					; Load X Register from Accumulator
+582	3F	  	EX	0					; Exchange Accumulator and Memory
+583	00	F8	LBL	007				; Load B Long
+585	77	  	LDI	8				; Load Accumulator Immediate
+586	1C	41	IOL	41				; Input/Output Long
+588	24	  	RC					; Reset Carry flip-flop
+589	02	7E	TML	27E				; Transfer and Mark Long
+58B	20	  	SC					; Set Carry flip-flop
+58C	01	3E	TML	13E				; Transfer and Mark Long
+58E	02	7E	TML	27E				; Transfer and Mark Long
+590	96	  	T	596				; Transfer
+591	01	BE	TML	1BE				; Transfer and Mark Long
+593	02	7E	TML	27E				; Transfer and Mark Long
+595	97	  	T	597				; Transfer
+596	21	  	SF2					; Set FF2
+597	02	3E	TML	23E				; Transfer and Mark Long
+599	00	FD	LBL	002				; Load B Long
+59B	77	  	LDI	8				; Load Accumulator Immediate
+59C	1C	41	IOL	41				; Input/Output Long
+59E	00	FB	LBL	004				; Load B Long
+5A0	7F	  	LDI	0				; Load Accumulator Immediate
+5A1	1C	41	IOL	41				; Input/Output Long
+5A3	1C	41	IOL	41				; Input/Output Long
+5A5	14	  	SKF2				; Skip if FF2 Equals 1
+5A6	05	  	RTN					; Return
+5A7	00	D6	LBL	029				; Load B Long
+5A9	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+5AA	1A	  	XAX					; Exchange Accumulator and X
+5AB	3F	  	EX	0					; Exchange Accumulator and Memory
+5AC	1A	  	XAX					; Exchange Accumulator and X
+5AD	18	  	XBMX				; Exchange BM and X
+5AE	55	7B	TL	57B				; Transfer Long
+5B0	15	  	SKC					; Skip on Carry flip-flop
+5B1	77	  	LDI	8				; Load Accumulator Immediate
+5B2	7F	  	LDI	0				; Load Accumulator Immediate
+5B3	00	FE	LBL	001				; Load B Long
+5B5	1C	41	IOL	41				; Input/Output Long
+5B7	00	FC	LBL	003				; Load B Long
+5B9	7F	  	LDI	0				; Load Accumulator Immediate
+5BA	1C	41	IOL	41				; Input/Output Long
+5BC	1C	41	IOL	41				; Input/Output Long
+5BE	05	  	RTN					; Return
+5C0	00	  	SET NIB	#0				; Load B Long
+5C0	3F	  	EX	0					; Exchange Accumulator and Memory
+5C1	00	FB	LBL	004				; Load B Long
+5C3	7E	  	LDI	1				; Load Accumulator Immediate
+5C4	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+5C5	37	  	LD	0				; Load Accumulator from Memory
+5C6	1B	  	LXA					; Load X Register from Accumulator
+5C7	1F	  	DECB					; Decrement BL
+5C8	37	  	LD	0				; Load Accumulator from Memory
+5C9	1A	  	XAX					; Exchange Accumulator and X
+5CA	18	  	XBMX				; Exchange BM and X
+5CB	19	  	XABL					; Exchange Accumulator and BL
+5CC	37	  	LD	0				; Load Accumulator from Memory
+5CD	00	FB	LBL	004				; Load B Long
+5CF	0D	  	AND					; Logical AND
+5D0	1E	  	SKZ					; Skip on Accumulator Zero
+5D1	7F	  	LDI	0				; Load Accumulator Immediate
+5D2	77	  	LDI	8				; Load Accumulator Immediate
+5D3	00	FE	LBL	001				; Load B Long
+5D5	1C	41	IOL	41				; Input/Output Long
+5D7	17	  	INCB					; Increment BL
+5D8	7F	  	LDI	0				; Load Accumulator Immediate
+5D9	1C	41	IOL	41				; Input/Output Long
+5DB	17	  	INCB					; Increment BL
+5DC	7F	  	LDI	0				; Load Accumulator Immediate
+5DD	1C	41	IOL	41				; Input/Output Long
+5DF	1C	41	IOL	41				; Input/Output Long
+5E1	1F	  	DECB					; Decrement BL
+5E2	77	  	LDI	8				; Load Accumulator Immediate
+5E3	1C	41	IOL	41				; Input/Output Long
+5E5	00	FB	LBL	004				; Load B Long
+5E7	7F	  	LDI	0				; Load Accumulator Immediate
+5E8	1C	41	IOL	41				; Input/Output Long
+5EA	1C	41	IOL	41				; Input/Output Long
+5EC	37	  	LD	0				; Load Accumulator from Memory
+5ED	09	  	ADSK				; Add and skip on carry-out
+5EE	84	  	T	5C4				; Transfer
+5EF	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+5F0	7E	  	LDI	1				; Load Accumulator Immediate
+5F1	09	  	ADSK				; Add and skip on carry-out
+5F2	80	  	T	5C0				; Transfer
+5F3	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+5F4	7E	  	LDI	1				; Load Accumulator Immediate
+5F5	09	  	ADSK				; Add and skip on carry-out
+5F6	80	  	T	5C0				; Transfer
+5F7	00	FA	LBL	005				; Load B Long
+5F9	77	  	LDI	8				; Load Accumulator Immediate
+5FA	1C	41	IOL	41				; Input/Output Long
+5FC	53	C0	TL	3C0				; Transfer Long
+5FE	00	00	LBL	0FF				; Load B Long
+600	16	  	SKF1				; Skip if FF1 Equals 1
+601	9C	  	T	61C				; Transfer
+602	00	B7	LBL	048				; Load B Long
+604	77	  	LDI	8				; Load Accumulator Immediate
+605	0F	  	OR					; Logical OR
+606	6B	  	ADI	4				; Add Immediate and skip on carry-out
+607	9C	  	T	61C				; Transfer
+608	00	46	LBL	0B9				; Load B Long
+60A	77	  	LDI	8				; Load Accumulator Immediate
+60B	0F	  	OR					; Logical OR
+60C	6D	  	ADI	2				; Add Immediate and skip on carry-out
+60D	9C	  	T	61C				; Transfer
+60E	9B	  	T	61B				; Transfer
+60F	00	86	LBL	079				; Load B Long
+611	37	  	LD	0				; Load Accumulator from Memory
+612	1B	  	LXA					; Load X Register from Accumulator
+613	A4	  	T	624				; Transfer
+614	14	  	SKF2				; Skip if FF2 Equals 1
+615	80	  	T	600				; Transfer
+616	00	16	LBL	0E9				; Load B Long
+618	7D	  	LDI	2				; Load Accumulator Immediate
+619	0D	  	AND					; Logical AND
+61A	1E	  	SKZ					; Skip on Accumulator Zero
+61B	79	  	LDI	6				; Load Accumulator Immediate
+61C	7B	  	LDI	4				; Load Accumulator Immediate
+61D	1B	  	LXA					; Load X Register from Accumulator
+61E	00	16	LBL	0E9				; Load B Long
+620	7E	  	LDI	1				; Load Accumulator Immediate
+621	0D	  	AND					; Logical AND
+622	1E	  	SKZ					; Skip on Accumulator Zero
+623	8F	  	T	60F				; Transfer
+624	10	  	LBMX				; Load BM with X
+625	70	  	LDI	F				; Load Accumulator Immediate
+626	19	  	XABL					; Exchange Accumulator and BL
+627	1C	FB	IOL	FB				; Input/Output Long
+629	1C	F7	IOL	F7				; Input/Output Long
+62B	36	  	LD	1				; Load Accumulator from Memory
+62C	1C	FE	IOL	FE				; Input/Output Long
+62E	36	  	LD	1				; Load Accumulator from Memory
+62F	1C	FD	IOL	FD				; Input/Output Long
+631	1F	  	DECB					; Decrement BL
+632	B5	  	T	635				; Transfer
+633	56	55	TL	655				; Transfer Long
+635	12	  	LAX					; Load Accumulator from X Register
+636	67	  	ADI	8				; Add Immediate and skip on carry-out
+637	6B	  	ADI	4				; Add Immediate and skip on carry-out
+638	AB	  	T	62B				; Transfer
+639	4A	  	SKBI	A					; Skip if BL equals to Immediate.
+63A	BD	  	T	63D				; Transfer
+63B	56	42	TL	642				; Transfer Long
+63D	42	  	SKBI	2					; Skip if BL equals to Immediate.
+63E	AB	  	T	62B				; Transfer
+63F	BB	  	T	63B				; Transfer
+640	56	2B	TL	62B				; Transfer Long
+642	7B	  	LDI	4				; Load Accumulator Immediate
+643	13	  	SAG					; Special Address Generation
+644	0B	  	AD					; Add
+645	13	  	SAG					; Special Address Generation
+646	3F	  	EX	0					; Exchange Accumulator and Memory
+647	67	  	ADI	8				; Add Immediate and skip on carry-out
+648	80	  	T	640				; Transfer
+649	7A	  	LDI	5				; Load Accumulator Immediate
+64A	0D	  	AND					; Logical AND
+64B	1C	FE	IOL	FE				; Input/Output Long
+64D	36	  	LD	1				; Load Accumulator from Memory
+64E	7A	  	LDI	5				; Load Accumulator Immediate
+64F	0D	  	AND					; Logical AND
+650	1C	FD	IOL	FD				; Input/Output Long
+652	36	  	LD	1				; Load Accumulator from Memory
+653	56	31	TL	631				; Transfer Long
+655	1C	F3	IOL	F3				; Input/Output Long
+657	00	56	LBL	0A9				; Load B Long
+659	37	  	LD	0				; Load Accumulator from Memory
+65A	1E	  	SKZ					; Skip on Accumulator Zero
+65B	AE	  	T	66E				; Transfer
+65C	75	  	LDI	A				; Load Accumulator Immediate
+65D	3F	  	EX	0					; Exchange Accumulator and Memory
+65E	14	  	SKF2				; Skip if FF2 Equals 1
+65F	16	  	SKF1				; Skip if FF1 Equals 1
+660	A3	  	T	663				; Transfer
+661	00	CF	LBL	030				; Load B Long
+663	00	C7	LBL	038				; Load B Long
+665	24	  	RC					; Reset Carry flip-flop
+666	78	  	LDI	7				; Load Accumulator Immediate
+667	09	  	ADSK				; Add and skip on carry-out
+668	65	  	DC					; Decimal Correction
+669	3F	  	EX	0					; Exchange Accumulator and Memory
+66A	15	  	SKC					; Skip on Carry flip-flop
+66B	AE	  	T	66E				; Transfer
+66C	17	  	INCB					; Increment BL
+66D	B0	  	T	670				; Transfer
+66E	50	0B	TL	00B				; Transfer Long
+670	48	  	SKBI	8					; Skip if BL equals to Immediate.
+671	A5	  	T	665				; Transfer
+672	AE	  	T	66E				; Transfer
+673	37	  	LD	0				; Load Accumulator from Memory
+674	56	82	TL	682				; Transfer Long
+676	00	56	LBL	0A9				; Load B Long
+678	7E	  	LDI	1				; Load Accumulator Immediate
+679	0D	  	AND					; Logical AND
+67A	00	E8	LBL	017				; Load B Long
+67C	1E	  	SKZ					; Skip on Accumulator Zero
+67D	B3	  	T	673				; Transfer
+67E	56	80	TL	680				; Transfer Long
+680	77	  	LDI	8				; Load Accumulator Immediate
+681	0D	  	AND					; Logical AND
+682	1C	D5	IOL	D5				; Input/Output Long
+684	1F	  	DECB					; Decrement BL
+685	37	  	LD	0				; Load Accumulator from Memory
+686	1C	D4	IOL	D4				; Input/Output Long
+688	1F	  	DECB					; Decrement BL
+689	36	  	LD	1				; Load Accumulator from Memory
+68A	0E	  	COMP				; Complement
+68B	3E	  	EX	1					; Exchange Accumulator and Memory
+68C	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+68D	89	  	T	689				; Transfer
+68E	00	FA	LBL	005				; Load B Long
+690	7F	  	LDI	0				; Load Accumulator Immediate
+691	1B	  	LXA					; Load X Register from Accumulator
+692	97	  	T	697				; Transfer
+693	19	  	XABL					; Exchange Accumulator and BL
+694	1A	  	XAX					; Exchange Accumulator and X
+695	19	  	XABL					; Exchange Accumulator and BL
+696	1F	  	DECB					; Decrement BL
+697	7E	  	LDI	1				; Load Accumulator Immediate
+698	0D	  	AND					; Logical AND
+699	1A	  	XAX					; Exchange Accumulator and X
+69A	19	  	XABL					; Exchange Accumulator and BL
+69B	1A	  	XAX					; Exchange Accumulator and X
+69C	68	  	ADI	7				; Add Immediate and skip on carry-out
+69D	1C	21	IOL	21				; Input/Output Long
+69F	17	  	INCB					; Increment BL
+6A0	19	  	XABL					; Exchange Accumulator and BL
+6A1	1A	  	XAX					; Exchange Accumulator and X
+6A2	19	  	XABL					; Exchange Accumulator and BL
+6A3	7D	  	LDI	2				; Load Accumulator Immediate
+6A4	0D	  	AND					; Logical AND
+6A5	1A	  	XAX					; Exchange Accumulator and X
+6A6	19	  	XABL					; Exchange Accumulator and BL
+6A7	1A	  	XAX					; Exchange Accumulator and X
+6A8	69	  	ADI	6				; Add Immediate and skip on carry-out
+6A9	1C	21	IOL	21				; Input/Output Long
+6AB	17	  	INCB					; Increment BL
+6AC	19	  	XABL					; Exchange Accumulator and BL
+6AD	1A	  	XAX					; Exchange Accumulator and X
+6AE	19	  	XABL					; Exchange Accumulator and BL
+6AF	7B	  	LDI	4				; Load Accumulator Immediate
+6B0	0D	  	AND					; Logical AND
+6B1	1A	  	XAX					; Exchange Accumulator and X
+6B2	19	  	XABL					; Exchange Accumulator and BL
+6B3	1A	  	XAX					; Exchange Accumulator and X
+6B4	6B	  	ADI	4				; Add Immediate and skip on carry-out
+6B5	1C	21	IOL	21				; Input/Output Long
+6B7	17	  	INCB					; Increment BL
+6B8	19	  	XABL					; Exchange Accumulator and BL
+6B9	1A	  	XAX					; Exchange Accumulator and X
+6BA	19	  	XABL					; Exchange Accumulator and BL
+6BB	37	  	LD	0				; Load Accumulator from Memory
+6BC	1A	  	XAX					; Exchange Accumulator and X
+6BD	19	  	XABL					; Exchange Accumulator and BL
+6BE	52	C0	TL	2C0				; Transfer Long
+6C0	00	FF	LBL	000				; Load B Long
+6C2	70	  	LDI	F				; Load Accumulator Immediate
+6C3	1C	21	IOL	21				; Input/Output Long
+6C5	70	  	LDI	F				; Load Accumulator Immediate
+6C6	1C	41	IOL	41				; Input/Output Long
+6C8	17	  	INCB					; Increment BL
+6C9	82	  	T	6C2				; Transfer
+6CA	7F	  	LDI	0				; Load Accumulator Immediate
+6CB	1B	  	LXA					; Load X Register from Accumulator
+6CC	1C	FB	IOL	FB				; Input/Output Long
+6CE	1C	F7	IOL	F7				; Input/Output Long
+6D0	12	  	LAX					; Load Accumulator from X Register
+6D1	1C	FE	IOL	FE				; Input/Output Long
+6D3	12	  	LAX					; Load Accumulator from X Register
+6D4	1C	FD	IOL	FD				; Input/Output Long
+6D6	17	  	INCB					; Increment BL
+6D7	90	  	T	6D0				; Transfer
+6D8	1C	F3	IOL	F3				; Input/Output Long
+6DA	01	D2	TML	1D2				; Transfer and Mark Long
+6DC	17	  	INCB					; Increment BL
+6DD	9A	  	T	6DA				; Transfer
+6DE	12	  	LAX					; Load Accumulator from X Register
+6DF	6E	  	ADI	1				; Add Immediate and skip on carry-out
+6E0	8B	  	T	6CB				; Transfer
+6E1	7F	  	LDI	0				; Load Accumulator Immediate
+6E2	03	6A	TML	36A				; Transfer and Mark Long
+6E4	7F	  	LDI	0				; Load Accumulator Immediate
+6E5	1B	  	LXA					; Load X Register from Accumulator
+6E6	18	  	XBMX				; Exchange BM and X
+6E7	70	  	LDI	F				; Load Accumulator Immediate
+6E8	1B	  	LXA					; Load X Register from Accumulator
+6E9	3F	  	EX	0					; Exchange Accumulator and Memory
+6EA	12	  	LAX					; Load Accumulator from X Register
+6EB	0C	  	EOR					; Logical Exclusive-OR
+6EC	1E	  	SKZ					; Skip on Accumulator Zero
+6ED	B9	  	T	6F9				; Transfer
+6EE	12	  	LAX					; Load Accumulator from X Register
+6EF	60	  	ADI	F				; Add Immediate and skip on carry-out
+6F0	B2	  	T	6F2				; Transfer
+6F1	A8	  	T	6E8				; Transfer
+6F2	17	  	INCB					; Increment BL
+6F3	A7	  	T	6E7				; Transfer
+6F4	18	  	XBMX				; Exchange BM and X
+6F5	12	  	LAX					; Load Accumulator from X Register
+6F6	6E	  	ADI	1				; Add Immediate and skip on carry-out
+6F7	A5	  	T	6E5				; Transfer
+6F8	BA	  	T	6FA				; Transfer
+6F9	21	  	SF2					; Set FF2
+6FA	76	  	LDI	9				; Load Accumulator Immediate
+6FB	03	6A	TML	36A				; Transfer and Mark Long
+6FD	57	00	TL	700				; Transfer Long
+700	00	  	SET NIB	#0				; Load B Long
+700	03	6C	TML	36C				; Transfer and Mark Long
+702	1C	D0	IOL	D0				; Input/Output Long
+704	1C	D8	IOL	D8				; Input/Output Long
+706	01	EE	TML	1EE				; Transfer and Mark Long
+708	82	  	T	702				; Transfer
+709	1C	D1	IOL	D1				; Input/Output Long
+70B	1C	D9	IOL	D9				; Input/Output Long
+70D	01	EE	TML	1EE				; Transfer and Mark Long
+70F	89	  	T	709				; Transfer
+710	1C	D2	IOL	D2				; Input/Output Long
+712	1C	DA	IOL	DA				; Input/Output Long
+714	01	EE	TML	1EE				; Transfer and Mark Long
+716	90	  	T	710				; Transfer
+717	1C	D3	IOL	D3				; Input/Output Long
+719	1C	DF	IOL	DF				; Input/Output Long
+71B	01	EE	TML	1EE				; Transfer and Mark Long
+71D	97	  	T	717				; Transfer
+71E	1C	D4	IOL	D4				; Input/Output Long
+720	1C	DC	IOL	DC				; Input/Output Long
+722	01	FB	TML	1FB				; Transfer and Mark Long
+724	9E	  	T	71E				; Transfer
+725	1C	D5	IOL	D5				; Input/Output Long
+727	1C	DD	IOL	DD				; Input/Output Long
+729	01	FB	TML	1FB				; Transfer and Mark Long
+72B	A5	  	T	725				; Transfer
+72C	7F	  	LDI	0				; Load Accumulator Immediate
+72D	1C	D5	IOL	D5				; Input/Output Long
+72F	00	FF	LBL	000				; Load B Long
+731	77	  	LDI	8				; Load Accumulator Immediate
+732	03	6A	TML	36A				; Transfer and Mark Long
+734	24	  	RC					; Reset Carry flip-flop
+735	B7	  	T	737				; Transfer
+736	20	  	SC					; Set Carry flip-flop
+737	22	  	SF1					; Set FF1
+738	70	  	LDI	F				; Load Accumulator Immediate
+739	1C	20	IOL	20				; Input/Output Long
+73B	70	  	LDI	F				; Load Accumulator Immediate
+73C	1C	40	IOL	40				; Input/Output Long
+73E	57	44	TL	744				; Transfer Long
+740	57	36	TL	736				; Transfer Long
+742	22	  	SF1					; Set FF1
+743	9E	  	T	75E				; Transfer
+744	16	  	SKF1				; Skip if FF1 Equals 1
+745	77	  	LDI	8				; Load Accumulator Immediate
+746	7B	  	LDI	4				; Load Accumulator Immediate
+747	1B	  	LXA					; Load X Register from Accumulator
+748	18	  	XBMX				; Exchange BM and X
+749	15	  	SKC					; Skip on Carry flip-flop
+74A	8E	  	T	74E				; Transfer
+74B	1C	21	IOL	21				; Input/Output Long
+74D	90	  	T	750				; Transfer
+74E	1C	41	IOL	41				; Input/Output Long
+750	16	  	SKF1				; Skip if FF1 Equals 1
+751	66	  	ADI	9				; Add Immediate and skip on carry-out
+752	66	  	ADI	9				; Add Immediate and skip on carry-out
+753	82	  	T	742				; Transfer
+754	17	  	INCB					; Increment BL
+755	84	  	T	744				; Transfer
+756	16	  	SKF1				; Skip if FF1 Equals 1
+757	9A	  	T	75A				; Transfer
+758	26	  	RF1					; Reset FF1
+759	84	  	T	744				; Transfer
+75A	15	  	SKC					; Skip on Carry flip-flop
+75B	80	  	T	740				; Transfer
+75C	00	FF	LBL	000				; Load B Long
+75E	15	  	SKC					; Skip on Carry flip-flop
+75F	7E	  	LDI	1				; Load Accumulator Immediate
+760	7D	  	LDI	2				; Load Accumulator Immediate
+761	03	6A	TML	36A				; Transfer and Mark Long
+763	70	  	LDI	F				; Load Accumulator Immediate
+764	1C	D3	IOL	D3				; Input/Output Long
+766	01	D2	TML	1D2				; Transfer and Mark Long
+768	7F	  	LDI	0				; Load Accumulator Immediate
+769	1C	D3	IOL	D3				; Input/Output Long
+76B	57	C0	TL	7C0				; Transfer Long
+76D	1A	  	XAX					; Exchange Accumulator and X
+76E	18	  	XBMX				; Exchange BM and X
+76F	21	  	SF2					; Set FF2
+770	57	32	TL	732				; Transfer Long
+772	0C	  	EOR					; Logical Exclusive-OR
+773	1E	  	SKZ					; Skip on Accumulator Zero
+774	AD	  	T	76D				; Transfer
+775	17	  	INCB					; Increment BL
+776	BC	  	T	77C				; Transfer
+777	BC	  	T	77C				; Transfer
+778	7C	  	LDI	3				; Load Accumulator Immediate
+779	1B	  	LXA					; Load X Register from Accumulator
+77A	00	FE	LBL	001				; Load B Long
+77C	11	  	LABL				; Load Accumulator with BL
+77D	3F	  	EX	0					; Exchange Accumulator and Memory
+77E	57	80	TL	780				; Transfer Long
+780	01	D2	TML	1D2				; Transfer and Mark Long
+782	01	D2	TML	1D2				; Transfer and Mark Long
+784	01	D2	TML	1D2				; Transfer and Mark Long
+786	37	  	LD	0				; Load Accumulator from Memory
+787	40	  	SKBI	0					; Skip if BL equals to Immediate.
+788	05	  	RTN					; Return
+789	1A	  	XAX					; Exchange Accumulator and X
+78A	6E	  	ADI	1				; Add Immediate and skip on carry-out
+78B	1A	  	XAX					; Exchange Accumulator and X
+78C	07	  	RTNSK				; Return and Skip
+78D	1B	  	LXA					; Load X Register from Accumulator
+78E	1C	FB	IOL	FB				; Input/Output Long
+790	12	  	LAX					; Load Accumulator from X Register
+791	1C	FE	IOL	FE				; Input/Output Long
+793	1C	FE	IOL	FE				; Input/Output Long
+795	18	  	XBMX				; Exchange BM and X
+796	12	  	LAX					; Load Accumulator from X Register
+797	1C	FE	IOL	FE				; Input/Output Long
+799	1C	FE	IOL	FE				; Input/Output Long
+79B	11	  	LABL				; Load Accumulator with BL
+79C	1C	FE	IOL	FE				; Input/Output Long
+79E	18	  	XBMX				; Exchange BM and X
+79F	7A	  	LDI	5				; Load Accumulator Immediate
+7A0	19	  	XABL					; Exchange Accumulator and BL
+7A1	70	  	LDI	F				; Load Accumulator Immediate
+7A2	1C	FE	IOL	FE				; Input/Output Long
+7A4	17	  	INCB					; Increment BL
+7A5	A2	  	T	7A2				; Transfer
+7A6	1C	F3	IOL	F3				; Input/Output Long
+7A8	01	D2	TML	1D2				; Transfer and Mark Long
+7AA	17	  	INCB					; Increment BL
+7AB	A8	  	T	7A8				; Transfer
+7AC	16	  	SKF1				; Skip if FF1 Equals 1
+7AD	B0	  	T	7B0				; Transfer
+7AE	26	  	RF1					; Reset FF1
+7AF	A8	  	T	7A8				; Transfer
+7B0	1C	FB	IOL	FB				; Input/Output Long
+7B2	01	D2	TML	1D2				; Transfer and Mark Long
+7B4	17	  	INCB					; Increment BL
+7B5	B2	  	T	7B2				; Transfer
+7B6	14	  	SKF2				; Skip if FF2 Equals 1
+7B7	05	  	RTN					; Return
+7B8	A6	  	T	7A6				; Transfer
+7B9	22	  	SF1					; Set FF1
+7BA	19	  	XABL					; Exchange Accumulator and BL
+7BB	12	  	LAX					; Load Accumulator from X Register
+7BC	03	6A	TML	36A				; Transfer and Mark Long
+7BE	57	D1	TL	7D1				; Transfer Long
+7C0	03	6E	TML	36E				; Transfer and Mark Long
+7C2	72	  	LDI	D				; Load Accumulator Immediate
+7C3	09	  	ADSK				; Add and skip on carry-out
+7C4	9B	  	T	7DB				; Transfer
+7C5	1B	  	LXA					; Load X Register from Accumulator
+7C6	1C	D6	IOL	D6				; Input/Output Long
+7C8	03	6E	TML	36E				; Transfer and Mark Long
+7CA	12	  	LAX					; Load Accumulator from X Register
+7CB	1C	DB	IOL	DB				; Input/Output Long
+7CD	7E	  	LDI	1				; Load Accumulator Immediate
+7CE	0C	  	EOR					; Logical Exclusive-OR
+7CF	1E	  	SKZ					; Skip on Accumulator Zero
+7D0	A0	  	T	7E0				; Transfer
+7D1	12	  	LAX					; Load Accumulator from X Register
+7D2	6E	  	ADI	1				; Add Immediate and skip on carry-out
+7D3	85	  	T	7C5				; Transfer
+7D4	00	FF	LBL	000				; Load B Long
+7D6	7C	  	LDI	3				; Load Accumulator Immediate
+7D7	03	6A	TML	36A				; Transfer and Mark Long
+7D9	55	10	TL	510				; Transfer Long
+7DB	21	  	SF2					; Set FF2
+7DC	37	  	LD	0				; Load Accumulator from Memory
+7DD	1E	  	SKZ					; Skip on Accumulator Zero
+7DE	A5	  	T	7E5				; Transfer
+7DF	A6	  	T	7E6				; Transfer
+7E0	37	  	LD	0				; Load Accumulator from Memory
+7E1	1E	  	SKZ					; Skip on Accumulator Zero
+7E2	A7	  	T	7E7				; Transfer
+7E3	21	  	SF2					; Set FF2
+7E4	7B	  	LDI	4				; Load Accumulator Immediate
+7E5	7A	  	LDI	5				; Load Accumulator Immediate
+7E6	79	  	LDI	6				; Load Accumulator Immediate
+7E7	78	  	LDI	7				; Load Accumulator Immediate
+7E8	57	B9	TL	7B9				; Transfer Long
+7EA	12	  	LAX					; Load Accumulator from X Register
+7EB	19	  	XABL					; Exchange Accumulator and BL
+7EC	77	  	LDI	8				; Load Accumulator Immediate
+7ED	1B	  	LXA					; Load X Register from Accumulator
+7EE	75	  	LDI	A				; Load Accumulator Immediate
+7EF	1D	  	DOA					; Discrete Output
+7F0	01	D2	TML	1D2				; Transfer and Mark Long
+7F2	27	  	DIA					; Discrete Input Group A
+7F3	3F	  	EX	0					; Exchange Accumulator and Memory
+7F4	0C	  	EOR					; Logical Exclusive-OR
+7F5	1E	  	SKZ					; Skip on Accumulator Zero
+7F6	AC	  	T	7EC				; Transfer
+7F7	12	  	LAX					; Load Accumulator from X Register
+7F8	6E	  	ADI	1				; Add Immediate and skip on carry-out
+7F9	AD	  	T	7ED				; Transfer
+7FA	11	  	LABL				; Load Accumulator with BL
+7FB	1A	  	XAX					; Exchange Accumulator and X
+7FC	7C	  	LDI	3				; Load Accumulator Immediate
+7FD	0D	  	AND					; Logical AND
+7FE	3F	  	EX	0					; Exchange Accumulator and Memory
+7FF	05	  	RTN					; Return
+
+
+
+
+
+800	58	40	TL	840				; Transfer Long
+802	00	9E	LBL	061				; Load B Long
+804	37	  	LD	0				; Load Accumulator from Memory
+805	6F	  	CYS					; Cycle SA register and Accumulator
+806	1F	  	DECB					; Decrement BL
+807	36	  	LD	1				; Load Accumulator from Memory
+808	6F	  	CYS					; Cycle SA register and Accumulator
+809	37	  	LD	0				; Load Accumulator from Memory
+80A	6F	  	CYS					; Cycle SA register and Accumulator
+80B	17	  	INCB					; Increment BL
+80C	37	  	LD	0				; Load Accumulator from Memory
+80D	6F	  	CYS					; Cycle SA register and Accumulator
+80E	19	  	XABL					; Exchange Accumulator and BL
+80F	6F	  	CYS					; Cycle SA register and Accumulator
+810	1A	  	XAX					; Exchange Accumulator and X
+811	18	  	XBMX				; Exchange BM and X
+812	6F	  	CYS					; Cycle SA register and Accumulator
+813	1A	  	XAX					; Exchange Accumulator and X
+814	6F	  	CYS					; Cycle SA register and Accumulator
+815	1A	  	XAX					; Exchange Accumulator and X
+816	3F	  	EX	0					; Exchange Accumulator and Memory
+817	37	  	LD	0				; Load Accumulator from Memory
+818	1A	  	XAX					; Exchange Accumulator and X
+819	60	  	ADI	F				; Add Immediate and skip on carry-out
+81A	A5	  	T	825				; Transfer
+81B	17	  	INCB					; Increment BL
+81C	95	  	T	815				; Transfer
+81D	18	  	XBMX				; Exchange BM and X
+81E	1A	  	XAX					; Exchange Accumulator and X
+81F	6E	  	ADI	1				; Add Immediate and skip on carry-out
+820	A2	  	T	822				; Transfer
+821	AE	  	T	82E				; Transfer
+822	1A	  	XAX					; Exchange Accumulator and X
+823	18	  	XBMX				; Exchange BM and X
+824	95	  	T	815				; Transfer
+825	17	  	INCB					; Increment BL
+826	AE	  	T	82E				; Transfer
+827	18	  	XBMX				; Exchange BM and X
+828	1A	  	XAX					; Exchange Accumulator and X
+829	6E	  	ADI	1				; Add Immediate and skip on carry-out
+82A	AC	  	T	82C				; Transfer
+82B	AE	  	T	82E				; Transfer
+82C	1A	  	XAX					; Exchange Accumulator and X
+82D	18	  	XBMX				; Exchange BM and X
+82E	19	  	XABL					; Exchange Accumulator and BL
+82F	18	  	XBMX				; Exchange BM and X
+830	00	9E	LBL	061				; Load B Long
+832	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+833	1A	  	XAX					; Exchange Accumulator and X
+834	3E	  	EX	1					; Exchange Accumulator and Memory
+835	17	  	INCB					; Increment BL
+836	7F	  	LDI	0				; Load Accumulator Immediate
+837	3F	  	EX	0					; Exchange Accumulator and Memory
+838	00	86	LBL	079				; Load B Long
+83A	79	  	LDI	6				; Load Accumulator Immediate
+83B	3F	  	EX	0					; Exchange Accumulator and Memory
+83C	21	  	SF2					; Set FF2
+83D	22	  	SF1					; Set FF1
+83E	51	0E	TL	10E				; Transfer Long
+
+; init ram to 0
+840	00	00	LBL	0FF				; Load B Long
+842	7F	  	LDI	0				; Load Accumulator Immediate
+843	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+844	82	  	T	842				; Transfer
+
+;end of ram init, BL is 1111 here
+845	18	  	XBMX				; Exchange BM and X
+846	1A	  	XAX					; Exchange Accumulator and X
+847	60	  	ADI	F				; Add Immediate and skip on carry-out
+848	8C	  	T	84C				; Transfer
+849	1A	  	XAX					; Exchange Accumulator and X
+84A	18	  	XBMX				; Exchange BM and X
+84B	82	  	T	842				; Transfer
+
+put 1054F in @27..@23
+84C	00	D8	LBL	027				; Load B Long
+84E	7E	  	LDI	1				; Load Accumulator Immediate
+84F	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+850	7F	  	LDI	0				; Load Accumulator Immediate
+851	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+852	7A	  	LDI	5				; Load Accumulator Immediate
+853	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+854	7B	  	LDI	4				; Load Accumulator Immediate
+855	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+856	70	  	LDI	F				; Load Accumulator Immediate
+857	3F	  	EX	0					; Exchange Accumulator and Memory
+
+;put @20<-1
+858	00	DF	LBL	020				; Load B Long
+85A	7E	  	LDI	1				; Load Accumulator Immediate
+85B	3B	  	EX	4					; Exchange Accumulator and Memory
+
+; B is now 60, put @60<-2
+85C	7D	  	LDI	2				; Load Accumulator Immediate
+85D	3E	  	EX	1					; Exchange Accumulator and Memory
+
+; B is now 70, put @70<-0
+85E	7F	  	LDI	0				; Load Accumulator Immediate
+85F	3E	  	EX	1					; Exchange Accumulator and Memory
+
+; B is now back to 60++, @61<-B
+860	17	  	INCB					; Increment BL
+861	74	  	LDI	B				; Load Accumulator Immediate
+862	3E	  	EX	1					; Exchange Accumulator and Memory
+
+; B is now 71, @71<-0
+863	7F	  	LDI	0				; Load Accumulator Immediate
+864	3F	  	EX	0					; Exchange Accumulator and Memory
+
+; B is set to 81, @81<-4
+865	00	7E	LBL	081				; Load B Long
+867	7B	  	LDI	4				; Load Accumulator Immediate
+868	3E	  	EX	1				; 1000xor0001=>91
+
+; B is now 91, @91<-F
+869	70	  	LDI	F				; Load Accumulator Immediate
+86A	3C	  	EX	3				; 1001xor0011
+
+; B is now A1, @A1<-2
+86B	7D	  	LDI	2				; Load Accumulator Immediate
+86C	3E	  	EX	1				; 1010xor0001
+
+; B is now B1, @B1<-E
+86D	71	  	LDI	E				; Load Accumulator Immediate
+86E	2C	  	EXD	3				; 1011xor0011
+
+; B is now 80, @80<-4
+86F	7B	  	LDI	4				; Load Accumulator Immediate
+870	3E	  	EX	1					; Exchange Accumulator and Memory
+
+; B is now 90, @90<-3
+871	7C	  	LDI	3				; Load Accumulator Immediate
+872	3C	  	EX	3				; 1001xor0011
+
+; B is now A0, @A0<-D
+873	72	  	LDI	D				; Load Accumulator Immediate
+874	3E	  	EX	1					; Exchange Accumulator and Memory
+
+; B is now B0, @B0<-9
+875	76	  	LDI	9				; Load Accumulator Immediate
+876	3F	  	EX	0				; Exchange Accumulator and Memory
+877	58	C0	TL	8C0				; Transfer Long
+
+879	D7	  	TM	(D7)	;(target addr=15C)	; Transfer and Mark Indirect
+87A	6B	  	ADI	4				; Add Immediate and skip on carry-out
+87B	21	  	SF2					; Set FF2
+87C	EF	  	TM	(EF)	;(target addr=16C)	; Transfer and Mark Indirect
+87D	00	00	LBL	0FF				; Load B Long
+880	00	  	SET NIB	#0				; Load B Long
+880	58	02	TL	802				; Transfer Long
+882	58	02	TL	802				; Transfer Long
+884	58	02	TL	802				; Transfer Long
+886	58	02	TL	802				; Transfer Long
+888	58	02	TL	802				; Transfer Long
+88A	58	02	TL	802				; Transfer Long
+88C	58	02	TL	802				; Transfer Long
+88E	58	02	TL	802				; Transfer Long
+890	58	02	TL	802				; Transfer Long
+892	58	02	TL	802				; Transfer Long
+894	58	02	TL	802				; Transfer Long
+896	58	02	TL	802				; Transfer Long
+898	58	02	TL	802				; Transfer Long
+89A	58	02	TL	802				; Transfer Long
+89C	58	02	TL	802				; Transfer Long
+89E	58	02	TL	802				; Transfer Long
+8A0	58	02	TL	802				; Transfer Long
+8A2	58	02	TL	802				; Transfer Long
+8A4	58	02	TL	802				; Transfer Long
+8A6	58	02	TL	802				; Transfer Long
+8A8	58	02	TL	802				; Transfer Long
+8AA	58	02	TL	802				; Transfer Long
+8AC	58	02	TL	802				; Transfer Long
+8AE	58	02	TL	802				; Transfer Long
+8B0	58	02	TL	802				; Transfer Long
+8B2	58	02	TL	802				; Transfer Long
+8B4	58	02	TL	802				; Transfer Long
+8B6	58	02	TL	802				; Transfer Long
+8B8	58	02	TL	802				; Transfer Long
+8BA	58	02	TL	802				; Transfer Long
+8BC	58	02	TL	802				; Transfer Long
+8BE	58	02	TL	802				; Transfer Long
+
+; B is set to F8, @F8<-E
+8C0	00	07	LBL	0F8				; Load B Long
+8C2	71	  	LDI	E				; Load Accumulator Immediate
+8C3	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+
+; @F7<-C
+8C4	73	  	LDI	C				; Load Accumulator Immediate
+8C5	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+
+; @F6<-C
+8C6	73	  	LDI	C				; Load Accumulator Immediate
+8C7	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+
+; @F5<-A @F4<-A @F3<-A @F2<-A @F1<-A @F0<-A
+8C8	75	  	LDI	A				; Load Accumulator Immediate
+8C9	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+
+8CA	88	  	T	8C8				; Transfer
+
+; @0A<-2
+8CB	00	F5	LBL	00A				; Load B Long
+8CD	7D	  	LDI	2				; Load Accumulator Immediate
+8CE	3E	  	EX	1					; Exchange Accumulator and Memory
+
+; B is now 1A, @1A<-1
+8CF	7E	  	LDI	1				; Load Accumulator Immediate
+8D0	3C	  	EX	3				; 0001xor0011
+
+; B is now 2A, @2A<-3
+8D1	7C	  	LDI	3				; Load Accumulator Immediate
+8D2	3B	  	EX	4				; 0010xor0100
+
+; B is now 6A, @6A<-C
+8D3	73	  	LDI	C				; Load Accumulator Immediate
+8D4	3E	  	EX	1					; Exchange Accumulator and Memory
+
+; B is now 7A, @7A<-C
+8D5	73	  	LDI	C				; Load Accumulator Immediate
+8D6	3F	  	EX	0					; Exchange Accumulator and Memory
+
+; B is set to 8A, @8A<-1
+8D7	00	75	LBL	08A				; Load B Long
+8D9	7E	  	LDI	1				; Load Accumulator Immediate
+8DA	3D	  	EX	2				; 1000xor0010
+
+; B is now AA, @AA<-2
+8DB	7D	  	LDI	2				; Load Accumulator Immediate
+8DC	39	  	EX	6				; 1010xor0110
+
+; B is now CA, @CA<-3
+8DD	7C	  	LDI	3				; Load Accumulator Immediate
+8DE	3D	  	EX	2				; 1100xor0010
+
+; B is now EA, @EA<-1
+8DF	7E	  	LDI	1				; Load Accumulator Immediate
+8E0	3E	  	EX	1					; Exchange Accumulator and Memory
+
+; B is now FA, @FA<-1
+8E1	7E	  	LDI	1				; Load Accumulator Immediate
+8E2	3F	  	EX	0					; Exchange Accumulator and Memory
+
+; B is set to 62, @62<-C
+8E3	00	9D	LBL	062				; Load B Long
+8E5	73	  	LDI	C				; Load Accumulator Immediate
+8E6	3E	  	EX	1					; Exchange Accumulator and Memory
+
+; B is now 72, @72<-C
+8E7	73	  	LDI	C				; Load Accumulator Immediate
+8E8	3F	  	EX	0					; Exchange Accumulator and Memory
+
+; B is set to 82, @82<-F
+8E9	00	7D	LBL	082				; Load B Long
+8EB	70	  	LDI	F				; Load Accumulator Immediate
+8EC	3E	  	EX	1					; Exchange Accumulator and Memory
+
+; B is now 92, @92<-F
+8ED	70	  	LDI	F				; Load Accumulator Immediate
+8EE	3C	  	EX	3				; 1001xor0011
+
+; B is now A2, @A2<-F
+8EF	70	  	LDI	F				; Load Accumulator Immediate
+8F0	3E	  	EX	1					; Exchange Accumulator and Memory
+
+; B is now B2, @B2<-F
+8F1	70	  	LDI	F				; Load Accumulator Immediate
+8F2	3F	  	EX	0					; Exchange Accumulator and Memory
+8F3	21	  	SF2					; Set FF2
+8F4	22	  	SF1					; Set FF1
+8F5	52	F4	TL	2F4				; Copy all Ram to HM6508
+
+8F7	05	  	RTN					; Return
+8F8	50	11	TL	011				; Transfer Long
+8FA	51	0E	TL	10E				; Transfer Long
+8FC	58	F3	TL	8F3				; Transfer Long
+8FE	52	1E	TL	21E				; Transfer Long
+900	58	40	TL	840				; Transfer Long
+902	00	9E	LBL	061				; Load B Long
+904	37	  	LD	0				; Load Accumulator from Memory
+905	6F	  	CYS					; Cycle SA register and Accumulator
+906	1F	  	DECB					; Decrement BL
+907	36	  	LD	1				; Load Accumulator from Memory
+908	6F	  	CYS					; Cycle SA register and Accumulator
+909	37	  	LD	0				; Load Accumulator from Memory
+90A	6F	  	CYS					; Cycle SA register and Accumulator
+90B	17	  	INCB					; Increment BL
+90C	37	  	LD	0				; Load Accumulator from Memory
+90D	6F	  	CYS					; Cycle SA register and Accumulator
+90E	19	  	XABL					; Exchange Accumulator and BL
+90F	6F	  	CYS					; Cycle SA register and Accumulator
+910	1A	  	XAX					; Exchange Accumulator and X
+911	18	  	XBMX				; Exchange BM and X
+912	6F	  	CYS					; Cycle SA register and Accumulator
+913	1A	  	XAX					; Exchange Accumulator and X
+914	6F	  	CYS					; Cycle SA register and Accumulator
+915	1A	  	XAX					; Exchange Accumulator and X
+916	3F	  	EX	0					; Exchange Accumulator and Memory
+917	37	  	LD	0				; Load Accumulator from Memory
+918	1A	  	XAX					; Exchange Accumulator and X
+919	60	  	ADI	F				; Add Immediate and skip on carry-out
+91A	A5	  	T	925				; Transfer
+91B	17	  	INCB					; Increment BL
+91C	95	  	T	915				; Transfer
+91D	18	  	XBMX				; Exchange BM and X
+91E	1A	  	XAX					; Exchange Accumulator and X
+91F	6E	  	ADI	1				; Add Immediate and skip on carry-out
+920	A2	  	T	922				; Transfer
+921	AE	  	T	92E				; Transfer
+922	1A	  	XAX					; Exchange Accumulator and X
+923	18	  	XBMX				; Exchange BM and X
+924	95	  	T	915				; Transfer
+925	17	  	INCB					; Increment BL
+926	AE	  	T	92E				; Transfer
+927	18	  	XBMX				; Exchange BM and X
+928	1A	  	XAX					; Exchange Accumulator and X
+929	6E	  	ADI	1				; Add Immediate and skip on carry-out
+92A	AC	  	T	92C				; Transfer
+92B	AE	  	T	92E				; Transfer
+92C	1A	  	XAX					; Exchange Accumulator and X
+92D	18	  	XBMX				; Exchange BM and X
+92E	19	  	XABL					; Exchange Accumulator and BL
+92F	18	  	XBMX				; Exchange BM and X
+930	00	9E	LBL	061				; Load B Long
+932	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+933	1A	  	XAX					; Exchange Accumulator and X
+934	3E	  	EX	1					; Exchange Accumulator and Memory
+935	17	  	INCB					; Increment BL
+936	7F	  	LDI	0				; Load Accumulator Immediate
+937	3F	  	EX	0					; Exchange Accumulator and Memory
+938	00	86	LBL	079				; Load B Long
+93A	79	  	LDI	6				; Load Accumulator Immediate
+93B	3F	  	EX	0					; Exchange Accumulator and Memory
+93C	21	  	SF2					; Set FF2
+93D	22	  	SF1					; Set FF1
+93E	51	0E	TL	10E				; Transfer Long
+940	00	00	LBL	0FF				; Load B Long
+942	7F	  	LDI	0				; Load Accumulator Immediate
+943	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+944	82	  	T	942				; Transfer
+945	18	  	XBMX				; Exchange BM and X
+946	1A	  	XAX					; Exchange Accumulator and X
+947	60	  	ADI	F				; Add Immediate and skip on carry-out
+948	8C	  	T	94C				; Transfer
+949	1A	  	XAX					; Exchange Accumulator and X
+94A	18	  	XBMX				; Exchange BM and X
+94B	82	  	T	942				; Transfer
+94C	00	D8	LBL	027				; Load B Long
+94E	7E	  	LDI	1				; Load Accumulator Immediate
+94F	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+950	7F	  	LDI	0				; Load Accumulator Immediate
+951	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+952	7A	  	LDI	5				; Load Accumulator Immediate
+953	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+954	7B	  	LDI	4				; Load Accumulator Immediate
+955	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+956	70	  	LDI	F				; Load Accumulator Immediate
+957	3F	  	EX	0					; Exchange Accumulator and Memory
+958	00	DF	LBL	020				; Load B Long
+95A	7E	  	LDI	1				; Load Accumulator Immediate
+95B	3B	  	EX	4					; Exchange Accumulator and Memory
+95C	7D	  	LDI	2				; Load Accumulator Immediate
+95D	3E	  	EX	1					; Exchange Accumulator and Memory
+95E	7F	  	LDI	0				; Load Accumulator Immediate
+95F	3E	  	EX	1					; Exchange Accumulator and Memory
+960	17	  	INCB					; Increment BL
+961	74	  	LDI	B				; Load Accumulator Immediate
+962	3E	  	EX	1					; Exchange Accumulator and Memory
+963	7F	  	LDI	0				; Load Accumulator Immediate
+964	3F	  	EX	0					; Exchange Accumulator and Memory
+965	00	7E	LBL	081				; Load B Long
+967	7B	  	LDI	4				; Load Accumulator Immediate
+968	3E	  	EX	1					; Exchange Accumulator and Memory
+969	70	  	LDI	F				; Load Accumulator Immediate
+96A	3C	  	EX	3					; Exchange Accumulator and Memory
+96B	7D	  	LDI	2				; Load Accumulator Immediate
+96C	3E	  	EX	1					; Exchange Accumulator and Memory
+96D	71	  	LDI	E				; Load Accumulator Immediate
+96E	2C	  	EXD	3					; Exchange Accumulator and Memory and decrement BL
+96F	7B	  	LDI	4				; Load Accumulator Immediate
+970	3E	  	EX	1					; Exchange Accumulator and Memory
+971	7C	  	LDI	3				; Load Accumulator Immediate
+972	3C	  	EX	3					; Exchange Accumulator and Memory
+973	72	  	LDI	D				; Load Accumulator Immediate
+974	3E	  	EX	1					; Exchange Accumulator and Memory
+975	76	  	LDI	9				; Load Accumulator Immediate
+976	3F	  	EX	0					; Exchange Accumulator and Memory
+977	58	C0	TL	8C0				; Transfer Long
+979	D7	  	TM	(D7)	;(target addr=15C)	; Transfer and Mark Indirect
+97A	6B	  	ADI	4				; Add Immediate and skip on carry-out
+97B	21	  	SF2					; Set FF2
+97C	EF	  	TM	(EF)	;(target addr=16C)	; Transfer and Mark Indirect
+97D	00	00	LBL	0FF				; Load B Long
+980	00	  	SET NIB	#0				; Load B Long
+980	58	02	TL	802				; Transfer Long
+982	58	02	TL	802				; Transfer Long
+984	58	02	TL	802				; Transfer Long
+986	58	02	TL	802				; Transfer Long
+988	58	02	TL	802				; Transfer Long
+98A	58	02	TL	802				; Transfer Long
+98C	58	02	TL	802				; Transfer Long
+98E	58	02	TL	802				; Transfer Long
+990	58	02	TL	802				; Transfer Long
+992	58	02	TL	802				; Transfer Long
+994	58	02	TL	802				; Transfer Long
+996	58	02	TL	802				; Transfer Long
+998	58	02	TL	802				; Transfer Long
+99A	58	02	TL	802				; Transfer Long
+99C	58	02	TL	802				; Transfer Long
+99E	58	02	TL	802				; Transfer Long
+9A0	58	02	TL	802				; Transfer Long
+9A2	58	02	TL	802				; Transfer Long
+9A4	58	02	TL	802				; Transfer Long
+9A6	58	02	TL	802				; Transfer Long
+9A8	58	02	TL	802				; Transfer Long
+9AA	58	02	TL	802				; Transfer Long
+9AC	58	02	TL	802				; Transfer Long
+9AE	58	02	TL	802				; Transfer Long
+9B0	58	02	TL	802				; Transfer Long
+9B2	58	02	TL	802				; Transfer Long
+9B4	58	02	TL	802				; Transfer Long
+9B6	58	02	TL	802				; Transfer Long
+9B8	58	02	TL	802				; Transfer Long
+9BA	58	02	TL	802				; Transfer Long
+9BC	58	02	TL	802				; Transfer Long
+9BE	58	02	TL	802				; Transfer Long
+9C0	00	07	LBL	0F8				; Load B Long
+9C2	71	  	LDI	E				; Load Accumulator Immediate
+9C3	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+9C4	73	  	LDI	C				; Load Accumulator Immediate
+9C5	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+9C6	73	  	LDI	C				; Load Accumulator Immediate
+9C7	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+9C8	75	  	LDI	A				; Load Accumulator Immediate
+9C9	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+9CA	88	  	T	9C8				; Transfer
+9CB	00	F5	LBL	00A				; Load B Long
+9CD	7D	  	LDI	2				; Load Accumulator Immediate
+9CE	3E	  	EX	1					; Exchange Accumulator and Memory
+9CF	7E	  	LDI	1				; Load Accumulator Immediate
+9D0	3C	  	EX	3					; Exchange Accumulator and Memory
+9D1	7C	  	LDI	3				; Load Accumulator Immediate
+9D2	3B	  	EX	4					; Exchange Accumulator and Memory
+9D3	73	  	LDI	C				; Load Accumulator Immediate
+9D4	3E	  	EX	1					; Exchange Accumulator and Memory
+9D5	73	  	LDI	C				; Load Accumulator Immediate
+9D6	3F	  	EX	0					; Exchange Accumulator and Memory
+9D7	00	75	LBL	08A				; Load B Long
+9D9	7E	  	LDI	1				; Load Accumulator Immediate
+9DA	3D	  	EX	2					; Exchange Accumulator and Memory
+9DB	7D	  	LDI	2				; Load Accumulator Immediate
+9DC	39	  	EX	6					; Exchange Accumulator and Memory
+9DD	7C	  	LDI	3				; Load Accumulator Immediate
+9DE	3D	  	EX	2					; Exchange Accumulator and Memory
+9DF	7E	  	LDI	1				; Load Accumulator Immediate
+9E0	3E	  	EX	1					; Exchange Accumulator and Memory
+9E1	7E	  	LDI	1				; Load Accumulator Immediate
+9E2	3F	  	EX	0					; Exchange Accumulator and Memory
+9E3	00	9D	LBL	062				; Load B Long
+9E5	73	  	LDI	C				; Load Accumulator Immediate
+9E6	3E	  	EX	1					; Exchange Accumulator and Memory
+9E7	73	  	LDI	C				; Load Accumulator Immediate
+9E8	3F	  	EX	0					; Exchange Accumulator and Memory
+9E9	00	7D	LBL	082				; Load B Long
+9EB	70	  	LDI	F				; Load Accumulator Immediate
+9EC	3E	  	EX	1					; Exchange Accumulator and Memory
+9ED	70	  	LDI	F				; Load Accumulator Immediate
+9EE	3C	  	EX	3					; Exchange Accumulator and Memory
+9EF	70	  	LDI	F				; Load Accumulator Immediate
+9F0	3E	  	EX	1					; Exchange Accumulator and Memory
+9F1	70	  	LDI	F				; Load Accumulator Immediate
+9F2	3F	  	EX	0					; Exchange Accumulator and Memory
+9F3	21	  	SF2					; Set FF2
+9F4	22	  	SF1					; Set FF1
+9F5	52	F4	TL	2F4				; Transfer Long
+9F7	05	  	RTN					; Return
+9F8	50	11	TL	011				; Transfer Long
+9FA	51	0E	TL	10E				; Transfer Long
+9FC	58	F3	TL	8F3				; Transfer Long
+9FE	52	1E	TL	21E				; Transfer Long
+A00	58	40	TL	840				; Transfer Long
+A02	00	9E	LBL	061				; Load B Long
+A04	37	  	LD	0				; Load Accumulator from Memory
+A05	6F	  	CYS					; Cycle SA register and Accumulator
+A06	1F	  	DECB					; Decrement BL
+A07	36	  	LD	1				; Load Accumulator from Memory
+A08	6F	  	CYS					; Cycle SA register and Accumulator
+A09	37	  	LD	0				; Load Accumulator from Memory
+A0A	6F	  	CYS					; Cycle SA register and Accumulator
+A0B	17	  	INCB					; Increment BL
+A0C	37	  	LD	0				; Load Accumulator from Memory
+A0D	6F	  	CYS					; Cycle SA register and Accumulator
+A0E	19	  	XABL					; Exchange Accumulator and BL
+A0F	6F	  	CYS					; Cycle SA register and Accumulator
+A10	1A	  	XAX					; Exchange Accumulator and X
+A11	18	  	XBMX				; Exchange BM and X
+A12	6F	  	CYS					; Cycle SA register and Accumulator
+A13	1A	  	XAX					; Exchange Accumulator and X
+A14	6F	  	CYS					; Cycle SA register and Accumulator
+A15	1A	  	XAX					; Exchange Accumulator and X
+A16	3F	  	EX	0					; Exchange Accumulator and Memory
+A17	37	  	LD	0				; Load Accumulator from Memory
+A18	1A	  	XAX					; Exchange Accumulator and X
+A19	60	  	ADI	F				; Add Immediate and skip on carry-out
+A1A	A5	  	T	A25				; Transfer
+A1B	17	  	INCB					; Increment BL
+A1C	95	  	T	A15				; Transfer
+A1D	18	  	XBMX				; Exchange BM and X
+A1E	1A	  	XAX					; Exchange Accumulator and X
+A1F	6E	  	ADI	1				; Add Immediate and skip on carry-out
+A20	A2	  	T	A22				; Transfer
+A21	AE	  	T	A2E				; Transfer
+A22	1A	  	XAX					; Exchange Accumulator and X
+A23	18	  	XBMX				; Exchange BM and X
+A24	95	  	T	A15				; Transfer
+A25	17	  	INCB					; Increment BL
+A26	AE	  	T	A2E				; Transfer
+A27	18	  	XBMX				; Exchange BM and X
+A28	1A	  	XAX					; Exchange Accumulator and X
+A29	6E	  	ADI	1				; Add Immediate and skip on carry-out
+A2A	AC	  	T	A2C				; Transfer
+A2B	AE	  	T	A2E				; Transfer
+A2C	1A	  	XAX					; Exchange Accumulator and X
+A2D	18	  	XBMX				; Exchange BM and X
+A2E	19	  	XABL					; Exchange Accumulator and BL
+A2F	18	  	XBMX				; Exchange BM and X
+A30	00	9E	LBL	061				; Load B Long
+A32	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+A33	1A	  	XAX					; Exchange Accumulator and X
+A34	3E	  	EX	1					; Exchange Accumulator and Memory
+A35	17	  	INCB					; Increment BL
+A36	7F	  	LDI	0				; Load Accumulator Immediate
+A37	3F	  	EX	0					; Exchange Accumulator and Memory
+A38	00	86	LBL	079				; Load B Long
+A3A	79	  	LDI	6				; Load Accumulator Immediate
+A3B	3F	  	EX	0					; Exchange Accumulator and Memory
+A3C	21	  	SF2					; Set FF2
+A3D	22	  	SF1					; Set FF1
+A3E	51	0E	TL	10E				; Transfer Long
+A40	00	00	LBL	0FF				; Load B Long
+A42	7F	  	LDI	0				; Load Accumulator Immediate
+A43	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+A44	82	  	T	A42				; Transfer
+A45	18	  	XBMX				; Exchange BM and X
+A46	1A	  	XAX					; Exchange Accumulator and X
+A47	60	  	ADI	F				; Add Immediate and skip on carry-out
+A48	8C	  	T	A4C				; Transfer
+A49	1A	  	XAX					; Exchange Accumulator and X
+A4A	18	  	XBMX				; Exchange BM and X
+A4B	82	  	T	A42				; Transfer
+A4C	00	D8	LBL	027				; Load B Long
+A4E	7E	  	LDI	1				; Load Accumulator Immediate
+A4F	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+A50	7F	  	LDI	0				; Load Accumulator Immediate
+A51	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+A52	7A	  	LDI	5				; Load Accumulator Immediate
+A53	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+A54	7B	  	LDI	4				; Load Accumulator Immediate
+A55	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+A56	70	  	LDI	F				; Load Accumulator Immediate
+A57	3F	  	EX	0					; Exchange Accumulator and Memory
+A58	00	DF	LBL	020				; Load B Long
+A5A	7E	  	LDI	1				; Load Accumulator Immediate
+A5B	3B	  	EX	4					; Exchange Accumulator and Memory
+A5C	7D	  	LDI	2				; Load Accumulator Immediate
+A5D	3E	  	EX	1					; Exchange Accumulator and Memory
+A5E	7F	  	LDI	0				; Load Accumulator Immediate
+A5F	3E	  	EX	1					; Exchange Accumulator and Memory
+A60	17	  	INCB					; Increment BL
+A61	74	  	LDI	B				; Load Accumulator Immediate
+A62	3E	  	EX	1					; Exchange Accumulator and Memory
+A63	7F	  	LDI	0				; Load Accumulator Immediate
+A64	3F	  	EX	0					; Exchange Accumulator and Memory
+A65	00	7E	LBL	081				; Load B Long
+A67	7B	  	LDI	4				; Load Accumulator Immediate
+A68	3E	  	EX	1					; Exchange Accumulator and Memory
+A69	70	  	LDI	F				; Load Accumulator Immediate
+A6A	3C	  	EX	3					; Exchange Accumulator and Memory
+A6B	7D	  	LDI	2				; Load Accumulator Immediate
+A6C	3E	  	EX	1					; Exchange Accumulator and Memory
+A6D	71	  	LDI	E				; Load Accumulator Immediate
+A6E	2C	  	EXD	3					; Exchange Accumulator and Memory and decrement BL
+A6F	7B	  	LDI	4				; Load Accumulator Immediate
+A70	3E	  	EX	1					; Exchange Accumulator and Memory
+A71	7C	  	LDI	3				; Load Accumulator Immediate
+A72	3C	  	EX	3					; Exchange Accumulator and Memory
+A73	72	  	LDI	D				; Load Accumulator Immediate
+A74	3E	  	EX	1					; Exchange Accumulator and Memory
+A75	76	  	LDI	9				; Load Accumulator Immediate
+A76	3F	  	EX	0					; Exchange Accumulator and Memory
+A77	58	C0	TL	8C0				; Transfer Long
+A79	D7	  	TM	(D7)	;(target addr=15C)	; Transfer and Mark Indirect
+A7A	6B	  	ADI	4				; Add Immediate and skip on carry-out
+A7B	21	  	SF2					; Set FF2
+A7C	EF	  	TM	(EF)	;(target addr=16C)	; Transfer and Mark Indirect
+A7D	00	00	LBL	0FF				; Load B Long
+A80	00	  	SET NIB	#0				; Load B Long
+A80	58	02	TL	802				; Transfer Long
+A82	58	02	TL	802				; Transfer Long
+A84	58	02	TL	802				; Transfer Long
+A86	58	02	TL	802				; Transfer Long
+A88	58	02	TL	802				; Transfer Long
+A8A	58	02	TL	802				; Transfer Long
+A8C	58	02	TL	802				; Transfer Long
+A8E	58	02	TL	802				; Transfer Long
+A90	58	02	TL	802				; Transfer Long
+A92	58	02	TL	802				; Transfer Long
+A94	58	02	TL	802				; Transfer Long
+A96	58	02	TL	802				; Transfer Long
+A98	58	02	TL	802				; Transfer Long
+A9A	58	02	TL	802				; Transfer Long
+A9C	58	02	TL	802				; Transfer Long
+A9E	58	02	TL	802				; Transfer Long
+AA0	58	02	TL	802				; Transfer Long
+AA2	58	02	TL	802				; Transfer Long
+AA4	58	02	TL	802				; Transfer Long
+AA6	58	02	TL	802				; Transfer Long
+AA8	58	02	TL	802				; Transfer Long
+AAA	58	02	TL	802				; Transfer Long
+AAC	58	02	TL	802				; Transfer Long
+AAE	58	02	TL	802				; Transfer Long
+AB0	58	02	TL	802				; Transfer Long
+AB2	58	02	TL	802				; Transfer Long
+AB4	58	02	TL	802				; Transfer Long
+AB6	58	02	TL	802				; Transfer Long
+AB8	58	02	TL	802				; Transfer Long
+ABA	58	02	TL	802				; Transfer Long
+ABC	58	02	TL	802				; Transfer Long
+ABE	58	02	TL	802				; Transfer Long
+AC0	00	07	LBL	0F8				; Load B Long
+AC2	71	  	LDI	E				; Load Accumulator Immediate
+AC3	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+AC4	73	  	LDI	C				; Load Accumulator Immediate
+AC5	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+AC6	73	  	LDI	C				; Load Accumulator Immediate
+AC7	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+AC8	75	  	LDI	A				; Load Accumulator Immediate
+AC9	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+ACA	88	  	T	AC8				; Transfer
+ACB	00	F5	LBL	00A				; Load B Long
+ACD	7D	  	LDI	2				; Load Accumulator Immediate
+ACE	3E	  	EX	1					; Exchange Accumulator and Memory
+ACF	7E	  	LDI	1				; Load Accumulator Immediate
+AD0	3C	  	EX	3					; Exchange Accumulator and Memory
+AD1	7C	  	LDI	3				; Load Accumulator Immediate
+AD2	3B	  	EX	4					; Exchange Accumulator and Memory
+AD3	73	  	LDI	C				; Load Accumulator Immediate
+AD4	3E	  	EX	1					; Exchange Accumulator and Memory
+AD5	73	  	LDI	C				; Load Accumulator Immediate
+AD6	3F	  	EX	0					; Exchange Accumulator and Memory
+AD7	00	75	LBL	08A				; Load B Long
+AD9	7E	  	LDI	1				; Load Accumulator Immediate
+ADA	3D	  	EX	2					; Exchange Accumulator and Memory
+ADB	7D	  	LDI	2				; Load Accumulator Immediate
+ADC	39	  	EX	6					; Exchange Accumulator and Memory
+ADD	7C	  	LDI	3				; Load Accumulator Immediate
+ADE	3D	  	EX	2					; Exchange Accumulator and Memory
+ADF	7E	  	LDI	1				; Load Accumulator Immediate
+AE0	3E	  	EX	1					; Exchange Accumulator and Memory
+AE1	7E	  	LDI	1				; Load Accumulator Immediate
+AE2	3F	  	EX	0					; Exchange Accumulator and Memory
+AE3	00	9D	LBL	062				; Load B Long
+AE5	73	  	LDI	C				; Load Accumulator Immediate
+AE6	3E	  	EX	1					; Exchange Accumulator and Memory
+AE7	73	  	LDI	C				; Load Accumulator Immediate
+AE8	3F	  	EX	0					; Exchange Accumulator and Memory
+AE9	00	7D	LBL	082				; Load B Long
+AEB	70	  	LDI	F				; Load Accumulator Immediate
+AEC	3E	  	EX	1					; Exchange Accumulator and Memory
+AED	70	  	LDI	F				; Load Accumulator Immediate
+AEE	3C	  	EX	3					; Exchange Accumulator and Memory
+AEF	70	  	LDI	F				; Load Accumulator Immediate
+AF0	3E	  	EX	1					; Exchange Accumulator and Memory
+AF1	70	  	LDI	F				; Load Accumulator Immediate
+AF2	3F	  	EX	0					; Exchange Accumulator and Memory
+AF3	21	  	SF2					; Set FF2
+AF4	22	  	SF1					; Set FF1
+AF5	52	F4	TL	2F4				; Transfer Long
+AF7	05	  	RTN					; Return
+AF8	50	11	TL	011				; Transfer Long
+AFA	51	0E	TL	10E				; Transfer Long
+AFC	58	F3	TL	8F3				; Transfer Long
+AFE	52	1E	TL	21E				; Transfer Long
+B00	58	40	TL	840				; Transfer Long
+B02	00	9E	LBL	061				; Load B Long
+B04	37	  	LD	0				; Load Accumulator from Memory
+B05	6F	  	CYS					; Cycle SA register and Accumulator
+B06	1F	  	DECB					; Decrement BL
+B07	36	  	LD	1				; Load Accumulator from Memory
+B08	6F	  	CYS					; Cycle SA register and Accumulator
+B09	37	  	LD	0				; Load Accumulator from Memory
+B0A	6F	  	CYS					; Cycle SA register and Accumulator
+B0B	17	  	INCB					; Increment BL
+B0C	37	  	LD	0				; Load Accumulator from Memory
+B0D	6F	  	CYS					; Cycle SA register and Accumulator
+B0E	19	  	XABL					; Exchange Accumulator and BL
+B0F	6F	  	CYS					; Cycle SA register and Accumulator
+B10	1A	  	XAX					; Exchange Accumulator and X
+B11	18	  	XBMX				; Exchange BM and X
+B12	6F	  	CYS					; Cycle SA register and Accumulator
+B13	1A	  	XAX					; Exchange Accumulator and X
+B14	6F	  	CYS					; Cycle SA register and Accumulator
+B15	1A	  	XAX					; Exchange Accumulator and X
+B16	3F	  	EX	0					; Exchange Accumulator and Memory
+B17	37	  	LD	0				; Load Accumulator from Memory
+B18	1A	  	XAX					; Exchange Accumulator and X
+B19	60	  	ADI	F				; Add Immediate and skip on carry-out
+B1A	A5	  	T	B25				; Transfer
+B1B	17	  	INCB					; Increment BL
+B1C	95	  	T	B15				; Transfer
+B1D	18	  	XBMX				; Exchange BM and X
+B1E	1A	  	XAX					; Exchange Accumulator and X
+B1F	6E	  	ADI	1				; Add Immediate and skip on carry-out
+B20	A2	  	T	B22				; Transfer
+B21	AE	  	T	B2E				; Transfer
+B22	1A	  	XAX					; Exchange Accumulator and X
+B23	18	  	XBMX				; Exchange BM and X
+B24	95	  	T	B15				; Transfer
+B25	17	  	INCB					; Increment BL
+B26	AE	  	T	B2E				; Transfer
+B27	18	  	XBMX				; Exchange BM and X
+B28	1A	  	XAX					; Exchange Accumulator and X
+B29	6E	  	ADI	1				; Add Immediate and skip on carry-out
+B2A	AC	  	T	B2C				; Transfer
+B2B	AE	  	T	B2E				; Transfer
+B2C	1A	  	XAX					; Exchange Accumulator and X
+B2D	18	  	XBMX				; Exchange BM and X
+B2E	19	  	XABL					; Exchange Accumulator and BL
+B2F	18	  	XBMX				; Exchange BM and X
+B30	00	9E	LBL	061				; Load B Long
+B32	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+B33	1A	  	XAX					; Exchange Accumulator and X
+B34	3E	  	EX	1					; Exchange Accumulator and Memory
+B35	17	  	INCB					; Increment BL
+B36	7F	  	LDI	0				; Load Accumulator Immediate
+B37	3F	  	EX	0					; Exchange Accumulator and Memory
+B38	00	86	LBL	079				; Load B Long
+B3A	79	  	LDI	6				; Load Accumulator Immediate
+B3B	3F	  	EX	0					; Exchange Accumulator and Memory
+B3C	21	  	SF2					; Set FF2
+B3D	22	  	SF1					; Set FF1
+B3E	51	0E	TL	10E				; Transfer Long
+B40	00	00	LBL	0FF				; Load B Long
+B42	7F	  	LDI	0				; Load Accumulator Immediate
+B43	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+B44	82	  	T	B42				; Transfer
+B45	18	  	XBMX				; Exchange BM and X
+B46	1A	  	XAX					; Exchange Accumulator and X
+B47	60	  	ADI	F				; Add Immediate and skip on carry-out
+B48	8C	  	T	B4C				; Transfer
+B49	1A	  	XAX					; Exchange Accumulator and X
+B4A	18	  	XBMX				; Exchange BM and X
+B4B	82	  	T	B42				; Transfer
+B4C	00	D8	LBL	027				; Load B Long
+B4E	7E	  	LDI	1				; Load Accumulator Immediate
+B4F	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+B50	7F	  	LDI	0				; Load Accumulator Immediate
+B51	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+B52	7A	  	LDI	5				; Load Accumulator Immediate
+B53	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+B54	7B	  	LDI	4				; Load Accumulator Immediate
+B55	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+B56	70	  	LDI	F				; Load Accumulator Immediate
+B57	3F	  	EX	0					; Exchange Accumulator and Memory
+B58	00	DF	LBL	020				; Load B Long
+B5A	7E	  	LDI	1				; Load Accumulator Immediate
+B5B	3B	  	EX	4					; Exchange Accumulator and Memory
+B5C	7D	  	LDI	2				; Load Accumulator Immediate
+B5D	3E	  	EX	1					; Exchange Accumulator and Memory
+B5E	7F	  	LDI	0				; Load Accumulator Immediate
+B5F	3E	  	EX	1					; Exchange Accumulator and Memory
+B60	17	  	INCB					; Increment BL
+B61	74	  	LDI	B				; Load Accumulator Immediate
+B62	3E	  	EX	1					; Exchange Accumulator and Memory
+B63	7F	  	LDI	0				; Load Accumulator Immediate
+B64	3F	  	EX	0					; Exchange Accumulator and Memory
+B65	00	7E	LBL	081				; Load B Long
+B67	7B	  	LDI	4				; Load Accumulator Immediate
+B68	3E	  	EX	1					; Exchange Accumulator and Memory
+B69	70	  	LDI	F				; Load Accumulator Immediate
+B6A	3C	  	EX	3					; Exchange Accumulator and Memory
+B6B	7D	  	LDI	2				; Load Accumulator Immediate
+B6C	3E	  	EX	1					; Exchange Accumulator and Memory
+B6D	71	  	LDI	E				; Load Accumulator Immediate
+B6E	2C	  	EXD	3					; Exchange Accumulator and Memory and decrement BL
+B6F	7B	  	LDI	4				; Load Accumulator Immediate
+B70	3E	  	EX	1					; Exchange Accumulator and Memory
+B71	7C	  	LDI	3				; Load Accumulator Immediate
+B72	3C	  	EX	3					; Exchange Accumulator and Memory
+B73	72	  	LDI	D				; Load Accumulator Immediate
+B74	3E	  	EX	1					; Exchange Accumulator and Memory
+B75	76	  	LDI	9				; Load Accumulator Immediate
+B76	3F	  	EX	0					; Exchange Accumulator and Memory
+B77	58	C0	TL	8C0				; Transfer Long
+B79	D7	  	TM	(D7)	;(target addr=15C)	; Transfer and Mark Indirect
+B7A	6B	  	ADI	4				; Add Immediate and skip on carry-out
+B7B	21	  	SF2					; Set FF2
+B7C	EF	  	TM	(EF)	;(target addr=16C)	; Transfer and Mark Indirect
+B7D	00	00	LBL	0FF				; Load B Long
+B80	00	  	SET NIB	#0				; Load B Long
+B80	58	02	TL	802				; Transfer Long
+B82	58	02	TL	802				; Transfer Long
+B84	58	02	TL	802				; Transfer Long
+B86	58	02	TL	802				; Transfer Long
+B88	58	02	TL	802				; Transfer Long
+B8A	58	02	TL	802				; Transfer Long
+B8C	58	02	TL	802				; Transfer Long
+B8E	58	02	TL	802				; Transfer Long
+B90	58	02	TL	802				; Transfer Long
+B92	58	02	TL	802				; Transfer Long
+B94	58	02	TL	802				; Transfer Long
+B96	58	02	TL	802				; Transfer Long
+B98	58	02	TL	802				; Transfer Long
+B9A	58	02	TL	802				; Transfer Long
+B9C	58	02	TL	802				; Transfer Long
+B9E	58	02	TL	802				; Transfer Long
+BA0	58	02	TL	802				; Transfer Long
+BA2	58	02	TL	802				; Transfer Long
+BA4	58	02	TL	802				; Transfer Long
+BA6	58	02	TL	802				; Transfer Long
+BA8	58	02	TL	802				; Transfer Long
+BAA	58	02	TL	802				; Transfer Long
+BAC	58	02	TL	802				; Transfer Long
+BAE	58	02	TL	802				; Transfer Long
+BB0	58	02	TL	802				; Transfer Long
+BB2	58	02	TL	802				; Transfer Long
+BB4	58	02	TL	802				; Transfer Long
+BB6	58	02	TL	802				; Transfer Long
+BB8	58	02	TL	802				; Transfer Long
+BBA	58	02	TL	802				; Transfer Long
+BBC	58	02	TL	802				; Transfer Long
+BBE	58	02	TL	802				; Transfer Long
+BC0	00	07	LBL	0F8				; Load B Long
+BC2	71	  	LDI	E				; Load Accumulator Immediate
+BC3	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+BC4	73	  	LDI	C				; Load Accumulator Immediate
+BC5	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+BC6	73	  	LDI	C				; Load Accumulator Immediate
+BC7	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+BC8	75	  	LDI	A				; Load Accumulator Immediate
+BC9	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+BCA	88	  	T	BC8				; Transfer
+BCB	00	F5	LBL	00A				; Load B Long
+BCD	7D	  	LDI	2				; Load Accumulator Immediate
+BCE	3E	  	EX	1					; Exchange Accumulator and Memory
+BCF	7E	  	LDI	1				; Load Accumulator Immediate
+BD0	3C	  	EX	3					; Exchange Accumulator and Memory
+BD1	7C	  	LDI	3				; Load Accumulator Immediate
+BD2	3B	  	EX	4					; Exchange Accumulator and Memory
+BD3	73	  	LDI	C				; Load Accumulator Immediate
+BD4	3E	  	EX	1					; Exchange Accumulator and Memory
+BD5	73	  	LDI	C				; Load Accumulator Immediate
+BD6	3F	  	EX	0					; Exchange Accumulator and Memory
+BD7	00	75	LBL	08A				; Load B Long
+BD9	7E	  	LDI	1				; Load Accumulator Immediate
+BDA	3D	  	EX	2					; Exchange Accumulator and Memory
+BDB	7D	  	LDI	2				; Load Accumulator Immediate
+BDC	39	  	EX	6					; Exchange Accumulator and Memory
+BDD	7C	  	LDI	3				; Load Accumulator Immediate
+BDE	3D	  	EX	2					; Exchange Accumulator and Memory
+BDF	7E	  	LDI	1				; Load Accumulator Immediate
+BE0	3E	  	EX	1					; Exchange Accumulator and Memory
+BE1	7E	  	LDI	1				; Load Accumulator Immediate
+BE2	3F	  	EX	0					; Exchange Accumulator and Memory
+BE3	00	9D	LBL	062				; Load B Long
+BE5	73	  	LDI	C				; Load Accumulator Immediate
+BE6	3E	  	EX	1					; Exchange Accumulator and Memory
+BE7	73	  	LDI	C				; Load Accumulator Immediate
+BE8	3F	  	EX	0					; Exchange Accumulator and Memory
+BE9	00	7D	LBL	082				; Load B Long
+BEB	70	  	LDI	F				; Load Accumulator Immediate
+BEC	3E	  	EX	1					; Exchange Accumulator and Memory
+BED	70	  	LDI	F				; Load Accumulator Immediate
+BEE	3C	  	EX	3					; Exchange Accumulator and Memory
+BEF	70	  	LDI	F				; Load Accumulator Immediate
+BF0	3E	  	EX	1					; Exchange Accumulator and Memory
+BF1	70	  	LDI	F				; Load Accumulator Immediate
+BF2	3F	  	EX	0					; Exchange Accumulator and Memory
+BF3	21	  	SF2					; Set FF2
+BF4	22	  	SF1					; Set FF1
+BF5	52	F4	TL	2F4				; Transfer Long
+BF7	05	  	RTN					; Return
+BF8	50	11	TL	011				; Transfer Long
+BFA	51	0E	TL	10E				; Transfer Long
+BFC	58	F3	TL	8F3				; Transfer Long
+BFE	52	1E	TL	21E				; Transfer Long
+C00	54	4C	TL	44C				; Transfer Long
+C02	DA	  	TM	(DA)	;(target addr=142)	; Transfer and Mark Indirect
+C03	12	  	LAX					; Load Accumulator from X Register
+C04	B4	  	T	C34				; Transfer
+C05	01	CB	TML	1CB				; Transfer and Mark Long
+C07	8B	  	T	C0B				; Transfer
+C08	00	7C	LBL	083				; Load B Long
+C0A	D4	  	TM	(D4)	;(target addr=12D)	; Transfer and Mark Indirect
+C0B	00	5F	LBL	0A0				; Load B Long
+C0D	22	  	SF1					; Set FF1
+C0E	E3	  	TM	(E3)	;(target addr=183)	; Transfer and Mark Indirect
+C0F	E6	  	TM	(E6)	;(target addr=153)	; Transfer and Mark Indirect
+C10	EB	  	TM	(EB)	;(target addr=164)	; Transfer and Mark Indirect
+C11	16	  	SKF1				; Skip if FF1 Equals 1
+C12	80	  	T	C00				; Transfer
+C13	A6	  	T	C26				; Transfer
+C14	01	CB	TML	1CB				; Transfer and Mark Long
+C16	9A	  	T	C1A				; Transfer
+C17	00	64	LBL	09B				; Load B Long
+C19	D4	  	TM	(D4)	;(target addr=12D)	; Transfer and Mark Indirect
+C1A	00	4F	LBL	0B0				; Load B Long
+C1C	37	  	LD	0				; Load Accumulator from Memory
+C1D	A9	  	T	C29				; Transfer
+C1E	01	CB	TML	1CB				; Transfer and Mark Long
+C20	A4	  	T	C24				; Transfer
+C21	00	74	LBL	08B				; Load B Long
+C23	D4	  	TM	(D4)	;(target addr=12D)	; Transfer and Mark Indirect
+C24	00	5E	LBL	0A1				; Load B Long
+C26	7C	  	LDI	3				; Load Accumulator Immediate
+C27	0D	  	AND					; Logical AND
+C28	6E	  	ADI	1				; Add Immediate and skip on carry-out
+C29	00	5E	LBL	0A1				; Load B Long
+C2B	22	  	SF1					; Set FF1
+C2C	1B	  	LXA					; Load X Register from Accumulator
+C2D	73	  	LDI	C				; Load Accumulator Immediate
+C2E	0D	  	AND					; Logical AND
+C2F	6B	  	ADI	4				; Add Immediate and skip on carry-out
+C30	82	  	T	C02				; Transfer
+C31	DE	  	TM	(DE)	;(target addr=14B)	; Transfer and Mark Indirect
+C32	12	  	LAX					; Load Accumulator from X Register
+C33	6E	  	ADI	1				; Add Immediate and skip on carry-out
+C34	1B	  	LXA					; Load X Register from Accumulator
+C35	00	16	LBL	0E9				; Load B Long
+C37	F4	  	TM	(F4)	;(target addr=191)	; Transfer and Mark Indirect
+C38	BD	  	T	C3D				; Transfer
+C39	00	44	LBL	0BB				; Load B Long
+C3B	12	  	LAX					; Load Accumulator from X Register
+C3C	D5	  	TM	(D5)	;(target addr=12E)	; Transfer and Mark Indirect
+C3D	12	  	LAX					; Load Accumulator from X Register
+C3E	54	40	TL	440				; Transfer Long
+C40	00	4C	LBL	0B3				; Load B Long
+C42	D5	  	TM	(D5)	;(target addr=12E)	; Transfer and Mark Indirect
+C43	C2	  	LB	(C2)	(B<=051)				; Load B Indirect
+C44	D3	  	TM	(D3)	;(target addr=123)	; Transfer and Mark Indirect
+C45	8D	  	T	C4D				; Transfer
+C46	1F	  	DECB					; Decrement BL
+C47	30	  	LD	7				; Load Accumulator from Memory
+C48	0E	  	COMP				; Complement
+C49	09	  	ADSK				; Add and skip on carry-out
+C4A	90	  	T	C50				; Transfer
+C4B	30	  	LD	7				; Load Accumulator from Memory
+C4C	D0	  	TM	(D0)	;(target addr=117)	; Transfer and Mark Indirect
+C4D	22	  	SF1					; Set FF1
+C4E	59	80	TL	980				; Transfer Long
+C50	30	  	LD	7				; Load Accumulator from Memory
+C51	3F	  	EX	0					; Exchange Accumulator and Memory
+C52	17	  	INCB					; Increment BL
+C53	76	  	LDI	9				; Load Accumulator Immediate
+C54	3F	  	EX	0					; Exchange Accumulator and Memory
+C55	8D	  	T	C4D				; Transfer
+C56	14	  	SKF2				; Skip if FF2 Equals 1
+C57	58	00	TL	800				; Transfer Long
+C59	A6	  	T	C66				; Transfer
+C5A	F8	  	TM	(F8)	;(target addr=199)	; Transfer and Mark Indirect
+C5B	9E	  	T	C5E				; Transfer
+C5C	53	F7	TL	3F7				; Transfer Long
+C5E	54	D3	TL	4D3				; Transfer Long
+C60	9C	  	T	C5C				; Transfer
+C61	00	86	LBL	079				; Load B Long
+C63	37	  	LD	0				; Load Accumulator from Memory
+C64	6B	  	ADI	4				; Add Immediate and skip on carry-out
+C65	A8	  	T	C68				; Transfer
+C66	51	0E	TL	10E				; Transfer Long
+C68	69	  	ADI	6				; Add Immediate and skip on carry-out
+C69	A6	  	T	C66				; Transfer
+C6A	7E	  	LDI	1				; Load Accumulator Immediate
+C6B	0C	  	EOR					; Logical Exclusive-OR
+C6C	1B	  	LXA					; Load X Register from Accumulator
+C6D	C1	  	LB	(C1)	(B<=0E9)				; Load B Indirect
+C6E	73	  	LDI	C				; Load Accumulator Immediate
+C6F	0D	  	AND					; Logical AND
+C70	1E	  	SKZ					; Skip on Accumulator Zero
+C71	B3	  	T	C73				; Transfer
+C72	A6	  	T	C66				; Transfer
+C73	67	  	ADI	8				; Add Immediate and skip on carry-out
+C74	7F	  	LDI	0				; Load Accumulator Immediate
+C75	7E	  	LDI	1				; Load Accumulator Immediate
+C76	19	  	XABL					; Exchange Accumulator and BL
+C77	18	  	XBMX				; Exchange BM and X
+C78	7E	  	LDI	1				; Load Accumulator Immediate
+C79	0B	  	AD					; Add
+C7A	3F	  	EX	0					; Exchange Accumulator and Memory
+C7B	A6	  	T	C66				; Transfer
+C7C	1C	D3	IOL	D3				; Input/Output Long
+C7E	58	00	TL	800				; Transfer Long
+C80	7E	  	LDI	1				; Load Accumulator Immediate
+C81	1C	D3	IOL	D3				; Input/Output Long
+C83	01	D2	TML	1D2				; Transfer and Mark Long
+C85	51	11	TL	111				; Transfer Long
+C87	00	47	LBL	0B8				; Load B Long
+C89	F8	  	TM	(F8)	;(target addr=199)	; Transfer and Mark Indirect
+C8A	9F	  	T	C9F				; Transfer
+C8B	D2	  	TM	(D2)	;(target addr=122)	; Transfer and Mark Indirect
+C8C	17	  	INCB					; Increment BL
+C8D	75	  	LDI	A				; Load Accumulator Immediate
+C8E	3F	  	EX	0					; Exchange Accumulator and Memory
+C8F	CC	  	LB	(CC)	(B<=0B9)				; Load B Indirect
+C90	35	  	LD	2				; Load Accumulator from Memory
+C91	3C	  	EX	3					; Exchange Accumulator and Memory
+C92	7F	  	LDI	0				; Load Accumulator Immediate
+C93	3F	  	EX	0					; Exchange Accumulator and Memory
+C94	00	B6	LBL	049				; Load B Long
+C96	7E	  	LDI	1				; Load Accumulator Immediate
+C97	0D	  	AND					; Logical AND
+C98	1E	  	SKZ					; Skip on Accumulator Zero
+C99	7D	  	LDI	2				; Load Accumulator Immediate
+C9A	7B	  	LDI	4				; Load Accumulator Immediate
+C9B	1C	D6	IOL	D6				; Input/Output Long
+C9D	50	A7	TL	0A7				; Transfer Long
+C9F	D2	  	TM	(D2)	;(target addr=122)	; Transfer and Mark Indirect
+CA0	A4	  	T	CA4				; Transfer
+CA1	D2	  	TM	(D2)	;(target addr=122)	; Transfer and Mark Indirect
+CA2	CC	  	LB	(CC)	(B<=0B9)				; Load B Indirect
+CA3	A9	  	T	CA9				; Transfer
+CA4	D2	  	TM	(D2)	;(target addr=122)	; Transfer and Mark Indirect
+CA5	8F	  	T	C8F				; Transfer
+CA6	00	00	LBL	0FF				; Load B Long
+CA8	00	D6	LBL	029				; Load B Long
+CAA	F7	  	TM	(F7)	;(target addr=194)	; Transfer and Mark Indirect
+CAB	D6	  	TM	(D6)	;(target addr=17B)	; Transfer and Mark Indirect
+CAC	8F	  	T	C8F				; Transfer
+CAD	1F	  	DECB					; Decrement BL
+CAE	D6	  	TM	(D6)	;(target addr=17B)	; Transfer and Mark Indirect
+CAF	00	B6	LBL	049				; Load B Long
+CB1	37	  	LD	0				; Load Accumulator from Memory
+CB2	1B	  	LXA					; Load X Register from Accumulator
+CB3	C8	  	LB	(C8)	(B<=042)				; Load B Indirect
+CB4	FC	  	TM	(FC)	;(target addr=19D)	; Transfer and Mark Indirect
+CB5	C9	  	LB	(C9)	(B<=04A)				; Load B Indirect
+CB6	FC	  	TM	(FC)	;(target addr=19D)	; Transfer and Mark Indirect
+CB7	CA	  	LB	(CA)	(B<=05A)				; Load B Indirect
+CB8	FC	  	TM	(FC)	;(target addr=19D)	; Transfer and Mark Indirect
+CB9	CB	  	LB	(CB)	(B<=052)				; Load B Indirect
+CBA	FC	  	TM	(FC)	;(target addr=19D)	; Transfer and Mark Indirect
+CBB	22	  	SF1					; Set FF1
+CBC	50	0B	TL	00B				; Transfer Long
+CBE	00	00	LBL	0FF				; Load B Long
+CC0	77	  	LDI	8				; Load Accumulator Immediate
+CC1	76	  	LDI	9				; Load Accumulator Immediate
+CC2	75	  	LDI	A				; Load Accumulator Immediate
+CC3	74	  	LDI	B				; Load Accumulator Immediate
+CC4	73	  	LDI	C				; Load Accumulator Immediate
+CC5	72	  	LDI	D				; Load Accumulator Immediate
+CC6	71	  	LDI	E				; Load Accumulator Immediate
+CC7	70	  	LDI	F				; Load Accumulator Immediate
+CC8	1C	D6	IOL	D6				; Input/Output Long
+CCA	16	  	SKF1				; Skip if FF1 Equals 1
+CCB	91	  	T	CD1				; Transfer
+CCC	14	  	SKF2				; Skip if FF2 Equals 1
+CCD	7D	  	LDI	2				; Load Accumulator Immediate
+CCE	7E	  	LDI	1				; Load Accumulator Immediate
+CCF	21	  	SF2					; Set FF2
+CD0	F9	  	TM	(F9)	;(target addr=1B5)	; Transfer and Mark Indirect
+CD1	50	05	TL	005				; Transfer Long
+CD3	CE	  	LB	(CE)	(B<=016)				; Load B Indirect
+CD4	D6	  	TM	(D6)	;(target addr=17B)	; Transfer and Mark Indirect
+CD5	98	  	T	CD8				; Transfer
+CD6	58	00	TL	800				; Transfer Long
+CD8	CF	  	LB	(CF)	(B<=017)				; Load B Indirect
+CD9	F6	  	TM	(F6)	;(target addr=193)	; Transfer and Mark Indirect
+CDA	7C	  	LDI	3				; Load Accumulator Immediate
+CDB	74	  	LDI	B				; Load Accumulator Immediate
+CDC	F9	  	TM	(F9)	;(target addr=1B5)	; Transfer and Mark Indirect
+CDD	B0	  	T	CF0				; Transfer
+CDE	03	93	TML	393				; Transfer and Mark Long
+CE0	00	00	LBL	0FF				; Load B Long
+CE2	C5	  	LB	(C5)	(B<=0B1)				; Load B Indirect
+CE3	F7	  	TM	(F7)	;(target addr=194)	; Transfer and Mark Indirect
+CE4	A9	  	T	CE9				; Transfer
+CE5	CE	  	LB	(CE)	(B<=016)				; Load B Indirect
+CE6	D0	  	TM	(D0)	;(target addr=117)	; Transfer and Mark Indirect
+CE7	05	  	RTN					; Return
+CE8	05	  	RTN					; Return
+CE9	CE	  	LB	(CE)	(B<=016)				; Load B Indirect
+CEA	D2	  	TM	(D2)	;(target addr=122)	; Transfer and Mark Indirect
+CEB	05	  	RTN					; Return
+CEC	3F	  	EX	0					; Exchange Accumulator and Memory
+CED	05	  	RTN					; Return
+CEE	00	00	LBL	0FF				; Load B Long
+CF0	00	96	LBL	069				; Load B Long
+CF2	F8	  	TM	(F8)	;(target addr=199)	; Transfer and Mark Indirect
+CF3	BA	  	T	CFA				; Transfer
+CF4	1F	  	DECB					; Decrement BL
+CF5	F8	  	TM	(F8)	;(target addr=199)	; Transfer and Mark Indirect
+CF6	BA	  	T	CFA				; Transfer
+CF7	01	03	TML	103				; Transfer and Mark Long
+CF9	93	  	T	CD3				; Transfer
+CFA	C7	  	LB	(C7)	(B<=0E0)				; Load B Indirect
+CFB	DC	  	TM	(DC)	;(target addr=149)	; Transfer and Mark Indirect
+CFC	53	17	TL	317				; Transfer Long
+CFE	00	00	LBL	0FF				; Load B Long
+D00	54	1E	TL	41E				; Transfer Long
+D02	54	05	TL	405				; Transfer Long
+D04	54	14	TL	414				; Transfer Long
+D06	52	D0	TL	2D0				; Transfer Long
+D08	54	61	TL	461				; Transfer Long
+D0A	54	61	TL	461				; Transfer Long
+D0C	53	70	TL	370				; Transfer Long
+D0E	52	DC	TL	2DC				; Transfer Long
+D10	00	FA	LBL	005				; Load B Long
+D12	7F	  	LDI	0				; Load Accumulator Immediate
+D13	1C	41	IOL	41				; Input/Output Long
+D15	00	D6	LBL	029				; Load B Long
+D17	7F	  	LDI	0				; Load Accumulator Immediate
+D18	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+D19	7F	  	LDI	0				; Load Accumulator Immediate
+D1A	3F	  	EX	0					; Exchange Accumulator and Memory
+D1B	55	40	TL	540				; Transfer Long
+D1D	19	  	XABL					; Exchange Accumulator and BL
+D1E	17	  	INCB					; Increment BL
+D1F	37	  	LD	0				; Load Accumulator from Memory
+D20	69	  	ADI	6				; Add Immediate and skip on carry-out
+D21	6D	  	ADI	2				; Add Immediate and skip on carry-out
+D22	A5	  	T	D25				; Transfer
+D23	55	6C	TL	56C				; Transfer Long
+D25	7D	  	LDI	2				; Load Accumulator Immediate
+D26	55	64	TL	564				; Transfer Long
+D28	00	FD	LBL	002				; Load B Long
+D2A	7F	  	LDI	0				; Load Accumulator Immediate
+D2B	1C	41	IOL	41				; Input/Output Long
+D2D	00	F9	LBL	006				; Load B Long
+D2F	7F	  	LDI	0				; Load Accumulator Immediate
+D30	1C	41	IOL	41				; Input/Output Long
+D32	1C	41	IOL	41				; Input/Output Long
+D34	17	  	INCB					; Increment BL
+D35	7F	  	LDI	0				; Load Accumulator Immediate
+D36	1C	41	IOL	41				; Input/Output Long
+D38	00	FF	LBL	000				; Load B Long
+D3A	77	  	LDI	8				; Load Accumulator Immediate
+D3B	1C	41	IOL	41				; Input/Output Long
+D3D	1E	  	SKZ					; Skip on Accumulator Zero
+D3E	05	  	RTN					; Return
+D3F	07	  	RTNSK				; Return and Skip
+D40	00	FF	LBL	000				; Load B Long
+D42	7F	  	LDI	0				; Load Accumulator Immediate
+D43	3F	  	EX	0					; Exchange Accumulator and Memory
+D44	03	66	TML	366				; Transfer and Mark Long
+D46	7E	  	LDI	1				; Load Accumulator Immediate
+D47	03	68	TML	368				; Transfer and Mark Long
+D49	03	66	TML	366				; Transfer and Mark Long
+D4B	7D	  	LDI	2				; Load Accumulator Immediate
+D4C	03	68	TML	368				; Transfer and Mark Long
+D4E	03	66	TML	366				; Transfer and Mark Long
+D50	7B	  	LDI	4				; Load Accumulator Immediate
+D51	03	68	TML	368				; Transfer and Mark Long
+D53	03	66	TML	366				; Transfer and Mark Long
+D55	77	  	LDI	8				; Load Accumulator Immediate
+D56	03	68	TML	368				; Transfer and Mark Long
+D58	00	D6	LBL	029				; Load B Long
+D5A	35	  	LD	2				; Load Accumulator from Memory
+D5B	2D	  	EXD	2					; Exchange Accumulator and Memory and decrement BL
+D5C	35	  	LD	2				; Load Accumulator from Memory
+D5D	19	  	XABL					; Exchange Accumulator and BL
+D5E	42	  	SKBI	2					; Skip if BL equals to Immediate.
+D5F	A2	  	T	D62				; Transfer
+D60	55	1D	TL	51D				; Transfer Long
+D62	19	  	XABL					; Exchange Accumulator and BL
+D63	17	  	INCB					; Increment BL
+D64	18	  	XBMX				; Exchange BM and X
+D65	1B	  	LXA					; Load X Register from Accumulator
+D66	18	  	XBMX				; Exchange BM and X
+D67	13	  	SAG					; Special Address Generation
+D68	37	  	LD	0				; Load Accumulator from Memory
+D69	19	  	XABL					; Exchange Accumulator and BL
+D6A	12	  	LAX					; Load Accumulator from X Register
+D6B	3F	  	EX	0					; Exchange Accumulator and Memory
+D6C	00	D6	LBL	029				; Load B Long
+D6E	24	  	RC					; Reset Carry flip-flop
+D6F	7E	  	LDI	1				; Load Accumulator Immediate
+D70	0B	  	AD					; Add
+D71	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+D72	15	  	SKC					; Skip on Carry flip-flop
+D73	80	  	T	D40				; Transfer
+D74	47	  	SKBI	7					; Skip if BL equals to Immediate.
+D75	AE	  	T	D6E				; Transfer
+D76	00	FA	LBL	005				; Load B Long
+D78	77	  	LDI	8				; Load Accumulator Immediate
+D79	1C	41	IOL	41				; Input/Output Long
+D7B	19	  	XABL					; Exchange Accumulator and BL
+D7C	03	6A	TML	36A				; Transfer and Mark Long
+D7E	52	D0	TL	2D0				; Transfer Long
+D80	0F	  	OR					; Logical OR
+D81	1B	  	LXA					; Load X Register from Accumulator
+D82	3F	  	EX	0					; Exchange Accumulator and Memory
+D83	00	F8	LBL	007				; Load B Long
+D85	77	  	LDI	8				; Load Accumulator Immediate
+D86	1C	41	IOL	41				; Input/Output Long
+D88	24	  	RC					; Reset Carry flip-flop
+D89	02	7E	TML	27E				; Transfer and Mark Long
+D8B	20	  	SC					; Set Carry flip-flop
+D8C	01	3E	TML	13E				; Transfer and Mark Long
+D8E	02	7E	TML	27E				; Transfer and Mark Long
+D90	96	  	T	D96				; Transfer
+D91	01	BE	TML	1BE				; Transfer and Mark Long
+D93	02	7E	TML	27E				; Transfer and Mark Long
+D95	97	  	T	D97				; Transfer
+D96	21	  	SF2					; Set FF2
+D97	02	3E	TML	23E				; Transfer and Mark Long
+D99	00	FD	LBL	002				; Load B Long
+D9B	77	  	LDI	8				; Load Accumulator Immediate
+D9C	1C	41	IOL	41				; Input/Output Long
+D9E	00	FB	LBL	004				; Load B Long
+DA0	7F	  	LDI	0				; Load Accumulator Immediate
+DA1	1C	41	IOL	41				; Input/Output Long
+DA3	1C	41	IOL	41				; Input/Output Long
+DA5	14	  	SKF2				; Skip if FF2 Equals 1
+DA6	05	  	RTN					; Return
+DA7	00	D6	LBL	029				; Load B Long
+DA9	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+DAA	1A	  	XAX					; Exchange Accumulator and X
+DAB	3F	  	EX	0					; Exchange Accumulator and Memory
+DAC	1A	  	XAX					; Exchange Accumulator and X
+DAD	18	  	XBMX				; Exchange BM and X
+DAE	55	7B	TL	57B				; Transfer Long
+DB0	15	  	SKC					; Skip on Carry flip-flop
+DB1	77	  	LDI	8				; Load Accumulator Immediate
+DB2	7F	  	LDI	0				; Load Accumulator Immediate
+DB3	00	FE	LBL	001				; Load B Long
+DB5	1C	41	IOL	41				; Input/Output Long
+DB7	00	FC	LBL	003				; Load B Long
+DB9	7F	  	LDI	0				; Load Accumulator Immediate
+DBA	1C	41	IOL	41				; Input/Output Long
+DBC	1C	41	IOL	41				; Input/Output Long
+DBE	05	  	RTN					; Return
+DC0	00	  	SET NIB	#0				; Load B Long
+DC0	3F	  	EX	0					; Exchange Accumulator and Memory
+DC1	00	FB	LBL	004				; Load B Long
+DC3	7E	  	LDI	1				; Load Accumulator Immediate
+DC4	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+DC5	37	  	LD	0				; Load Accumulator from Memory
+DC6	1B	  	LXA					; Load X Register from Accumulator
+DC7	1F	  	DECB					; Decrement BL
+DC8	37	  	LD	0				; Load Accumulator from Memory
+DC9	1A	  	XAX					; Exchange Accumulator and X
+DCA	18	  	XBMX				; Exchange BM and X
+DCB	19	  	XABL					; Exchange Accumulator and BL
+DCC	37	  	LD	0				; Load Accumulator from Memory
+DCD	00	FB	LBL	004				; Load B Long
+DCF	0D	  	AND					; Logical AND
+DD0	1E	  	SKZ					; Skip on Accumulator Zero
+DD1	7F	  	LDI	0				; Load Accumulator Immediate
+DD2	77	  	LDI	8				; Load Accumulator Immediate
+DD3	00	FE	LBL	001				; Load B Long
+DD5	1C	41	IOL	41				; Input/Output Long
+DD7	17	  	INCB					; Increment BL
+DD8	7F	  	LDI	0				; Load Accumulator Immediate
+DD9	1C	41	IOL	41				; Input/Output Long
+DDB	17	  	INCB					; Increment BL
+DDC	7F	  	LDI	0				; Load Accumulator Immediate
+DDD	1C	41	IOL	41				; Input/Output Long
+DDF	1C	41	IOL	41				; Input/Output Long
+DE1	1F	  	DECB					; Decrement BL
+DE2	77	  	LDI	8				; Load Accumulator Immediate
+DE3	1C	41	IOL	41				; Input/Output Long
+DE5	00	FB	LBL	004				; Load B Long
+DE7	7F	  	LDI	0				; Load Accumulator Immediate
+DE8	1C	41	IOL	41				; Input/Output Long
+DEA	1C	41	IOL	41				; Input/Output Long
+DEC	37	  	LD	0				; Load Accumulator from Memory
+DED	09	  	ADSK				; Add and skip on carry-out
+DEE	84	  	T	DC4				; Transfer
+DEF	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+DF0	7E	  	LDI	1				; Load Accumulator Immediate
+DF1	09	  	ADSK				; Add and skip on carry-out
+DF2	80	  	T	DC0				; Transfer
+DF3	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+DF4	7E	  	LDI	1				; Load Accumulator Immediate
+DF5	09	  	ADSK				; Add and skip on carry-out
+DF6	80	  	T	DC0				; Transfer
+DF7	00	FA	LBL	005				; Load B Long
+DF9	77	  	LDI	8				; Load Accumulator Immediate
+DFA	1C	41	IOL	41				; Input/Output Long
+DFC	53	C0	TL	3C0				; Transfer Long
+DFE	00	00	LBL	0FF				; Load B Long
+E00	16	  	SKF1				; Skip if FF1 Equals 1
+E01	9C	  	T	E1C				; Transfer
+E02	00	B7	LBL	048				; Load B Long
+E04	77	  	LDI	8				; Load Accumulator Immediate
+E05	0F	  	OR					; Logical OR
+E06	6B	  	ADI	4				; Add Immediate and skip on carry-out
+E07	9C	  	T	E1C				; Transfer
+E08	00	46	LBL	0B9				; Load B Long
+E0A	77	  	LDI	8				; Load Accumulator Immediate
+E0B	0F	  	OR					; Logical OR
+E0C	6D	  	ADI	2				; Add Immediate and skip on carry-out
+E0D	9C	  	T	E1C				; Transfer
+E0E	9B	  	T	E1B				; Transfer
+E0F	00	86	LBL	079				; Load B Long
+E11	37	  	LD	0				; Load Accumulator from Memory
+E12	1B	  	LXA					; Load X Register from Accumulator
+E13	A4	  	T	E24				; Transfer
+E14	14	  	SKF2				; Skip if FF2 Equals 1
+E15	80	  	T	E00				; Transfer
+E16	00	16	LBL	0E9				; Load B Long
+E18	7D	  	LDI	2				; Load Accumulator Immediate
+E19	0D	  	AND					; Logical AND
+E1A	1E	  	SKZ					; Skip on Accumulator Zero
+E1B	79	  	LDI	6				; Load Accumulator Immediate
+E1C	7B	  	LDI	4				; Load Accumulator Immediate
+E1D	1B	  	LXA					; Load X Register from Accumulator
+E1E	00	16	LBL	0E9				; Load B Long
+E20	7E	  	LDI	1				; Load Accumulator Immediate
+E21	0D	  	AND					; Logical AND
+E22	1E	  	SKZ					; Skip on Accumulator Zero
+E23	8F	  	T	E0F				; Transfer
+E24	10	  	LBMX				; Load BM with X
+E25	70	  	LDI	F				; Load Accumulator Immediate
+E26	19	  	XABL					; Exchange Accumulator and BL
+E27	1C	FB	IOL	FB				; Input/Output Long
+E29	1C	F7	IOL	F7				; Input/Output Long
+E2B	36	  	LD	1				; Load Accumulator from Memory
+E2C	1C	FE	IOL	FE				; Input/Output Long
+E2E	36	  	LD	1				; Load Accumulator from Memory
+E2F	1C	FD	IOL	FD				; Input/Output Long
+E31	1F	  	DECB					; Decrement BL
+E32	B5	  	T	E35				; Transfer
+E33	56	55	TL	655				; Transfer Long
+E35	12	  	LAX					; Load Accumulator from X Register
+E36	67	  	ADI	8				; Add Immediate and skip on carry-out
+E37	6B	  	ADI	4				; Add Immediate and skip on carry-out
+E38	AB	  	T	E2B				; Transfer
+E39	4A	  	SKBI	A					; Skip if BL equals to Immediate.
+E3A	BD	  	T	E3D				; Transfer
+E3B	56	42	TL	642				; Transfer Long
+E3D	42	  	SKBI	2					; Skip if BL equals to Immediate.
+E3E	AB	  	T	E2B				; Transfer
+E3F	BB	  	T	E3B				; Transfer
+E40	56	2B	TL	62B				; Transfer Long
+E42	7B	  	LDI	4				; Load Accumulator Immediate
+E43	13	  	SAG					; Special Address Generation
+E44	0B	  	AD					; Add
+E45	13	  	SAG					; Special Address Generation
+E46	3F	  	EX	0					; Exchange Accumulator and Memory
+E47	67	  	ADI	8				; Add Immediate and skip on carry-out
+E48	80	  	T	E40				; Transfer
+E49	7A	  	LDI	5				; Load Accumulator Immediate
+E4A	0D	  	AND					; Logical AND
+E4B	1C	FE	IOL	FE				; Input/Output Long
+E4D	36	  	LD	1				; Load Accumulator from Memory
+E4E	7A	  	LDI	5				; Load Accumulator Immediate
+E4F	0D	  	AND					; Logical AND
+E50	1C	FD	IOL	FD				; Input/Output Long
+E52	36	  	LD	1				; Load Accumulator from Memory
+E53	56	31	TL	631				; Transfer Long
+E55	1C	F3	IOL	F3				; Input/Output Long
+E57	00	56	LBL	0A9				; Load B Long
+E59	37	  	LD	0				; Load Accumulator from Memory
+E5A	1E	  	SKZ					; Skip on Accumulator Zero
+E5B	AE	  	T	E6E				; Transfer
+E5C	75	  	LDI	A				; Load Accumulator Immediate
+E5D	3F	  	EX	0					; Exchange Accumulator and Memory
+E5E	14	  	SKF2				; Skip if FF2 Equals 1
+E5F	16	  	SKF1				; Skip if FF1 Equals 1
+E60	A3	  	T	E63				; Transfer
+E61	00	CF	LBL	030				; Load B Long
+E63	00	C7	LBL	038				; Load B Long
+E65	24	  	RC					; Reset Carry flip-flop
+E66	78	  	LDI	7				; Load Accumulator Immediate
+E67	09	  	ADSK				; Add and skip on carry-out
+E68	65	  	DC					; Decimal Correction
+E69	3F	  	EX	0					; Exchange Accumulator and Memory
+E6A	15	  	SKC					; Skip on Carry flip-flop
+E6B	AE	  	T	E6E				; Transfer
+E6C	17	  	INCB					; Increment BL
+E6D	B0	  	T	E70				; Transfer
+E6E	50	0B	TL	00B				; Transfer Long
+E70	48	  	SKBI	8					; Skip if BL equals to Immediate.
+E71	A5	  	T	E65				; Transfer
+E72	AE	  	T	E6E				; Transfer
+E73	37	  	LD	0				; Load Accumulator from Memory
+E74	56	82	TL	682				; Transfer Long
+E76	00	56	LBL	0A9				; Load B Long
+E78	7E	  	LDI	1				; Load Accumulator Immediate
+E79	0D	  	AND					; Logical AND
+E7A	00	E8	LBL	017				; Load B Long
+E7C	1E	  	SKZ					; Skip on Accumulator Zero
+E7D	B3	  	T	E73				; Transfer
+E7E	56	80	TL	680				; Transfer Long
+E80	77	  	LDI	8				; Load Accumulator Immediate
+E81	0D	  	AND					; Logical AND
+E82	1C	D5	IOL	D5				; Input/Output Long
+E84	1F	  	DECB					; Decrement BL
+E85	37	  	LD	0				; Load Accumulator from Memory
+E86	1C	D4	IOL	D4				; Input/Output Long
+E88	1F	  	DECB					; Decrement BL
+E89	36	  	LD	1				; Load Accumulator from Memory
+E8A	0E	  	COMP				; Complement
+E8B	3E	  	EX	1					; Exchange Accumulator and Memory
+E8C	2F	  	EXD	0					; Exchange Accumulator and Memory and decrement BL
+E8D	89	  	T	E89				; Transfer
+E8E	00	FA	LBL	005				; Load B Long
+E90	7F	  	LDI	0				; Load Accumulator Immediate
+E91	1B	  	LXA					; Load X Register from Accumulator
+E92	97	  	T	E97				; Transfer
+E93	19	  	XABL					; Exchange Accumulator and BL
+E94	1A	  	XAX					; Exchange Accumulator and X
+E95	19	  	XABL					; Exchange Accumulator and BL
+E96	1F	  	DECB					; Decrement BL
+E97	7E	  	LDI	1				; Load Accumulator Immediate
+E98	0D	  	AND					; Logical AND
+E99	1A	  	XAX					; Exchange Accumulator and X
+E9A	19	  	XABL					; Exchange Accumulator and BL
+E9B	1A	  	XAX					; Exchange Accumulator and X
+E9C	68	  	ADI	7				; Add Immediate and skip on carry-out
+E9D	1C	21	IOL	21				; Input/Output Long
+E9F	17	  	INCB					; Increment BL
+EA0	19	  	XABL					; Exchange Accumulator and BL
+EA1	1A	  	XAX					; Exchange Accumulator and X
+EA2	19	  	XABL					; Exchange Accumulator and BL
+EA3	7D	  	LDI	2				; Load Accumulator Immediate
+EA4	0D	  	AND					; Logical AND
+EA5	1A	  	XAX					; Exchange Accumulator and X
+EA6	19	  	XABL					; Exchange Accumulator and BL
+EA7	1A	  	XAX					; Exchange Accumulator and X
+EA8	69	  	ADI	6				; Add Immediate and skip on carry-out
+EA9	1C	21	IOL	21				; Input/Output Long
+EAB	17	  	INCB					; Increment BL
+EAC	19	  	XABL					; Exchange Accumulator and BL
+EAD	1A	  	XAX					; Exchange Accumulator and X
+EAE	19	  	XABL					; Exchange Accumulator and BL
+EAF	7B	  	LDI	4				; Load Accumulator Immediate
+EB0	0D	  	AND					; Logical AND
+EB1	1A	  	XAX					; Exchange Accumulator and X
+EB2	19	  	XABL					; Exchange Accumulator and BL
+EB3	1A	  	XAX					; Exchange Accumulator and X
+EB4	6B	  	ADI	4				; Add Immediate and skip on carry-out
+EB5	1C	21	IOL	21				; Input/Output Long
+EB7	17	  	INCB					; Increment BL
+EB8	19	  	XABL					; Exchange Accumulator and BL
+EB9	1A	  	XAX					; Exchange Accumulator and X
+EBA	19	  	XABL					; Exchange Accumulator and BL
+EBB	37	  	LD	0				; Load Accumulator from Memory
+EBC	1A	  	XAX					; Exchange Accumulator and X
+EBD	19	  	XABL					; Exchange Accumulator and BL
+EBE	52	C0	TL	2C0				; Transfer Long
+EC0	00	FF	LBL	000				; Load B Long
+EC2	70	  	LDI	F				; Load Accumulator Immediate
+EC3	1C	21	IOL	21				; Input/Output Long
+EC5	70	  	LDI	F				; Load Accumulator Immediate
+EC6	1C	41	IOL	41				; Input/Output Long
+EC8	17	  	INCB					; Increment BL
+EC9	82	  	T	EC2				; Transfer
+ECA	7F	  	LDI	0				; Load Accumulator Immediate
+ECB	1B	  	LXA					; Load X Register from Accumulator
+ECC	1C	FB	IOL	FB				; Input/Output Long
+ECE	1C	F7	IOL	F7				; Input/Output Long
+ED0	12	  	LAX					; Load Accumulator from X Register
+ED1	1C	FE	IOL	FE				; Input/Output Long
+ED3	12	  	LAX					; Load Accumulator from X Register
+ED4	1C	FD	IOL	FD				; Input/Output Long
+ED6	17	  	INCB					; Increment BL
+ED7	90	  	T	ED0				; Transfer
+ED8	1C	F3	IOL	F3				; Input/Output Long
+EDA	01	D2	TML	1D2				; Transfer and Mark Long
+EDC	17	  	INCB					; Increment BL
+EDD	9A	  	T	EDA				; Transfer
+EDE	12	  	LAX					; Load Accumulator from X Register
+EDF	6E	  	ADI	1				; Add Immediate and skip on carry-out
+EE0	8B	  	T	ECB				; Transfer
+EE1	7F	  	LDI	0				; Load Accumulator Immediate
+EE2	03	6A	TML	36A				; Transfer and Mark Long
+EE4	7F	  	LDI	0				; Load Accumulator Immediate
+EE5	1B	  	LXA					; Load X Register from Accumulator
+EE6	18	  	XBMX				; Exchange BM and X
+EE7	70	  	LDI	F				; Load Accumulator Immediate
+EE8	1B	  	LXA					; Load X Register from Accumulator
+EE9	3F	  	EX	0					; Exchange Accumulator and Memory
+EEA	12	  	LAX					; Load Accumulator from X Register
+EEB	0C	  	EOR					; Logical Exclusive-OR
+EEC	1E	  	SKZ					; Skip on Accumulator Zero
+EED	B9	  	T	EF9				; Transfer
+EEE	12	  	LAX					; Load Accumulator from X Register
+EEF	60	  	ADI	F				; Add Immediate and skip on carry-out
+EF0	B2	  	T	EF2				; Transfer
+EF1	A8	  	T	EE8				; Transfer
+EF2	17	  	INCB					; Increment BL
+EF3	A7	  	T	EE7				; Transfer
+EF4	18	  	XBMX				; Exchange BM and X
+EF5	12	  	LAX					; Load Accumulator from X Register
+EF6	6E	  	ADI	1				; Add Immediate and skip on carry-out
+EF7	A5	  	T	EE5				; Transfer
+EF8	BA	  	T	EFA				; Transfer
+EF9	21	  	SF2					; Set FF2
+EFA	76	  	LDI	9				; Load Accumulator Immediate
+EFB	03	6A	TML	36A				; Transfer and Mark Long
+EFD	57	34	TL	734				; Transfer Long
+F00	00	  	SET NIB	#0				; Load B Long
+F00	03	6C	TML	36C				; Transfer and Mark Long
+F02	1C	D0	IOL	D0				; Input/Output Long
+F04	1C	D8	IOL	D8				; Input/Output Long
+F06	01	EE	TML	1EE				; Transfer and Mark Long
+F08	82	  	T	F02				; Transfer
+F09	1C	D1	IOL	D1				; Input/Output Long
+F0B	1C	D9	IOL	D9				; Input/Output Long
+F0D	01	EE	TML	1EE				; Transfer and Mark Long
+F0F	89	  	T	F09				; Transfer
+F10	1C	D2	IOL	D2				; Input/Output Long
+F12	1C	DA	IOL	DA				; Input/Output Long
+F14	01	EE	TML	1EE				; Transfer and Mark Long
+F16	90	  	T	F10				; Transfer
+F17	1C	D3	IOL	D3				; Input/Output Long
+F19	1C	DF	IOL	DF				; Input/Output Long
+F1B	01	EE	TML	1EE				; Transfer and Mark Long
+F1D	97	  	T	F17				; Transfer
+F1E	1C	D4	IOL	D4				; Input/Output Long
+F20	1C	DC	IOL	DC				; Input/Output Long
+F22	01	FB	TML	1FB				; Transfer and Mark Long
+F24	9E	  	T	F1E				; Transfer
+F25	1C	D5	IOL	D5				; Input/Output Long
+F27	1C	DD	IOL	DD				; Input/Output Long
+F29	01	FB	TML	1FB				; Transfer and Mark Long
+F2B	A5	  	T	F25				; Transfer
+F2C	7F	  	LDI	0				; Load Accumulator Immediate
+F2D	1C	D5	IOL	D5				; Input/Output Long
+F2F	00	FF	LBL	000				; Load B Long
+F31	77	  	LDI	8				; Load Accumulator Immediate
+F32	03	6A	TML	36A				; Transfer and Mark Long
+F34	24	  	RC					; Reset Carry flip-flop
+F35	B7	  	T	F37				; Transfer
+F36	20	  	SC					; Set Carry flip-flop
+F37	22	  	SF1					; Set FF1
+F38	70	  	LDI	F				; Load Accumulator Immediate
+F39	1C	20	IOL	20				; Input/Output Long
+F3B	70	  	LDI	F				; Load Accumulator Immediate
+F3C	1C	40	IOL	40				; Input/Output Long
+F3E	57	44	TL	744				; Transfer Long
+F40	57	36	TL	736				; Transfer Long
+F42	22	  	SF1					; Set FF1
+F43	9E	  	T	F5E				; Transfer
+F44	16	  	SKF1				; Skip if FF1 Equals 1
+F45	77	  	LDI	8				; Load Accumulator Immediate
+F46	7B	  	LDI	4				; Load Accumulator Immediate
+F47	1B	  	LXA					; Load X Register from Accumulator
+F48	18	  	XBMX				; Exchange BM and X
+F49	15	  	SKC					; Skip on Carry flip-flop
+F4A	8E	  	T	F4E				; Transfer
+F4B	1C	21	IOL	21				; Input/Output Long
+F4D	90	  	T	F50				; Transfer
+F4E	1C	41	IOL	41				; Input/Output Long
+F50	16	  	SKF1				; Skip if FF1 Equals 1
+F51	66	  	ADI	9				; Add Immediate and skip on carry-out
+F52	66	  	ADI	9				; Add Immediate and skip on carry-out
+F53	82	  	T	F42				; Transfer
+F54	17	  	INCB					; Increment BL
+F55	84	  	T	F44				; Transfer
+F56	16	  	SKF1				; Skip if FF1 Equals 1
+F57	9A	  	T	F5A				; Transfer
+F58	26	  	RF1					; Reset FF1
+F59	84	  	T	F44				; Transfer
+F5A	15	  	SKC					; Skip on Carry flip-flop
+F5B	80	  	T	F40				; Transfer
+F5C	00	FF	LBL	000				; Load B Long
+F5E	15	  	SKC					; Skip on Carry flip-flop
+F5F	7E	  	LDI	1				; Load Accumulator Immediate
+F60	7D	  	LDI	2				; Load Accumulator Immediate
+F61	03	6A	TML	36A				; Transfer and Mark Long
+F63	70	  	LDI	F				; Load Accumulator Immediate
+F64	1C	D3	IOL	D3				; Input/Output Long
+F66	01	D2	TML	1D2				; Transfer and Mark Long
+F68	7F	  	LDI	0				; Load Accumulator Immediate
+F69	1C	D3	IOL	D3				; Input/Output Long
+F6B	57	C0	TL	7C0				; Transfer Long
+F6D	1A	  	XAX					; Exchange Accumulator and X
+F6E	18	  	XBMX				; Exchange BM and X
+F6F	21	  	SF2					; Set FF2
+F70	57	32	TL	732				; Transfer Long
+F72	0C	  	EOR					; Logical Exclusive-OR
+F73	1E	  	SKZ					; Skip on Accumulator Zero
+F74	AD	  	T	F6D				; Transfer
+F75	17	  	INCB					; Increment BL
+F76	BC	  	T	F7C				; Transfer
+F77	BC	  	T	F7C				; Transfer
+F78	7C	  	LDI	3				; Load Accumulator Immediate
+F79	1B	  	LXA					; Load X Register from Accumulator
+F7A	00	FE	LBL	001				; Load B Long
+F7C	11	  	LABL				; Load Accumulator with BL
+F7D	3F	  	EX	0					; Exchange Accumulator and Memory
+F7E	57	80	TL	780				; Transfer Long
+F80	01	D2	TML	1D2				; Transfer and Mark Long
+F82	01	D2	TML	1D2				; Transfer and Mark Long
+F84	01	D2	TML	1D2				; Transfer and Mark Long
+F86	37	  	LD	0				; Load Accumulator from Memory
+F87	40	  	SKBI	0					; Skip if BL equals to Immediate.
+F88	05	  	RTN					; Return
+F89	1A	  	XAX					; Exchange Accumulator and X
+F8A	6E	  	ADI	1				; Add Immediate and skip on carry-out
+F8B	1A	  	XAX					; Exchange Accumulator and X
+F8C	07	  	RTNSK				; Return and Skip
+F8D	1B	  	LXA					; Load X Register from Accumulator
+F8E	1C	FB	IOL	FB				; Input/Output Long
+F90	12	  	LAX					; Load Accumulator from X Register
+F91	1C	FE	IOL	FE				; Input/Output Long
+F93	1C	FE	IOL	FE				; Input/Output Long
+F95	18	  	XBMX				; Exchange BM and X
+F96	12	  	LAX					; Load Accumulator from X Register
+F97	1C	FE	IOL	FE				; Input/Output Long
+F99	1C	FE	IOL	FE				; Input/Output Long
+F9B	11	  	LABL				; Load Accumulator with BL
+F9C	1C	FE	IOL	FE				; Input/Output Long
+F9E	18	  	XBMX				; Exchange BM and X
+F9F	7A	  	LDI	5				; Load Accumulator Immediate
+FA0	19	  	XABL					; Exchange Accumulator and BL
+FA1	70	  	LDI	F				; Load Accumulator Immediate
+FA2	1C	FE	IOL	FE				; Input/Output Long
+FA4	17	  	INCB					; Increment BL
+FA5	A2	  	T	FA2				; Transfer
+FA6	1C	F3	IOL	F3				; Input/Output Long
+FA8	01	D2	TML	1D2				; Transfer and Mark Long
+FAA	17	  	INCB					; Increment BL
+FAB	A8	  	T	FA8				; Transfer
+FAC	16	  	SKF1				; Skip if FF1 Equals 1
+FAD	B0	  	T	FB0				; Transfer
+FAE	26	  	RF1					; Reset FF1
+FAF	A8	  	T	FA8				; Transfer
+FB0	1C	FB	IOL	FB				; Input/Output Long
+FB2	01	D2	TML	1D2				; Transfer and Mark Long
+FB4	17	  	INCB					; Increment BL
+FB5	B2	  	T	FB2				; Transfer
+FB6	14	  	SKF2				; Skip if FF2 Equals 1
+FB7	05	  	RTN					; Return
+FB8	A6	  	T	FA6				; Transfer
+FB9	22	  	SF1					; Set FF1
+FBA	19	  	XABL					; Exchange Accumulator and BL
+FBB	12	  	LAX					; Load Accumulator from X Register
+FBC	03	6A	TML	36A				; Transfer and Mark Long
+FBE	57	D1	TL	7D1				; Transfer Long
+FC0	03	6E	TML	36E				; Transfer and Mark Long
+FC2	72	  	LDI	D				; Load Accumulator Immediate
+FC3	09	  	ADSK				; Add and skip on carry-out
+FC4	9B	  	T	FDB				; Transfer
+FC5	1B	  	LXA					; Load X Register from Accumulator
+FC6	1C	D6	IOL	D6				; Input/Output Long
+FC8	03	6E	TML	36E				; Transfer and Mark Long
+FCA	12	  	LAX					; Load Accumulator from X Register
+FCB	1C	DB	IOL	DB				; Input/Output Long
+FCD	7E	  	LDI	1				; Load Accumulator Immediate
+FCE	0C	  	EOR					; Logical Exclusive-OR
+FCF	1E	  	SKZ					; Skip on Accumulator Zero
+FD0	A0	  	T	FE0				; Transfer
+FD1	12	  	LAX					; Load Accumulator from X Register
+FD2	6E	  	ADI	1				; Add Immediate and skip on carry-out
+FD3	85	  	T	FC5				; Transfer
+FD4	00	FF	LBL	000				; Load B Long
+FD6	7C	  	LDI	3				; Load Accumulator Immediate
+FD7	03	6A	TML	36A				; Transfer and Mark Long
+FD9	55	10	TL	510				; Transfer Long
+FDB	21	  	SF2					; Set FF2
+FDC	37	  	LD	0				; Load Accumulator from Memory
+FDD	1E	  	SKZ					; Skip on Accumulator Zero
+FDE	A5	  	T	FE5				; Transfer
+FDF	A6	  	T	FE6				; Transfer
+FE0	37	  	LD	0				; Load Accumulator from Memory
+FE1	1E	  	SKZ					; Skip on Accumulator Zero
+FE2	A7	  	T	FE7				; Transfer
+FE3	21	  	SF2					; Set FF2
+FE4	7B	  	LDI	4				; Load Accumulator Immediate
+FE5	7A	  	LDI	5				; Load Accumulator Immediate
+FE6	79	  	LDI	6				; Load Accumulator Immediate
+FE7	78	  	LDI	7				; Load Accumulator Immediate
+FE8	57	B9	TL	7B9				; Transfer Long
+FEA	12	  	LAX					; Load Accumulator from X Register
+FEB	19	  	XABL					; Exchange Accumulator and BL
+FEC	77	  	LDI	8				; Load Accumulator Immediate
+FED	1B	  	LXA					; Load X Register from Accumulator
+FEE	75	  	LDI	A				; Load Accumulator Immediate
+FEF	1D	  	DOA					; Discrete Output
+FF0	01	D2	TML	1D2				; Transfer and Mark Long
+FF2	27	  	DIA					; Discrete Input Group A
+FF3	3F	  	EX	0					; Exchange Accumulator and Memory
+FF4	0C	  	EOR					; Logical Exclusive-OR
+FF5	1E	  	SKZ					; Skip on Accumulator Zero
+FF6	AC	  	T	FEC				; Transfer
+FF7	12	  	LAX					; Load Accumulator from X Register
+FF8	6E	  	ADI	1				; Add Immediate and skip on carry-out
+FF9	AD	  	T	FED				; Transfer
+FFA	11	  	LABL				; Load Accumulator with BL
+FFB	1A	  	XAX					; Exchange Accumulator and X
+FFC	7C	  	LDI	3				; Load Accumulator Immediate
+FFD	0D	  	AND					; Logical AND
+FFE	3F	  	EX	0					; Exchange Accumulator and Memory
+FFF	05	  	RTN					; Return
