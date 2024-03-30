@@ -42,11 +42,11 @@ You are to write a python script like the one in example as testcpu.py
 #you will need to put in the 2nd the exact value you had from the last cycle     
 `ramv = 0` 
 
-#you can also set up cpu state:   
+## you can also set up cpu state:   
 `cpu.P = Register("{0:012b}".format(0x5C0))`    
 `cpu.BL = Register("{0:04b}".format(0x2))`    
 
-#finally launch trace 	for n cycles    
+## finally launch trace 	for n cycles    
 `ncycl = 2000`
 
 `cpu.trace(ncycl, prom, pram, devices, ramv)`
@@ -55,6 +55,10 @@ You are to write a python script like the one in example as testcpu.py
 > you may also disassemble the rom, draw graphs, and many things. Read testcpu.py to see all
 >
 > 
+
+
+## Python version  
+This script was successfully tested with python 3.11.4. It should work with any 3 version. There is no special function in there.   
 
 PhD 2023-09-30
 

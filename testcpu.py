@@ -5,6 +5,8 @@ Created on 6 déc. 2022
 
 start of iol handling
 '''
+from cProfile import run
+import sys
 import matplotlib.pyplot as plt
 
 from pps4.cpum import ROM12, RAM, Pps4Cpu
@@ -14,22 +16,26 @@ from pps4._10788 import GPKD10788
 from pps4.register import Register
 from pps4.cpum import PPS4InstSet
 
-if __name__ == '__main__':
+def entryPoint():
     infodict=dict()
     for k,v in PPS4InstSet.HexCod.items():
         for vi in v:
             infodict[vi] = k 
-            
-    #myfile = "pps4/recel_mrevil.bin"
-    #myfile = "pps4/SpaceGame-Recel/System_III_H_invA_invD.bin"
-    #myfile = "pps4/SpaceGame-Recel/recel_spacegame.bin"
+    try:       
+        fn = sys.argv[1]
+    except:
+        print("must specify file argument. Abort")
+        exit()
+        
     #fb = open("pps4/A1752EFA1753EE.bin", "rb")
-    #fb = open("pps4/recel_screech.bin", "rb")
-    #fb = open("pps4/recelbm.bin", "rb")
-    myfile = "hm6508fmt.bin"
-    fb = open(myfile, "rb")
-    print("opening:", myfile)
-    
+    try:
+        fb = open(fn, "rb")
+        print (";Disassembling %s... " % fn)
+    except Exception as ex:
+        print (";must specify a valid file arg. Taking integrated example.", "pps4/recel_screech.bin")
+        fb = open("pps4/recel_screech.bin", "rb")
+ 
+
     prom = ROM12(fb)  #creation of a rom area from binary file
     fb.close()
     pram = RAM(256)
@@ -48,29 +54,30 @@ if __name__ == '__main__':
     
     if False:
         #this how to access RAM or ROM
-        print("===ROM===")
+        print(";===ROM===")
         prom.show(length=10)
-        print("===RAM===")  
+        print(";===RAM===")  
         pram.show()
 
 
-    print("===A17 1/switch matrix===")
-    print("a17", "id=#{0:01X}".format(a170x2.id))
+    print(";===A17 1/switch matrix===")
+    print(";a17", "id=#{0:01X}".format(a170x2.id))
     
-    print("===A17 2/solenoid control===")
-    print("a17", "id=#{0:01X}".format(a170x4.id))
+    print(";===A17 2/solenoid control===")
+    print(";a17", "id=#{0:01X}".format(a170x4.id))
     
-    print("===CPU===")
-    cpu.P = Register("{0:012b}".format(0x005))
+    print(";===CPU===")
+    cpu.P = Register("{0:012b}".format(0x00))
     cpu.A = Register("{0:04b}".format(0x0))
-    cpu.BL = Register("{0:04b}".format(0x2))
+    cpu.BL = Register("{0:04b}".format(0x000))
     cpu.BM = Register("{0:04b}".format(0x0))
     cpu.BU = Register("{0:04b}".format(0x0))
 
-    cpu.zapthis = [0x1D2]
-    ramv = 0
-    if False:
-        cpu.trace(100000, prom, pram, devices, ramv)  
+    if True:
+        cpu.zapthis = [0x1D2]
+        ramv = 0
+        bp_list=[0x2FA]
+        cpu.trace(100000, prom, pram, devices, ramv, bp_list)  
 
     # for i in range(2000):
     #
@@ -222,13 +229,13 @@ if __name__ == '__main__':
     #
     #
     #######################
-    if True:
+    if False:
+        verbose = True   #to be set to False if you want an "reassemblable" file
         romdistxt = list()
         cpudis = Pps4Cpu(mode="dasm", ROM=prom.mem)
         romi=0
         rom_addr = 0
         is2cycle = False
-        #print("====rom len", len(prom.mem))
         while rom_addr<len(prom.mem):
             romi = prom.mem[rom_addr]
             _, ldis, _ = cpudis.cyclephi4(romi)
@@ -255,16 +262,29 @@ if __name__ == '__main__':
     
         for linedis in romdistxt:
             #print(linedis)
-            print("{0:03X}".format(linedis[1][0][0]), end='\t')
-            print("{0:02X}".format(linedis[1][0][1]), end='\t')
-            try:
-                print("{0:02X}".format(linedis[1][0][2]), end='\t')
-            except:
-                print('  ', end='\t')
+            if verbose:
+                print("0X{0:03X}".format(linedis[1][0][0]), end='\t')
+                print("0X{0:02X}".format(linedis[1][0][1]), end='\t')
+                try:
+                    print("0X{0:02X}".format(linedis[1][0][2]), end='\t')
+                except:
+                    print('  ', end='\t')
             if len(linedis[1][1])>20:
                 print(linedis[1][1], end='\t')
             elif len(linedis[1][1])<4:
                 print(linedis[1][1], end='\t\t\t\t\t')
             else:
                 print(linedis[1][1], end='\t\t\t\t')
+            if not verbose:
+                print(";0X{0:03X}".format(linedis[1][0][0]), end='\t')
+
             print(";", linedis[2][0])
+            
+            
+            
+if __name__ == '__main__':
+    entryPoint()
+    #run('''entryPoint()''')
+    
+
+            
