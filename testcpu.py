@@ -16,13 +16,17 @@ from pps4._10788 import GPKD10788
 from pps4.register import Register
 from pps4.cpum import PPS4InstSet
 
-def entryPoint(fn):
+def entryPoint():
     infodict=dict()
     for k,v in PPS4InstSet.HexCod.items():
         for vi in v:
             infodict[vi] = k 
-            
-
+    try:       
+        fn = sys.argv[1]
+    except:
+        print("must specify file argument. Abort")
+        exit()
+        
     #fb = open("pps4/A1752EFA1753EE.bin", "rb")
     try:
         fb = open(fn, "rb")
@@ -63,16 +67,17 @@ def entryPoint(fn):
     print(";a17", "id=#{0:01X}".format(a170x4.id))
     
     print(";===CPU===")
-    cpu.P = Register("{0:012b}".format(0x005))
+    cpu.P = Register("{0:012b}".format(0x00))
     cpu.A = Register("{0:04b}".format(0x0))
-    cpu.BL = Register("{0:04b}".format(0x2))
+    cpu.BL = Register("{0:04b}".format(0x000))
     cpu.BM = Register("{0:04b}".format(0x0))
     cpu.BU = Register("{0:04b}".format(0x0))
 
-    if False:
+    if True:
         cpu.zapthis = [0x1D2]
         ramv = 0
-        cpu.trace(100000, prom, pram, devices, ramv)  
+        bp_list=[0x2FA]
+        cpu.trace(100000, prom, pram, devices, ramv, bp_list)  
 
     # for i in range(2000):
     #
@@ -224,7 +229,7 @@ def entryPoint(fn):
     #
     #
     #######################
-    if True:
+    if False:
         verbose = True   #to be set to False if you want an "reassemblable" file
         romdistxt = list()
         cpudis = Pps4Cpu(mode="dasm", ROM=prom.mem)
@@ -278,7 +283,7 @@ def entryPoint(fn):
             
             
 if __name__ == '__main__':
-    entryPoint(sys.argv[1])
+    entryPoint()
     #run('''entryPoint()''')
     
 
