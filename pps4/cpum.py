@@ -1979,4 +1979,10 @@ class Pps4Cpu:
                 else:
                     print("{1:08d}\t{2:03X}\t{3:02X}\t  \t{4}".format(rom_addr, i, int(ldis[0][0]), int(ldis[0][1]), ldis[1]))
                     
+
+                try:
+                    if self.P.toInt() in bp_list:
+                        break
+                except: pass
+                
     

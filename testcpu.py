@@ -67,7 +67,7 @@ def entryPoint():
     print(";a17", "id=#{0:01X}".format(a170x4.id))
     
     print(";===CPU===")
-    cpu.P = Register("{0:012b}".format(0x00))
+    cpu.P = Register("{0:012b}".format(0x800))
     cpu.A = Register("{0:04b}".format(0x0))
     cpu.BL = Register("{0:04b}".format(0x000))
     cpu.BM = Register("{0:04b}".format(0x0))
@@ -76,7 +76,7 @@ def entryPoint():
     if True:
         cpu.zapthis = [0x1D2]
         ramv = 0
-        bp_list=[0x2FA]
+        bp_list=[0x2F4]
         cpu.trace(100000, prom, pram, devices, ramv, bp_list)  
 
     # for i in range(2000):
@@ -160,7 +160,7 @@ def entryPoint():
     #     #     print("{1:08d}\t==============".format(rom_addr, i))
 
     a170x2.stop()  
-    if False:  
+    if True:  
         pram.show()
     
     
