@@ -26,7 +26,19 @@ def entryPoint():
     except:
         print("must specify file argument. Abort")
         exit()
-        
+    
+    try:       
+        usr_mode = sys.argv[2].lower()
+    except:
+        usr_mode = "dasm"
+        print("no mode selected==> Disassembly only")
+
+    if usr_mode == "trace":
+        print("Mode trace selected")
+    else:
+        print("Mode disassembly selected")
+        usr_mode = "dasm"
+                
     #fb = open("pps4/A1752EFA1753EE.bin", "rb")
     try:
         fb = open(fn, "rb")
@@ -73,11 +85,11 @@ def entryPoint():
     cpu.BM = Register("{0:04b}".format(0x0))
     cpu.BU = Register("{0:04b}".format(0x0))
 
-    if True:
+    if usr_mode=="trace":
         cpu.zapthis = [0x1D2]
         ramv = 0
-        bp_list=[0x2F4]
-        cpu.trace(100000, prom, pram, devices, ramv, bp_list)  
+        bp_list=[] #bp_list=[0x2F4]
+        cpu.trace(5000, prom, pram, devices, ramv, bp_list)  
 
     # for i in range(2000):
     #
@@ -160,7 +172,7 @@ def entryPoint():
     #     #     print("{1:08d}\t==============".format(rom_addr, i))
 
     a170x2.stop()  
-    if True:  
+    if False:  
         pram.show()
     
     
@@ -229,7 +241,7 @@ def entryPoint():
     #
     #
     #######################
-    if False:
+    if usr_mode=="dasm":
         verbose = True   #to be set to False if you want an "reassemblable" file
         romdistxt = list()
         cpudis = Pps4Cpu(mode="dasm", ROM=prom.mem)
