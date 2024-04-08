@@ -88,7 +88,7 @@ def entryPoint():
     if usr_mode=="trace":
         cpu.zapthis = [0x1D2]
         ramv = 0
-        bp_list=[] #bp_list=[0x2F4]
+        bp_list=[0x2F4] #bp_list=[] #bp_list=[0x2F4]
         cpu.trace(5000, prom, pram, devices, ramv, bp_list)  
 
     # for i in range(2000):
@@ -172,8 +172,12 @@ def entryPoint():
     #     #     print("{1:08d}\t==============".format(rom_addr, i))
 
     a170x2.stop()  
-    if False:  
+    if True:  
         pram.show()
+        #temporary to make a snapshot of the ram...
+        ft = open("mirrorram.bin", "wb")
+        ft.write(pram.mem)
+        ft.close()
     
     
     
